@@ -34,7 +34,7 @@ dotnet_search_reference_assemblies = true
 # Organize usings
 dotnet_separate_import_directive_groups = true
 dotnet_sort_system_directives_first = true
-file_header_template = -------------------------------------------------------------------------------------------------\nvisualfiredev.com - https://visualfiredev.com/\nCopyright (c) 2026 Visual Fire Development LLC. All rights reserved.\n\nUnauthorized commercial use, distribution, or modification is strictly prohibited.\n-------------------------------------------------------------------------------------------------
+file_header_template = -------------------------------------------------------------------------------------------------\nvisualfiredev.com - https://visualfiredev.com/\nCopyright (c) 2026 Visual Fire Development LLC\n\nSPDX-License-Identifier: Apache-2.0\n-------------------------------------------------------------------------------------------------
 # this. and Me. preferences
 dotnet_style_qualification_for_event = false
 dotnet_style_qualification_for_field = false
