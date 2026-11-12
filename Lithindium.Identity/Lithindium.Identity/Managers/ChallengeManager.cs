@@ -79,6 +79,8 @@ namespace Lithindium.Identity {
                     var email = new UserEmail(payload.Target!, payload.Primary);
                     OperationResult result = await emails.AddEmailAsync(user, email, cancellationToken).ConfigureAwait(false);
                     if (!MutationSucceeded(result)) return result;
+                    result = await _users.RotateAsync(user, user, null, op, cancellationToken).ConfigureAwait(false);
+                    if (!Succeeded(result)) return result;
                     return await _users.AuditAsync(user, actor, null, UserAuditType.Email, UserAuditAction.Verified, cancellationToken).ConfigureAwait(false);
                 }, cancellationToken);
         }
@@ -107,6 +109,8 @@ namespace Lithindium.Identity {
                     var phone = new UserPhone(payload.Target!, payload.Secondary, payload.Primary);
                     OperationResult result = await phones.AddPhoneAsync(user, phone, cancellationToken).ConfigureAwait(false);
                     if (!MutationSucceeded(result)) return result;
+                    result = await _users.RotateAsync(user, user, null, op, cancellationToken).ConfigureAwait(false);
+                    if (!Succeeded(result)) return result;
                     return await _users.AuditAsync(user, actor, null, UserAuditType.Phone, UserAuditAction.Verified, cancellationToken).ConfigureAwait(false);
                 }, cancellationToken);
         }

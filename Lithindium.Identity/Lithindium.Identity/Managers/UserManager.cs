@@ -111,7 +111,7 @@ namespace Lithindium.Identity {
         public virtual Task<OperationResult> DeleteAsync(Guid uuid, Guid? actor = null, CancellationToken cancellationToken = default) =>
             MutateAsync(uuid, OperationCode.UserDeleteUser, async user => {
                 OperationResult result = await _store.DeleteAsync(user.Uuid, cancellationToken).ConfigureAwait(false);
-                if (!StoreSucceeded(result)) return result;
+                if (!RequiredMutationSucceeded(result)) return result;
                 return await AuditAsync(user, actor, user.Uuid, UserAuditType.User, UserAuditAction.Deleted, cancellationToken).ConfigureAwait(false);
             }, cancellationToken);
 
@@ -209,6 +209,8 @@ namespace Lithindium.Identity {
 
             return MutateCapabilityAsync<IUserEmailStore>(uuid, op, ContextCode.Email, async (store, user) => {
                 OperationResult result = await store.AddEmailAsync(user, email, cancellationToken).ConfigureAwait(false);
+                if (!RequiredMutationSucceeded(result)) return result;
+                result = await RotateAsync(user, user, null, op, cancellationToken).ConfigureAwait(false);
                 if (!StoreSucceeded(result)) return result;
                 return await AuditAsync(user, actor, null, UserAuditType.Email, UserAuditAction.Verified, cancellationToken).ConfigureAwait(false);
             }, cancellationToken);
@@ -223,7 +225,7 @@ namespace Lithindium.Identity {
 
             return MutateCapabilityAsync<IUserEmailStore>(uuid, op, ContextCode.Email, async (store, user) => {
                 OperationResult result = await store.RemoveEmailAsync(user, email, cancellationToken).ConfigureAwait(false);
-                if (!StoreSucceeded(result)) return result;
+                if (!RequiredMutationSucceeded(result)) return result;
                 result = await RotateAsync(user, user, null, op, cancellationToken).ConfigureAwait(false);
                 if (!StoreSucceeded(result)) return result;
                 return await AuditAsync(user, actor, null, UserAuditType.Email, UserAuditAction.Removed, cancellationToken).ConfigureAwait(false);
@@ -258,6 +260,8 @@ namespace Lithindium.Identity {
 
             return MutateCapabilityAsync<IUserPhoneStore>(uuid, op, ContextCode.Phone, async (store, user) => {
                 OperationResult result = await store.AddPhoneAsync(user, phone, cancellationToken).ConfigureAwait(false);
+                if (!RequiredMutationSucceeded(result)) return result;
+                result = await RotateAsync(user, user, null, op, cancellationToken).ConfigureAwait(false);
                 if (!StoreSucceeded(result)) return result;
                 return await AuditAsync(user, actor, null, UserAuditType.Phone, UserAuditAction.Verified, cancellationToken).ConfigureAwait(false);
             }, cancellationToken);
@@ -272,7 +276,7 @@ namespace Lithindium.Identity {
 
             return MutateCapabilityAsync<IUserPhoneStore>(uuid, op, ContextCode.Phone, async (store, user) => {
                 OperationResult result = await store.RemovePhoneAsync(user, phone, cancellationToken).ConfigureAwait(false);
-                if (!StoreSucceeded(result)) return result;
+                if (!RequiredMutationSucceeded(result)) return result;
                 result = await RotateAsync(user, user, null, op, cancellationToken).ConfigureAwait(false);
                 if (!StoreSucceeded(result)) return result;
                 return await AuditAsync(user, actor, null, UserAuditType.Phone, UserAuditAction.Removed, cancellationToken).ConfigureAwait(false);
@@ -311,7 +315,7 @@ namespace Lithindium.Identity {
 
             return MutateCapabilityAsync<IUserTotpStore>(uuid, op, ContextCode.Totp, async (store, user) => {
                 OperationResult result = await store.AddTotpAsync(user, totp, cancellationToken).ConfigureAwait(false);
-                if (!StoreSucceeded(result)) return result;
+                if (!RequiredMutationSucceeded(result)) return result;
                 result = await RotateAsync(user, user, null, op, cancellationToken).ConfigureAwait(false);
                 if (!StoreSucceeded(result)) return result;
                 return await AuditAsync(user, actor, totp.Uuid, UserAuditType.Totp, UserAuditAction.Verified, cancellationToken).ConfigureAwait(false);
@@ -344,7 +348,7 @@ namespace Lithindium.Identity {
                 UserTotp? totp = await store.GetTotpAsync(user, totpUuid, cancellationToken).ConfigureAwait(false);
                 if (totp is not { } current) return Failure(StatusCode.NotFound, ContextCode.Totp, op);
                 OperationResult result = await store.RemoveTotpAsync(user, current, cancellationToken).ConfigureAwait(false);
-                if (!StoreSucceeded(result)) return result;
+                if (!RequiredMutationSucceeded(result)) return result;
                 if (_store is IUserRecoveryCodeStore recovery && !await AnyAsync(store.GetTotpsAsync(user, cancellationToken), cancellationToken).ConfigureAwait(false)) {
                     result = await recovery.ReplaceRecoveryCodesAsync(user, Array.Empty<UserRecoveryCode>(), cancellationToken).ConfigureAwait(false);
                     if (!StoreSucceeded(result)) return result;
@@ -366,6 +370,8 @@ namespace Lithindium.Identity {
 
             return MutateCapabilityAsync<IUserExternalIdentityStore>(uuid, op, ContextCode.ExternalIdentity, async (store, user) => {
                 OperationResult result = await store.AddExternalIdentityAsync(user, identity, cancellationToken).ConfigureAwait(false);
+                if (!RequiredMutationSucceeded(result)) return result;
+                result = await RotateAsync(user, user, null, op, cancellationToken).ConfigureAwait(false);
                 if (!StoreSucceeded(result)) return result;
                 return await AuditAsync(user, actor, identity.Uuid, UserAuditType.ExternalIdentity, UserAuditAction.Created, cancellationToken).ConfigureAwait(false);
             }, cancellationToken);
@@ -403,7 +409,7 @@ namespace Lithindium.Identity {
                     if (!other) return Failure(StatusCode.PolicyViolation, ContextCode.ExternalIdentity, op, DetailCode.LastCredential);
                 }
                 OperationResult result = await store.RemoveExternalIdentityAsync(user, current, cancellationToken).ConfigureAwait(false);
-                if (!StoreSucceeded(result)) return result;
+                if (!RequiredMutationSucceeded(result)) return result;
                 result = await RotateAsync(user, user, null, op, cancellationToken).ConfigureAwait(false);
                 if (!StoreSucceeded(result)) return result;
                 return await AuditAsync(user, actor, identityUuid, UserAuditType.ExternalIdentity, UserAuditAction.Removed, cancellationToken).ConfigureAwait(false);
@@ -536,16 +542,16 @@ namespace Lithindium.Identity {
 
             await using IUserStoreTransaction transaction = await _store.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
             result = await _store.CreateAsync(user, cancellationToken).ConfigureAwait(false);
-            if (!StoreSucceeded(result)) return new OperationResult<User>(result);
+            if (!RequiredMutationSucceeded(result)) return new OperationResult<User>(result);
             if (identity is { } linked) {
                 result = await ((IUserExternalIdentityStore)_store).AddExternalIdentityAsync(user, linked, cancellationToken).ConfigureAwait(false);
-                if (!StoreSucceeded(result)) return new OperationResult<User>(result);
+                if (!RequiredMutationSucceeded(result)) return new OperationResult<User>(result);
                 result = await AuditAsync(user, actor, linked.Uuid, UserAuditType.ExternalIdentity, UserAuditAction.Created, cancellationToken).ConfigureAwait(false);
                 if (!StoreSucceeded(result)) return new OperationResult<User>(result);
             }
             if (_store is IUserLockoutStore lockouts) {
                 result = await lockouts.TryUpdateLockoutAsync(user, null, new UserLockout(true, 0, null), cancellationToken).ConfigureAwait(false);
-                if (!StoreSucceeded(result)) return new OperationResult<User>(result);
+                if (!RequiredMutationSucceeded(result)) return new OperationResult<User>(result);
             }
             result = await AuditAsync(user, actor, user.Uuid, UserAuditType.User, UserAuditAction.Created, cancellationToken).ConfigureAwait(false);
             if (!StoreSucceeded(result)) return new OperationResult<User>(result);
@@ -684,6 +690,11 @@ namespace Lithindium.Identity {
         private static async Task<bool> AnyAsync<T>(IAsyncEnumerable<T> items, CancellationToken cancellationToken) {
             await foreach (T item in items.WithCancellation(cancellationToken).ConfigureAwait(false)) return true;
             return false;
+        }
+
+        internal static bool RequiredMutationSucceeded(OperationResult result) {
+            if (result.Status == StatusCode.NoOp) throw new InvalidOperationException("Required identity mutation was not applied.");
+            return StoreSucceeded(result);
         }
 
         internal static bool StoreSucceeded(OperationResult result) {

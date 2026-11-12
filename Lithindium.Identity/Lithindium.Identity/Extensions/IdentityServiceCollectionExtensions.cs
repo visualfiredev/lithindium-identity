@@ -6,6 +6,7 @@
 // -------------------------------------------------------------------------------------------------
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,9 +28,12 @@ namespace Lithindium.Identity {
             UserManagerOptions? users = null, ChallengeManagerOptions? challenges = null, SignInManagerOptions? signIn = null) {
             ArgumentNullException.ThrowIfNull(services);
 
-            services.TryAddSingleton(users ?? new UserManagerOptions());
-            services.TryAddSingleton(challenges ?? new ChallengeManagerOptions());
-            services.TryAddSingleton(signIn ?? new SignInManagerOptions());
+            if (users is null) services.TryAddSingleton(new UserManagerOptions());
+            else services.Replace(ServiceDescriptor.Singleton(users));
+            if (challenges is null) services.TryAddSingleton(new ChallengeManagerOptions());
+            else services.Replace(ServiceDescriptor.Singleton(challenges));
+            if (signIn is null) services.TryAddSingleton(new SignInManagerOptions());
+            else services.Replace(ServiceDescriptor.Singleton(signIn));
             services.TryAddSingleton(TimeProvider.System);
             services.TryAddScoped<IPasswordHasher<object>, PasswordHasher<object>>();
             services.TryAddScoped<UserManager>();
@@ -41,7 +45,7 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Registers identity with a single scoped store implementation.
         /// </summary>
-        public static IServiceCollection AddLithindiumIdentity<TStore>(this IServiceCollection services,
+        public static IServiceCollection AddLithindiumIdentity<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TStore>(this IServiceCollection services,
             UserManagerOptions? users = null, ChallengeManagerOptions? challenges = null, SignInManagerOptions? signIn = null)
             where TStore : class, IUserStore {
             services.AddLithindiumIdentity(users, challenges, signIn);

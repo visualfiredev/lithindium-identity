@@ -146,7 +146,9 @@ namespace Lithindium.Identity {
             if (session.AuthenticatedAt > now || session.ExpiresAt <= session.AuthenticatedAt)
                 return new OperationResult<AuthenticatedSession>(Failure(StatusCode.InvalidState, ContextCode.Session, op));
             OperationResult commit = await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-            return Succeeded(commit) ? new OperationResult<AuthenticatedSession>(Success(op), new AuthenticatedSession(userUuid, session)) : new OperationResult<AuthenticatedSession>(commit);
+            if (!Succeeded(commit)) return new OperationResult<AuthenticatedSession>(commit);
+            if (session.ExpiresAt <= Now) return new OperationResult<AuthenticatedSession>(Failure(StatusCode.Expired, ContextCode.Session, op));
+            return new OperationResult<AuthenticatedSession>(Success(op), new AuthenticatedSession(userUuid, session));
         }
 
         /// <summary>

@@ -1,98 +1,84 @@
-<div align="center">
-
 # Lithindium Identity
 
-**A modern identity and authentication library for .NET.**
-
-User accounts, authentication, and credential management — without the unnecessary complexity.
-
-![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)
-![C%23](https://img.shields.io/badge/C%23-14-239120)
-![Status](https://img.shields.io/badge/status-in%20development-orange)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-
-[Overview](#overview) · [Features](#features) · [Architecture](#architecture) · [Getting Started](#getting-started) · [Contributing](#contributing) · [AI Assisted Development](#ai-assisted-development)
-
-</div>
-
----
-
-## Overview
-
-Lithindium provides a reusable, consistent identity model for .NET. Inspired by ASP.NET Core Identity, it reuses established security primitives for account and credential management.
+A modern identity and authentication library for .NET.
 
 > [!IMPORTANT]
-> In active development. Authentication workflows and the public API are incomplete; not production-ready.
+> In active development. Review deployment configuration and validate security before production use.
 
-## Features
+## Packages
 
-Planned capabilities, not completed or security-reviewed features:
-
-| Capability | Description |
+| Package | Responsibility |
 | :--- | :--- |
-| **User management** | Unique usernames, optional display names, and account suspension. |
-| **Passwords** | Established password hashing and verification. |
-| **Email addresses** | Multiple verified addresses; optional primary. |
-| **Phone numbers** | Multiple verified numbers with extensions; optional primary. |
-| **Multi-factor authentication** | Multiple named TOTP authenticators. |
-| **Recovery codes** | Secure, single-use access codes. |
-| **Challenges** | Expiring, single-use verification and authentication challenges. |
-| **Sessions** | Persisted, expiring, individually revocable sessions. |
-| **External identities** | Linking by validated issuer and subject. |
-| **Account protection** | Lockouts and credential invalidation. |
-| **Auditing** | Persistent security event history. |
+| `Lithindium.Identity` | Identity records, stores, unified results and managers. |
+| `Lithindium.Identity.EntityFrameworkCore` | SQLite and PostgreSQL persistence. |
+| `Lithindium.Identity.AspNetCore` | Protected session cookies and HTTP authentication. |
 
-## Architecture
+The framework supports native and external accounts, verified contacts, passwords, TOTP, recovery codes, lockout, sessions and auditing. It is not an OAuth or OpenID Connect authorization server.
 
-The core library is persistence-independent. An EF Core provider is planned; identity workflows will reuse .NET security infrastructure.
+## Getting started
 
-```mermaid
-flowchart TD
-    A[Application] --> B[Lithindium Identity]
-    B --> C[Store contracts]
-    C --> D[EF Core provider]
-    D --> E[(Database)]
-    B --> F[.NET security infrastructure]
-```
-
-- **Consistent:** One strongly typed identity model and predictable API.
-- **Secure:** Established primitives; credential-sensitive operations stay in the identity layer.
-- **Application-independent:** Business rules, authorization and UI remain with the application.
-
-Lithindium is not a complete OAuth 2.0 or OpenID Connect authorization server.
-
-## Getting Started
-
-Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and [Git](https://git-scm.com/).
+Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 ```powershell
 git clone https://github.com/visualfiredev/lithindium-identity.git
 cd lithindium-identity
-dotnet build Lithindium.Identity/Lithindium.Identity/Lithindium.Identity.csproj
+dotnet build Lithindium.Identity/Lithindium.Identity.sln
+dotnet test Lithindium.Identity/Lithindium.Identity.sln
 ```
 
-Installation instructions and API examples will follow.
+Register the framework in an ASP.NET Core host:
+
+```csharp
+builder.Services.AddLithindiumIdentity(
+    users: new UserManagerOptions { MinimumPasswordLength = 15 });
+builder.Services.AddLithindiumEntityFrameworkCore(options =>
+    options.UseSqlite("Data Source=identity.db;Foreign Keys=True"));
+builder.Services.AddLithindiumAuthentication();
+builder.Services.AddAuthorization();
+```
+
+Use `UseNpgsql(connectionString)` for PostgreSQL. Configure shared Data Protection keys and an application name before deploying multiple instances. Resolve managers from the request scope.
+
+For a fresh, dedicated development database, use `IdentityDbContext.Database.EnsureCreatedAsync()`. For production, generate and review provider-specific EF Core migrations against an empty schema; do not combine EnsureCreated with migrations. The design-time factory accepts `LITHINDIUM_DB_PROVIDER` (`sqlite` or `postgres`) and `LITHINDIUM_DB_CONNECTION`. Example for SQLite:
+
+```powershell
+dotnet tool install --global dotnet-ef --version 10.0.15
+$env:LITHINDIUM_DB_PROVIDER = "sqlite"
+$env:LITHINDIUM_DB_CONNECTION = "Data Source=identity.db;Foreign Keys=True"
+dotnet ef migrations add InitialIdentity --project Lithindium.Identity/Lithindium.Identity.EntityFrameworkCore
+dotnet ef database update --project Lithindium.Identity/Lithindium.Identity.EntityFrameworkCore
+```
+
+Maintain separate migrations for each provider. The core is designed for Native AOT; EF Core and the HTTP/sample layers do not claim Native AOT compatibility.
+
+## Sample
+
+```powershell
+dotnet dev-certs https --trust
+$env:ASPNETCORE_ENVIRONMENT = "Development"
+dotnet run --project Lithindium.Identity/Lithindium.Identity.Sample -- --urls https://localhost:7243
+```
+
+The sample provides `GET /csrf`, `POST /auth/register`, `POST /auth/login`, `POST /auth/mfa/totp`, `POST /auth/mfa/recovery`, `POST /auth/logout` and protected `GET /me`. Supply the antiforgery token in `X-CSRF-TOKEN` with the cookie on POSTs; refresh it after sign-in. The sample is development-only.
+
+## Security boundaries
+
+- Use HTTPS, secure shared key storage, authorization, antiforgery and distributed rate limits. External assertions and message delivery remain host responsibilities.
+- Managers are trusted backend services; never expose raw user records, hashes, protected payloads or bearer credentials in logs or public APIs.
+- Use one scoped store, primary database reads and serializable transactions. Retry known aborted operations from fresh state; never retry unknown commit outcomes blindly. Preserve the identifier ledger, including during migration and backup restoration.
+- SQLite uses Unicode NFC/invariant uppercase lookup keys; PostgreSQL uses the same keys with deterministic collation. Issuer/subject are exact. The new schema is not a migration from the original OIDC database.
+- Password policy defaults are configurable; production deployments also need compromised-password screening, recovery/delivery policy and operational monitoring.
+
+CI builds and exercises SQLite and PostgreSQL. Set `LITHINDIUM_TEST_POSTGRES` to a disposable PostgreSQL server connection with database creation privileges to run PostgreSQL tests locally.
 
 ## Contributing
 
-Ideas, bug reports, proposals and pull requests are welcome on GitHub. Report suspected vulnerabilities privately.
+Issues, proposals and pull requests are welcome. Report suspected vulnerabilities privately.
 
 ## AI Assisted Development
 
-Human contributors and AI coding agents collaborate under human direction, engineering oversight and review.
-
-All contributions must meet the same correctness, maintainability, security, attribution and licensing standards. Contributors are responsible for their work's quality and legality.
+Human contributors and AI coding agents collaborate under human direction, engineering oversight and review. All contributions must meet the same correctness, maintainability, security, attribution and licensing standards.
 
 ## License
 
-Lithindium Identity is licensed under the [Apache License, Version 2.0](LICENSE).
-
-Copyright © 2026 Visual Fire Development LLC.
-
----
-
-<div align="center">
-
-Developed by [Visual Fire Development](https://www.visualfiredev.com/).
-
-</div>
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

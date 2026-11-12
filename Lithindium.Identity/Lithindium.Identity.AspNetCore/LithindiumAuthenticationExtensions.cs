@@ -53,6 +53,7 @@ namespace Lithindium.Identity.AspNetCore {
             LithindiumAuthenticationOptions options = GetOptions(context);
             CookieOptions cookie = CreateCookieOptions();
             if (options.PersistentCookie) cookie.Expires = new DateTimeOffset(authenticated.Session.ExpiresAt);
+            context.Response.Headers.CacheControl = "no-store";
             context.Response.Cookies.Append(options.CookieName, token, cookie);
         }
 
@@ -62,6 +63,7 @@ namespace Lithindium.Identity.AspNetCore {
         public static async Task<OperationResult> SignOutLithindiumAsync(this HttpContext context) {
             ArgumentNullException.ThrowIfNull(context);
             if (!context.Request.IsHttps) throw new InvalidOperationException("Lithindium cookies require HTTPS.");
+            context.Response.Headers.CacheControl = "no-store";
             LithindiumAuthenticationOptions options = GetOptions(context);
             if (!context.Request.Cookies.TryGetValue(options.CookieName, out string? token) || string.IsNullOrEmpty(token)) {
                 context.Response.Cookies.Delete(options.CookieName, CreateCookieOptions());

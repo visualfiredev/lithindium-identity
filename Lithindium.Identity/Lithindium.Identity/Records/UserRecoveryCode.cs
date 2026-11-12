@@ -43,6 +43,11 @@ namespace Lithindium.Identity {
             // ...
         }
 
+        /// <summary>
+        /// Returns a redacted diagnostic representation.
+        /// </summary>
+        public override string ToString() => $"UserRecoveryCode {{ Uuid = {Uuid} }}";
+
     }
 
 }

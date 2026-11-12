@@ -47,6 +47,9 @@ namespace Lithindium.Identity.EntityFrameworkCore {
                 throw new NotSupportedException("Use the SQLite or PostgreSQL identity provider.");
             if (db.Database.CreateExecutionStrategy().RetriesOnFailure)
                 throw new InvalidOperationException("Disable provider-level retries for identity transactions.");
+            if (db.Database.GetDbConnection() is SqliteConnection sqlite &&
+                new SqliteConnectionStringBuilder(sqlite.ConnectionString).ForeignKeys != true)
+                throw new InvalidOperationException("SQLite identity connections require Foreign Keys=True.");
             _db = db;
         }
 
@@ -142,7 +145,8 @@ namespace Lithindium.Identity.EntityFrameworkCore {
             public async Task RollbackAsync(CancellationToken cancellationToken = default) {
                 if (Completed) return;
                 try {
-                    await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                    if (transaction.GetDbTransaction().Connection is not null)
+                        await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
                 } finally {
                     Completed = true;
                     owner._db.ChangeTracker.Clear();
@@ -164,7 +168,7 @@ namespace Lithindium.Identity.EntityFrameworkCore {
 
         }
 
-        private static string Key(string value) => value.Normalize(NormalizationForm.FormC).ToUpperInvariant();
+        private static string Key(string value) => value.Normalize(NormalizationForm.FormC).ToUpperInvariant().Normalize(NormalizationForm.FormC);
         private static long Ticks(DateTime value) {
             if (value.Kind != DateTimeKind.Utc) throw new ArgumentException("Expected UTC time.");
             return value.Ticks;
@@ -259,7 +263,7 @@ namespace Lithindium.Identity.EntityFrameworkCore {
 
         /// <inheritdoc />
         public IAsyncEnumerable<UserEmail> GetEmailsAsync(User user, CancellationToken cancellationToken = default) =>
-            ReadMany(Query<EmailRow>().Where(x => x.UserUuid == user.Uuid), ToRecord, cancellationToken);
+            ReadMany<EmailRow, UserEmail>(Query<EmailRow>().Where(x => x.UserUuid == user.Uuid), ToRecord, cancellationToken);
 
         /// <inheritdoc />
         public async Task<User?> FindByEmailAsync(string address, CancellationToken cancellationToken = default) {
@@ -319,7 +323,7 @@ namespace Lithindium.Identity.EntityFrameworkCore {
 
         /// <inheritdoc />
         public IAsyncEnumerable<UserPhone> GetPhonesAsync(User user, CancellationToken cancellationToken = default) =>
-            ReadMany(Query<PhoneRow>().Where(x => x.UserUuid == user.Uuid), ToRecord, cancellationToken);
+            ReadMany<PhoneRow, UserPhone>(Query<PhoneRow>().Where(x => x.UserUuid == user.Uuid), ToRecord, cancellationToken);
 
         /// <inheritdoc />
         public async Task<User?> FindByPhoneAsync(string number, string? extension = null, CancellationToken cancellationToken = default) {
@@ -405,7 +409,7 @@ namespace Lithindium.Identity.EntityFrameworkCore {
 
         /// <inheritdoc />
         public IAsyncEnumerable<UserTotp> GetTotpsAsync(User user, CancellationToken cancellationToken = default) =>
-            ReadMany(Query<TotpRow>().Where(x => x.UserUuid == user.Uuid), ToRecord, cancellationToken);
+            ReadMany<TotpRow, UserTotp>(Query<TotpRow>().Where(x => x.UserUuid == user.Uuid), ToRecord, cancellationToken);
 
         /// <inheritdoc />
         public async Task<UserTotp?> GetTotpAsync(User user, Guid uuid, CancellationToken cancellationToken = default) {
@@ -459,7 +463,7 @@ namespace Lithindium.Identity.EntityFrameworkCore {
 
         /// <inheritdoc />
         public IAsyncEnumerable<UserRecoveryCode> GetRecoveryCodesAsync(User user, CancellationToken cancellationToken = default) =>
-            ReadMany(Query<RecoveryRow>().Where(x => x.UserUuid == user.Uuid), ToRecord, cancellationToken);
+            ReadMany<RecoveryRow, UserRecoveryCode>(Query<RecoveryRow>().Where(x => x.UserUuid == user.Uuid), ToRecord, cancellationToken);
 
         /// <inheritdoc />
         public Task<int> CountRecoveryCodesAsync(User user, CancellationToken cancellationToken = default) =>
@@ -497,7 +501,7 @@ namespace Lithindium.Identity.EntityFrameworkCore {
 
         /// <inheritdoc />
         public IAsyncEnumerable<UserExternalIdentity> GetExternalIdentitiesAsync(User user, CancellationToken cancellationToken = default) =>
-            ReadMany(Query<ExternalRow>().Where(x => x.UserUuid == user.Uuid), ToRecord, cancellationToken);
+            ReadMany<ExternalRow, UserExternalIdentity>(Query<ExternalRow>().Where(x => x.UserUuid == user.Uuid), ToRecord, cancellationToken);
 
         /// <inheritdoc />
         public async Task<UserExternalIdentity?> GetExternalIdentityAsync(User user, Guid uuid, CancellationToken cancellationToken = default) {
@@ -546,7 +550,7 @@ namespace Lithindium.Identity.EntityFrameworkCore {
 
         /// <inheritdoc />
         public IAsyncEnumerable<UserSession> GetSessionsAsync(User user, CancellationToken cancellationToken = default) =>
-            ReadMany(Query<SessionRow>().Where(x => x.UserUuid == user.Uuid), ToRecord, cancellationToken);
+            ReadMany<SessionRow, UserSession>(Query<SessionRow>().Where(x => x.UserUuid == user.Uuid), ToRecord, cancellationToken);
 
         /// <inheritdoc />
         public async Task<UserSession?> GetSessionAsync(User user, Guid uuid, CancellationToken cancellationToken = default) {
@@ -668,15 +672,15 @@ namespace Lithindium.Identity.EntityFrameworkCore {
 
         /// <inheritdoc />
         public IAsyncEnumerable<UserAudit> GetAuditsAsync(Guid user, CancellationToken cancellationToken = default) =>
-            ReadMany(Query<AuditRow>().Where(x => x.User == user), ToRecord, cancellationToken);
+            ReadMany<AuditRow, UserAudit>(Query<AuditRow>().Where(x => x.User == user), ToRecord, cancellationToken);
 
         /// <inheritdoc />
         public IAsyncEnumerable<UserAudit> GetAuditsByActorAsync(Guid actor, CancellationToken cancellationToken = default) =>
-            ReadMany(Query<AuditRow>().Where(x => x.Actor == actor), ToRecord, cancellationToken);
+            ReadMany<AuditRow, UserAudit>(Query<AuditRow>().Where(x => x.Actor == actor), ToRecord, cancellationToken);
 
         /// <inheritdoc />
         public IAsyncEnumerable<UserAudit> GetAuditsByEntityAsync(Guid entity, CancellationToken cancellationToken = default) =>
-            ReadMany(Query<AuditRow>().Where(x => x.Entity == entity), ToRecord, cancellationToken);
+            ReadMany<AuditRow, UserAudit>(Query<AuditRow>().Where(x => x.Entity == entity), ToRecord, cancellationToken);
 
         /// <inheritdoc />
         public Task<OperationResult> AddAuditAsync(UserAudit audit, CancellationToken cancellationToken = default) {
