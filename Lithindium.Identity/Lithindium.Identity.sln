@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lithindium.Identity", "Lith
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lithindium.Identity.Tests", "Lithindium.Identity.Tests\Lithindium.Identity.Tests.csproj", "{87ED5390-118A-4E6B-A0E1-4D32F6FE99A8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lithindium.Identity.EntityFrameworkCore", "Lithindium.Identity.EntityFrameworkCore\Lithindium.Identity.EntityFrameworkCore.csproj", "{A522C30D-8431-46D9-AE98-766F7E759D29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{87ED5390-118A-4E6B-A0E1-4D32F6FE99A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87ED5390-118A-4E6B-A0E1-4D32F6FE99A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87ED5390-118A-4E6B-A0E1-4D32F6FE99A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A522C30D-8431-46D9-AE98-766F7E759D29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A522C30D-8431-46D9-AE98-766F7E759D29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A522C30D-8431-46D9-AE98-766F7E759D29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A522C30D-8431-46D9-AE98-766F7E759D29}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
