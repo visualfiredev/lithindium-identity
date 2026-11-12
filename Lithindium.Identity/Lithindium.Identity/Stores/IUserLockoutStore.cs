@@ -39,6 +39,7 @@ namespace Lithindium.Identity {
         /// </returns>
         /// <remarks>
         /// Atomically compare and update; a <see langword="null"/> expectation requires no existing state.
+        /// Success requires applying the replacement.
         /// </remarks>
         Task<OperationResult> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default);
 

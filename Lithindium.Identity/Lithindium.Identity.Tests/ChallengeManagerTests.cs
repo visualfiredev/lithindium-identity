@@ -126,7 +126,7 @@ namespace Lithindium.Identity.Tests {
 
             var mfa = await f.IssueMfaAsync();
             bool completed = false;
-            Task<OperationResult> Complete(User user, UserChallenge challenge, CancellationToken ct) {
+            Task<OperationResult> Complete(User user, UserChallenge challenge, string firstFactor, CancellationToken ct) {
                 completed = true;
                 return Task.FromResult(new OperationResult(StatusCode.Success));
             }
@@ -152,14 +152,14 @@ namespace Lithindium.Identity.Tests {
             string recovery = (await f.Users.GenerateRecoveryCodesAsync(f.User.Uuid)).Value[0];
             int count = f.Store.RecoveryCodes.Count;
             var ticket = await f.IssueMfaAsync();
-            Task<OperationResult> Fail(User user, UserChallenge challenge, CancellationToken ct) =>
+            Task<OperationResult> Fail(User user, UserChallenge challenge, string firstFactor, CancellationToken ct) =>
                 Task.FromResult(new OperationResult(StatusCode.Conflict, operation: OperationCode.StoreAddSession));
             var result = await f.Challenges.CompleteMultiFactorAsync(f.User.Uuid, ticket.Uuid, ticket.Secret, null, recovery, Fail, default);
             Assert.Equal(StatusCode.Conflict, result.Status);
             Assert.Equal(count, f.Store.RecoveryCodes.Count);
             Assert.Equal(0u, f.Store.Challenges[ticket.Uuid].Attempts);
 
-            Task<OperationResult> Success(User user, UserChallenge challenge, CancellationToken ct) =>
+            Task<OperationResult> Success(User user, UserChallenge challenge, string firstFactor, CancellationToken ct) =>
                 Task.FromResult(new OperationResult(StatusCode.Success));
             Assert.True((await f.Challenges.CompleteMultiFactorAsync(f.User.Uuid, ticket.Uuid, ticket.Secret, null, recovery, Success, default)).IsSuccess);
             Assert.Equal(count - 1, f.Store.RecoveryCodes.Count);
@@ -196,7 +196,7 @@ namespace Lithindium.Identity.Tests {
             public async Task<ChallengeTicket> IssueMfaAsync() {
                 await using IUserStoreTransaction transaction = await Store.BeginTransactionAsync();
                 User current = Store.Users[User.Uuid];
-                ChallengeTicket ticket = (await Challenges.IssueMultiFactorAsync(current, default)).Value;
+                ChallengeTicket ticket = (await Challenges.IssueMultiFactorAsync(current, "pwd", default)).Value;
                 Assert.True((await transaction.CommitAsync()).IsSuccess);
                 return ticket;
             }

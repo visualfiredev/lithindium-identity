@@ -129,7 +129,7 @@ namespace Lithindium.Identity {
 
             return MutateAsync(uuid, op, async user => {
                 if (user.Status != UserStatus.Active) return Failure(StatusCode.AccessDenied, ContextCode.User, op, DetailCode.Suspended);
-                if (user.Password is null || _passwordHasher.VerifyHashedPassword(user, user.Password, currentPassword) == PasswordVerificationResult.Failed)
+                if (user.Password is null || VerifyPassword(user, currentPassword) is not (PasswordVerificationResult.Success or PasswordVerificationResult.SuccessRehashNeeded))
                     return Failure(StatusCode.InvalidCredential, ContextCode.Password, op);
 
                 return await RotateAsync(user, user with { Password = HashPassword(user, newPassword) }, exceptSessionUuid, op, cancellationToken).ConfigureAwait(false);
@@ -503,7 +503,7 @@ namespace Lithindium.Identity {
 
             return MutateAsync(uuid, op, async user => {
                 if (user.Status != UserStatus.Active) return Failure(StatusCode.AccessDenied, ContextCode.User, op, DetailCode.Suspended);
-                if (user.Password is null || _passwordHasher.VerifyHashedPassword(user, user.Password, currentPassword) == PasswordVerificationResult.Failed)
+                if (user.Password is null || VerifyPassword(user, currentPassword) is not (PasswordVerificationResult.Success or PasswordVerificationResult.SuccessRehashNeeded))
                     return Failure(StatusCode.InvalidCredential, ContextCode.Password, op);
                 if (_store is not IUserExternalIdentityStore external ||
                     !await AnyAsync(external.GetExternalIdentitiesAsync(user, cancellationToken), cancellationToken).ConfigureAwait(false))
@@ -597,6 +597,7 @@ namespace Lithindium.Identity {
 
             OperationResult result = await _store.TryUpdateAsync(current, replacement with { Rotation = exhausted ? current.Rotation : (ushort)(current.Rotation + 1) }, cancellationToken).ConfigureAwait(false);
             if (!StoreSucceeded(result)) return result;
+            if (result.Status == StatusCode.NoOp) throw new InvalidOperationException("Authentication state update was not applied.");
             if (_store is IUserChallengeStore challenges) {
                 result = await challenges.RemoveChallengesAsync(current, cancellationToken: cancellationToken).ConfigureAwait(false);
                 if (!StoreSucceeded(result)) return result;
@@ -612,6 +613,9 @@ namespace Lithindium.Identity {
             _store is IUserAuditStore audits
                 ? audits.AddAuditAsync(new UserAudit(Guid.CreateVersion7(), user.Uuid, actor, entity, type, action, "{}", _timeProvider.GetUtcNow().UtcDateTime), cancellationToken)
                 : Task.FromResult(new OperationResult(StatusCode.Success));
+
+        internal PasswordVerificationResult VerifyPassword(User user, string password) =>
+            user.Password is null ? PasswordVerificationResult.Failed : _passwordHasher.VerifyHashedPassword(user, user.Password, password);
 
         internal string HashPassword(User user, string password) {
             string hash = _passwordHasher.HashPassword(user, password);

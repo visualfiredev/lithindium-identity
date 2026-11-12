@@ -379,7 +379,52 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Challenge manager: RemoveExpired.
         /// </summary>
-        ChallengeRemoveExpired = 0x8B
+        ChallengeRemoveExpired = 0x8B,
+
+        /// <summary>
+        /// Sign-in manager: Password.
+        /// </summary>
+        SignInPassword = 0x90,
+
+        /// <summary>
+        /// Sign-in manager: External.
+        /// </summary>
+        SignInExternal = 0x91,
+
+        /// <summary>
+        /// Sign-in manager: CompleteMultiFactor.
+        /// </summary>
+        SignInCompleteMultiFactor = 0x92,
+
+        /// <summary>
+        /// Sign-in manager: ValidateSession.
+        /// </summary>
+        SignInValidateSession = 0x93,
+
+        /// <summary>
+        /// Sign-in manager: SignOut.
+        /// </summary>
+        SignInSignOut = 0x94,
+
+        /// <summary>
+        /// Sign-in manager: GetSessions.
+        /// </summary>
+        SignInGetSessions = 0x95,
+
+        /// <summary>
+        /// Sign-in manager: RevokeSession.
+        /// </summary>
+        SignInRevokeSession = 0x96,
+
+        /// <summary>
+        /// Sign-in manager: RevokeSessions.
+        /// </summary>
+        SignInRevokeSessions = 0x97,
+
+        /// <summary>
+        /// Sign-in manager: RemoveExpiredSessions.
+        /// </summary>
+        SignInRemoveExpiredSessions = 0x98
 
     }
 

@@ -56,7 +56,8 @@ namespace Lithindium.Identity {
         /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Identifier"/>.
         /// </returns>
         /// <remarks>
-        /// Expiration must follow authentication. Issue within the transaction validating
+        /// Success requires insertion. Expiration must follow authentication.
+        /// Issue within the transaction validating
         /// the authorizing authentication state, including required verification state changes.
         /// </remarks>
         Task<OperationResult> AddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);

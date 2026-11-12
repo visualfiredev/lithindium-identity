@@ -163,7 +163,7 @@ namespace Lithindium.Identity.Tests {
         private static UserChallenge NewChallenge() => new(Guid.NewGuid(), UserChallengeType.PasswordReset, null, null, 0, 5, DateTime.UtcNow, DateTime.UtcNow.AddMinutes(5));
 
         // Single-user transactional fake; not a concurrency or provider conformance test.
-        internal sealed class TestStore : IUserStore, IUserSessionStore, IUserChallengeStore, IUserAuditStore, IUserExternalIdentityStore, IUserEmailStore, IUserPhoneStore, IUserTotpStore, IUserRecoveryCodeStore {
+        internal sealed class TestStore : IUserStore, IUserSessionStore, IUserChallengeStore, IUserAuditStore, IUserExternalIdentityStore, IUserEmailStore, IUserPhoneStore, IUserTotpStore, IUserRecoveryCodeStore, IUserLockoutStore {
 
             public Dictionary<Guid, User> Users { get; private set; } = [];
             public Dictionary<Guid, UserSession> Sessions { get; private set; } = [];
@@ -178,6 +178,8 @@ namespace Lithindium.Identity.Tests {
 
             public List<UserAudit> Audits { get; private set; } = [];
             public bool FailSessionRemoval { get; set; }
+            public bool FailSessionAddition { get; set; }
+            public Dictionary<Guid, UserLockout> Lockouts { get; private set; } = [];
             public bool FailAudit { get; init; }
 
             private static Task<OperationResult> Ok(OperationCode operation) => Task.FromResult(new OperationResult(StatusCode.Success, operation: operation));
@@ -217,6 +219,7 @@ namespace Lithindium.Identity.Tests {
                 Phones.Clear();
                 Totps.Clear();
                 RecoveryCodes.Clear();
+                Lockouts.Remove(uuid);
                 return Ok(OperationCode.StoreDeleteUser);
             }
 
@@ -226,6 +229,7 @@ namespace Lithindium.Identity.Tests {
                 Task.FromResult(Sessions.TryGetValue(uuid, out UserSession session) ? (UserSession?)session : null);
 
             public Task<OperationResult> AddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default) {
+                if (FailSessionAddition) return Fail(StatusCode.Conflict, ContextCode.None, OperationCode.StoreAddSession);
                 Sessions.Add(session.Uuid, session);
                 return Ok(OperationCode.StoreAddSession);
             }
@@ -241,7 +245,11 @@ namespace Lithindium.Identity.Tests {
                 return Ok(OperationCode.StoreRemoveSessions);
             }
 
-            public Task<int> RemoveExpiredSessionsAsync(DateTime expiresAt, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+            public Task<int> RemoveExpiredSessionsAsync(DateTime expiresAt, CancellationToken cancellationToken = default) {
+                Guid[] expired = Sessions.Values.Where(s => s.ExpiresAt <= expiresAt).Select(s => s.Uuid).ToArray();
+                foreach (Guid uuid in expired) Sessions.Remove(uuid);
+                return Task.FromResult(expired.Length);
+            }
 
             public Task<UserChallenge?> GetChallengeAsync(User user, Guid uuid, CancellationToken cancellationToken = default) =>
                 Task.FromResult(Challenges.TryGetValue(uuid, out UserChallenge challenge) ? (UserChallenge?)challenge : null);
@@ -301,7 +309,8 @@ namespace Lithindium.Identity.Tests {
             public Task<UserExternalIdentity?> GetExternalIdentityAsync(User user, Guid uuid, CancellationToken cancellationToken = default) =>
                 Task.FromResult(Identities.TryGetValue(uuid, out UserExternalIdentity identity) ? (UserExternalIdentity?)identity : null);
 
-            public Task<User?> FindByExternalIdentityAsync(string issuer, string subject, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+            public Task<User?> FindByExternalIdentityAsync(string issuer, string subject, CancellationToken cancellationToken = default) =>
+                Task.FromResult(Identities.Values.Any(i => i.Issuer == issuer && i.Subject == subject) ? Users.Values.Select(u => (User?)u).SingleOrDefault() : null);
 
             public Task<OperationResult> AddExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default) {
                 Identities.Add(identity.Uuid, identity);
@@ -319,7 +328,8 @@ namespace Lithindium.Identity.Tests {
             }
 
             public IAsyncEnumerable<UserEmail> GetEmailsAsync(User user, CancellationToken cancellationToken = default) => Stream(Emails);
-            public Task<User?> FindByEmailAsync(string address, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+            public Task<User?> FindByEmailAsync(string address, CancellationToken cancellationToken = default) =>
+                Task.FromResult(Emails.Any(e => string.Equals(e.Address, address, StringComparison.OrdinalIgnoreCase)) ? Users.Values.Select(u => (User?)u).SingleOrDefault() : null);
 
             public Task<OperationResult> AddEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default) {
                 if (FailEmailAddition) return Fail(StatusCode.Conflict, ContextCode.None, OperationCode.StoreAddEmail);
@@ -338,7 +348,8 @@ namespace Lithindium.Identity.Tests {
             public Task<OperationResult> SetPrimaryEmailAsync(User user, UserEmail? email, CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
             public IAsyncEnumerable<UserPhone> GetPhonesAsync(User user, CancellationToken cancellationToken = default) => Stream(Phones);
-            public Task<User?> FindByPhoneAsync(string number, string? extension = null, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+            public Task<User?> FindByPhoneAsync(string number, string? extension = null, CancellationToken cancellationToken = default) =>
+                Task.FromResult(Phones.Any(p => p.Number == number && p.Extension == extension) ? Users.Values.Select(u => (User?)u).SingleOrDefault() : null);
 
             public Task<OperationResult> AddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default) {
                 if (phone.Primary) for (int i = 0; i < Phones.Count; i++) Phones[i] = Phones[i] with { Primary = false };
@@ -383,6 +394,16 @@ namespace Lithindium.Identity.Tests {
 
             public Task<int> CountRecoveryCodesAsync(User user, CancellationToken cancellationToken = default) => Task.FromResult(RecoveryCodes.Count);
 
+            public Task<UserLockout?> GetLockoutAsync(User user, CancellationToken cancellationToken = default) =>
+                Task.FromResult(Lockouts.TryGetValue(user.Uuid, out UserLockout state) ? (UserLockout?)state : null);
+
+            public Task<OperationResult> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default) {
+                UserLockout? current = Lockouts.TryGetValue(user.Uuid, out UserLockout state) ? state : null;
+                if (current != expected) return Fail(StatusCode.Conflict, ContextCode.None, OperationCode.StoreUpdateLockout);
+                Lockouts[user.Uuid] = lockout;
+                return Ok(OperationCode.StoreUpdateLockout);
+            }
+
             private static async IAsyncEnumerable<T> Stream<T>(IEnumerable<T> items) {
                 await Task.CompletedTask;
                 foreach (T item in items) yield return item;
@@ -398,6 +419,7 @@ namespace Lithindium.Identity.Tests {
                 private readonly List<UserPhone> _phones = new(store.Phones);
                 private readonly Dictionary<Guid, UserTotp> _totps = new(store.Totps);
                 private readonly List<UserRecoveryCode> _recoveryCodes = new(store.RecoveryCodes);
+                private readonly Dictionary<Guid, UserLockout> _lockouts = new(store.Lockouts);
                 private readonly List<UserAudit> _audits = new(store.Audits);
                 private bool _completed;
 
@@ -413,6 +435,7 @@ namespace Lithindium.Identity.Tests {
                         store.Challenges = _challenges;
                         store.Identities = _identities;
                         store.Audits = _audits;
+                        store.Lockouts = _lockouts;
                         store.Emails = _emails;
                         store.Phones = _phones;
                         store.Totps = _totps;

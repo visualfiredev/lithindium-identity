@@ -38,6 +38,9 @@ namespace Lithindium.Identity {
         private readonly IDataProtectionProvider _protection;
         private readonly ChallengeManagerOptions _options;
 
+        internal UserManager Users => _users;
+        internal IDataProtectionProvider Protection => _protection;
+
         /// <summary>
         /// Creates a manager sharing the user manager's store and clock.
         /// </summary>
@@ -228,7 +231,7 @@ namespace Lithindium.Identity {
 
         // Sign-in must call this inside its first-factor transaction, using freshly verified state.
         // Never expose the returned ticket before committing that transaction.
-        internal async Task<OperationResult<ChallengeTicket>> IssueMultiFactorAsync(User user, CancellationToken cancellationToken) {
+        internal async Task<OperationResult<ChallengeTicket>> IssueMultiFactorAsync(User user, string firstFactor, CancellationToken cancellationToken) {
             const OperationCode op = OperationCode.ChallengeIssueMultiFactor;
             if (_store is not IUserChallengeStore challenges) return RejectTicket(StatusCode.NotSupported, ContextCode.Challenge, op);
             if (_store is not IUserTotpStore totps) return RejectTicket(StatusCode.NotSupported, ContextCode.Totp, op);
@@ -240,7 +243,8 @@ namespace Lithindium.Identity {
             }
             if (!enrolled) return RejectTicket(StatusCode.InvalidState, ContextCode.Totp, op);
 
-            var payload = new Payload { Key = RandomNumberGenerator.GetBytes(32) };
+            if (firstFactor is not ("pwd" or "federated")) throw new ArgumentOutOfRangeException(nameof(firstFactor));
+            var payload = new Payload { Key = RandomNumberGenerator.GetBytes(32), Target = firstFactor };
             try {
                 return await IssueCoreAsync(challenges, user, UserChallengeType.MultiFactorAuthentication, payload, false, null, op, cancellationToken).ConfigureAwait(false);
             } finally {
@@ -251,11 +255,13 @@ namespace Lithindium.Identity {
         // Only SignInManager may supply the completion callback. It must issue the session
         // in this transaction without opening another one or publishing credentials.
         internal Task<OperationResult> CompleteMultiFactorAsync(Guid userUuid, Guid challengeUuid, string continuationProof, Guid? totpUuid, string code,
-            Func<User, UserChallenge, CancellationToken, Task<OperationResult>> complete, CancellationToken cancellationToken) {
+            Func<User, UserChallenge, string, CancellationToken, Task<OperationResult>> complete, CancellationToken cancellationToken,
+            Func<User, CancellationToken, Task<OperationResult>>? rejectedFactor = null) {
             const OperationCode op = OperationCode.ChallengeCompleteMultiFactor;
             if (_store is not IUserTotpStore totps) return Task.FromResult(Failure(StatusCode.NotSupported, ContextCode.Totp, op));
             return CompleteAsync(userUuid, challengeUuid, UserChallengeType.MultiFactorAuthentication, continuationProof, op, null,
                 async (user, challenge, payload) => {
+                    if (payload.Target is not ("pwd" or "federated")) throw new InvalidOperationException("Missing first-factor method.");
                     if (_store is IUserLockoutStore lockouts) {
                         UserLockout? state = await lockouts.GetLockoutAsync(user, cancellationToken).ConfigureAwait(false);
                         if (state is { Enabled: true, ReleaseAt: { } release } && release > Now)
@@ -291,7 +297,7 @@ namespace Lithindium.Identity {
                         return Failure(StatusCode.InvalidCredential, ContextCode.RecoveryCode, op);
                     if (!MutationSucceeded(result)) return result;
                     return await _users.AuditAsync(user, null, null, UserAuditType.RecoveryCode, UserAuditAction.Consumed, cancellationToken).ConfigureAwait(false);
-                }, (user, challenge, payload) => complete(user, challenge, cancellationToken), cancellationToken);
+                }, (user, challenge, payload) => complete(user, challenge, payload.Target!, cancellationToken), cancellationToken, rejectedFactor);
         }
 
         private async Task<OperationResult<ChallengeTicket>> IssueAsync(Guid uuid, ushort? expectedRotation, UserChallengeType type, Payload payload, bool numeric, Guid? actor,
@@ -341,7 +347,8 @@ namespace Lithindium.Identity {
 
         private async Task<OperationResult> CompleteAsync(Guid userUuid, Guid challengeUuid, UserChallengeType type, string proof, OperationCode op, Guid? actor,
             Func<User, UserChallenge, Payload, Task<OperationResult>>? verify,
-            Func<User, UserChallenge, Payload, Task<OperationResult>> apply, CancellationToken cancellationToken) {
+            Func<User, UserChallenge, Payload, Task<OperationResult>> apply, CancellationToken cancellationToken,
+            Func<User, CancellationToken, Task<OperationResult>>? rejectedFactor = null) {
             if (_store is not IUserChallengeStore challenges) return Failure(StatusCode.NotSupported, ContextCode.Challenge, op);
             await using IUserStoreTransaction transaction = await _store.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
             User? found = await _store.FindByUuidAsync(userUuid, cancellationToken).ConfigureAwait(false);
@@ -354,7 +361,8 @@ namespace Lithindium.Identity {
             if (!MutationSucceeded(result)) return result;
             Payload payload = UnprotectPayload(user.Uuid, challenge);
             try {
-                if (type != UserChallengeType.TotpEnrollment && !VerifyProof(challenge, payload.Key, proof)) {
+                bool validContinuation = type == UserChallengeType.TotpEnrollment || VerifyProof(challenge, payload.Key, proof);
+                if (!validContinuation) {
                     result = Failure(StatusCode.InvalidCredential, ContextCode.Challenge, op);
                 } else if (verify is not null) {
                     result = await verify(user, challenge, payload).ConfigureAwait(false);
@@ -365,6 +373,11 @@ namespace Lithindium.Identity {
                 if (!Succeeded(result)) {
                     // Only rejected proof/replay commits an attempt without the identity mutation.
                     if (result.Status is not (StatusCode.InvalidCredential or StatusCode.AlreadyUsed)) return result;
+                    // Only a valid continuation can increment the account-wide MFA failure count.
+                    if (validContinuation && rejectedFactor is not null) {
+                        OperationResult recorded = await rejectedFactor(user, cancellationToken).ConfigureAwait(false);
+                        if (!Succeeded(recorded)) return recorded;
+                    }
                     OperationResult failureCommit = await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
                     return Succeeded(failureCommit) ? result : failureCommit;
                 }
