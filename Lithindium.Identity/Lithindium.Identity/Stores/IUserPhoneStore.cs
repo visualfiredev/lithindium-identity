@@ -40,11 +40,16 @@ namespace Lithindium.Identity {
         /// <param name="user">The user to associate with the phone number.</param>
         /// <param name="phone">The phone number to add.</param>
         /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <returns>
+        /// <see cref="UserStoreError.None"/> on success;
+        /// <see cref="UserStoreError.UserNotFound"/>,
+        /// <see cref="UserStoreError.DuplicatePhone"/>, as applicable.
+        /// </returns>
         /// <remarks>
         /// If the phone number is designated as primary, any existing primary
         /// designation must be removed atomically.
         /// </remarks>
-        Task AddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
+        Task<UserStoreError> AddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a verified phone number from the specified user.
@@ -52,7 +57,12 @@ namespace Lithindium.Identity {
         /// <param name="user">The user associated with the phone number.</param>
         /// <param name="phone">The phone number to remove.</param>
         /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        Task RemovePhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
+        /// <returns>
+        /// <see cref="UserStoreError.None"/> on success;
+        /// <see cref="UserStoreError.UserNotFound"/>,
+        /// <see cref="UserStoreError.EntityNotFound"/>, as applicable.
+        /// </returns>
+        Task<UserStoreError> RemovePhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sets the primary phone number of the specified user.
@@ -60,10 +70,16 @@ namespace Lithindium.Identity {
         /// <param name="user">The user whose primary phone number to set.</param>
         /// <param name="phone">The phone number to designate as primary, or <see langword="null"/> to clear the designation.</param>
         /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <returns>
+        /// <see cref="UserStoreError.None"/> on success;
+        /// <see cref="UserStoreError.UserNotFound"/>,
+        /// <see cref="UserStoreError.EntityNotFound"/>, as applicable.
+        /// </returns>
         /// <remarks>
         /// Changes to the primary phone number must be performed atomically.
+        /// Clearing an absent primary designation succeeds; a non-null phone must belong to the user.
         /// </remarks>
-        Task SetPrimaryPhoneAsync(User user, UserPhone? phone, CancellationToken cancellationToken = default);
+        Task<UserStoreError> SetPrimaryPhoneAsync(User user, UserPhone? phone, CancellationToken cancellationToken = default);
 
     }
 

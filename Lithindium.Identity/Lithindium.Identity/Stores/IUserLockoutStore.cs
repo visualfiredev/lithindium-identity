@@ -32,14 +32,15 @@ namespace Lithindium.Identity {
         /// <param name="lockout">The updated lockout state.</param>
         /// <param name="cancellationToken">The token used to cancel the operation.</param>
         /// <returns>
-        /// <see langword="true"/> if the state was successfully updated;
-        /// otherwise, <see langword="false"/> if the existing state did not match
-        /// the expected state.
+        /// <see cref="UserStoreError.None"/> on success;
+        /// <see cref="UserStoreError.UserNotFound"/>,
+        /// <see cref="UserStoreError.ConcurrencyConflict"/>, as applicable.
         /// </returns>
         /// <remarks>
         /// The comparison and update must be performed atomically.
+        /// An expected value of <see langword="null"/> requires that no lockout state exists.
         /// </remarks>
-        Task<bool> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default);
+        Task<UserStoreError> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default);
 
     }
 

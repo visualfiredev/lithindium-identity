@@ -41,7 +41,12 @@ namespace Lithindium.Identity {
         /// <param name="user">The user to associate with the session.</param>
         /// <param name="session">The session to add.</param>
         /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        Task AddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
+        /// <returns>
+        /// <see cref="UserStoreError.None"/> on success;
+        /// <see cref="UserStoreError.UserNotFound"/>,
+        /// <see cref="UserStoreError.DuplicateIdentifier"/>, as applicable.
+        /// </returns>
+        Task<UserStoreError> AddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes an authentication session from the specified user.
@@ -49,7 +54,12 @@ namespace Lithindium.Identity {
         /// <param name="user">The user associated with the session.</param>
         /// <param name="session">The session to remove.</param>
         /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        Task RemoveSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
+        /// <returns>
+        /// <see cref="UserStoreError.None"/> on success;
+        /// <see cref="UserStoreError.UserNotFound"/>,
+        /// <see cref="UserStoreError.EntityNotFound"/>, as applicable.
+        /// </returns>
+        Task<UserStoreError> RemoveSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes the authentication sessions associated with the specified user.
@@ -58,10 +68,15 @@ namespace Lithindium.Identity {
         /// <param name="exceptUuid">The universally unique identifier of a session to preserve,
         /// or <see langword="null"/> to remove all sessions.</param>
         /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <returns>
+        /// <see cref="UserStoreError.None"/> on success;
+        /// <see cref="UserStoreError.UserNotFound"/>.
+        /// </returns>
         /// <remarks>
         /// The removal of matching sessions must be performed atomically.
+        /// If no sessions match, the operation succeeds without removing anything.
         /// </remarks>
-        Task RemoveSessionsAsync(User user, Guid? exceptUuid = null, CancellationToken cancellationToken = default);
+        Task<UserStoreError> RemoveSessionsAsync(User user, Guid? exceptUuid = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes expired authentication sessions from the identity store.
