@@ -41,14 +41,15 @@ namespace Lithindium.Identity {
         /// <param name="phone">Phone number.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.DuplicatePhone"/>.
+        /// <see cref="OperationCode.StoreAddPhone"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Phone"/>.
         /// </returns>
         /// <remarks>
         /// Adding a primary phone must atomically clear the previous primary.
         /// </remarks>
-        Task<UserStoreError> AddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
+        Task<OperationResult> AddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a verified phone.
@@ -57,11 +58,12 @@ namespace Lithindium.Identity {
         /// <param name="phone">Phone number.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>.
+        /// <see cref="OperationCode.StoreRemovePhone"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
         /// </returns>
-        Task<UserStoreError> RemovePhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
+        Task<OperationResult> RemovePhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sets the primary phone.
@@ -70,15 +72,16 @@ namespace Lithindium.Identity {
         /// <param name="phone">New primary, or <see langword="null"/> to clear.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>.
+        /// <see cref="OperationCode.StoreSetPrimaryPhone"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
         /// </returns>
         /// <remarks>
         /// Set the primary atomically. Clearing an absent primary succeeds; a non-null phone
         /// must belong to the user.
         /// </remarks>
-        Task<UserStoreError> SetPrimaryPhoneAsync(User user, UserPhone? phone, CancellationToken cancellationToken = default);
+        Task<OperationResult> SetPrimaryPhoneAsync(User user, UserPhone? phone, CancellationToken cancellationToken = default);
 
     }
 

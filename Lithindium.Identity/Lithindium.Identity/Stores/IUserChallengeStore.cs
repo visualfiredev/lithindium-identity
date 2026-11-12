@@ -40,15 +40,16 @@ namespace Lithindium.Identity {
         /// <param name="challenge">Challenge.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.DuplicateIdentifier"/>.
+        /// <see cref="OperationCode.StoreAddChallenge"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Identifier"/>.
         /// </returns>
         /// <remarks>
         /// Require zero attempts, a positive attempt limit and expiration after creation.
         /// Issue within the transaction validating the authorizing user state.
         /// </remarks>
-        Task<UserStoreError> AddChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
+        Task<OperationResult> AddChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Attempts to reserve a verification attempt.
@@ -58,11 +59,12 @@ namespace Lithindium.Identity {
         /// <param name="now">Current UTC time.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>,
-        /// <see cref="UserStoreError.ChallengeExpired"/>,
-        /// <see cref="UserStoreError.ChallengeAttemptsExhausted"/>.
+        /// <see cref="OperationCode.StoreReserveChallengeAttempt"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
+        /// <see cref="StatusCode.Expired"/> / <see cref="ContextCode.Challenge"/>.
+        /// <see cref="StatusCode.AttemptsExhausted"/> / <see cref="ContextCode.Challenge"/>.
         /// </returns>
         /// <remarks>
         /// Atomically validate existence, expiration and remaining attempts, then increment
@@ -70,7 +72,7 @@ namespace Lithindium.Identity {
         /// without applying the challenged operation. Rolled-back reservations do not count;
         /// retry with a new reservation.
         /// </remarks>
-        Task<UserStoreError> TryReserveChallengeAttemptAsync(User user, UserChallenge challenge, DateTime now, CancellationToken cancellationToken = default);
+        Task<OperationResult> TryReserveChallengeAttemptAsync(User user, UserChallenge challenge, DateTime now, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Attempts to consume a verified challenge.
@@ -80,10 +82,11 @@ namespace Lithindium.Identity {
         /// <param name="now">Current UTC time.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>,
-        /// <see cref="UserStoreError.ChallengeExpired"/>.
+        /// <see cref="OperationCode.StoreConsumeChallenge"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
+        /// <see cref="StatusCode.Expired"/> / <see cref="ContextCode.Challenge"/>.
         /// </returns>
         /// <remarks>
         /// Atomically validate existence and expiration, then delete. Reserve and verify successfully in
@@ -91,7 +94,7 @@ namespace Lithindium.Identity {
         /// Commit consumption and the resulting identity mutation together. Use consumption time,
         /// not reservation time.
         /// </remarks>
-        Task<UserStoreError> TryConsumeChallengeAsync(User user, UserChallenge challenge, DateTime now, CancellationToken cancellationToken = default);
+        Task<OperationResult> TryConsumeChallengeAsync(User user, UserChallenge challenge, DateTime now, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a challenge.
@@ -100,11 +103,12 @@ namespace Lithindium.Identity {
         /// <param name="challenge">Challenge.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>.
+        /// <see cref="OperationCode.StoreRemoveChallenge"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
         /// </returns>
-        Task<UserStoreError> RemoveChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
+        Task<OperationResult> RemoveChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a user's challenges.
@@ -113,13 +117,14 @@ namespace Lithindium.Identity {
         /// <param name="type">Challenge type, or <see langword="null"/> for all.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>.
+        /// <see cref="OperationCode.StoreRemoveChallenges"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
         /// </returns>
         /// <remarks>
         /// Remove matching challenges atomically; no matches is success.
         /// </remarks>
-        Task<UserStoreError> RemoveChallengesAsync(User user, UserChallengeType? type = null, CancellationToken cancellationToken = default);
+        Task<OperationResult> RemoveChallengesAsync(User user, UserChallengeType? type = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes expired challenges.

@@ -40,14 +40,15 @@ namespace Lithindium.Identity {
         /// <param name="email">Email address.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.DuplicateEmail"/>.
+        /// <see cref="OperationCode.StoreAddEmail"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Email"/>.
         /// </returns>
         /// <remarks>
         /// Adding a primary email must atomically clear the previous primary.
         /// </remarks>
-        Task<UserStoreError> AddEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
+        Task<OperationResult> AddEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a verified email.
@@ -56,11 +57,12 @@ namespace Lithindium.Identity {
         /// <param name="email">Email address.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>.
+        /// <see cref="OperationCode.StoreRemoveEmail"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
         /// </returns>
-        Task<UserStoreError> RemoveEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
+        Task<OperationResult> RemoveEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sets the primary email.
@@ -69,15 +71,16 @@ namespace Lithindium.Identity {
         /// <param name="email">New primary, or <see langword="null"/> to clear.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>.
+        /// <see cref="OperationCode.StoreSetPrimaryEmail"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
         /// </returns>
         /// <remarks>
         /// Set the primary atomically. Clearing an absent primary succeeds; a non-null email
         /// must belong to the user.
         /// </remarks>
-        Task<UserStoreError> SetPrimaryEmailAsync(User user, UserEmail? email, CancellationToken cancellationToken = default);
+        Task<OperationResult> SetPrimaryEmailAsync(User user, UserEmail? email, CancellationToken cancellationToken = default);
 
     }
 

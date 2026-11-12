@@ -42,11 +42,12 @@ namespace Lithindium.Identity {
         /// <param name="totp">Authenticator.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.DuplicateIdentifier"/>.
+        /// <see cref="OperationCode.StoreAddTotp"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Identifier"/>.
         /// </returns>
-        Task<UserStoreError> AddTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
+        Task<OperationResult> AddTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a TOTP authenticator.
@@ -55,11 +56,12 @@ namespace Lithindium.Identity {
         /// <param name="totp">Authenticator.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>.
+        /// <see cref="OperationCode.StoreRemoveTotp"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
         /// </returns>
-        Task<UserStoreError> RemoveTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
+        Task<OperationResult> RemoveTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Attempts a conditional authenticator rename.
@@ -69,15 +71,16 @@ namespace Lithindium.Identity {
         /// <param name="name">New name, or <see langword="null"/> to clear.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>,
-        /// <see cref="UserStoreError.ConcurrencyConflict"/>.
+        /// <see cref="OperationCode.StoreRenameTotp"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
+        /// <see cref="StatusCode.Conflict"/>.
         /// </returns>
         /// <remarks>
         /// Atomically compare and change only the name; preserve concurrent step advances.
         /// </remarks>
-        Task<UserStoreError> TryRenameTotpAsync(User user, UserTotp totp, string? name, CancellationToken cancellationToken = default);
+        Task<OperationResult> TryRenameTotpAsync(User user, UserTotp totp, string? name, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Attempts to advance the accepted TOTP time step.
@@ -87,15 +90,16 @@ namespace Lithindium.Identity {
         /// <param name="step">Accepted time step.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>,
-        /// <see cref="UserStoreError.TotpStepAlreadyUsed"/>.
+        /// <see cref="OperationCode.StoreAdvanceTotpStep"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
+        /// <see cref="StatusCode.AlreadyUsed"/> / <see cref="ContextCode.Totp"/>.
         /// </returns>
         /// <remarks>
         /// Atomically accept only a step strictly greater than the persisted step, if any.
         /// </remarks>
-        Task<UserStoreError> TryAdvanceTotpStepAsync(User user, UserTotp totp, ulong step, CancellationToken cancellationToken = default);
+        Task<OperationResult> TryAdvanceTotpStepAsync(User user, UserTotp totp, ulong step, CancellationToken cancellationToken = default);
 
     }
 

@@ -28,14 +28,16 @@ namespace Lithindium.Identity {
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.ConcurrencyConflict"/>, or another applicable persistence conflict.
+        /// <see cref="OperationCode.StoreCommit"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.Conflict"/>.
+        /// Other applicable persistence conflicts may also be returned.
         /// </returns>
         /// <remarks>
         /// On a known commit conflict, return its error and roll back.
         /// Throw on uncertain commit outcomes; do not assume rollback or automatically retry.
         /// </remarks>
-        Task<UserStoreError> CommitAsync(CancellationToken cancellationToken = default);
+        Task<OperationResult> CommitAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Rolls back the transaction.

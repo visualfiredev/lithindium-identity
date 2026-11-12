@@ -16,8 +16,9 @@ namespace Lithindium.Identity {
     /// User persistence.
     /// </summary>
     /// <remarks>
-    /// Error-returning methods report <see cref="UserStoreError.None"/> on success or an expected conflict,
-    /// including <see cref="UserStoreError.ConcurrencyConflict"/>; other methods retain their documented results.
+    /// Result-returning methods report <see cref="StatusCode.Success"/> on success or an expected conflict,
+    /// including <see cref="StatusCode.Conflict"/>; other methods retain their documented results.
+    /// Use each method's documented operation code; success context must be zero.
     /// Failed mutations leave no partial changes. Invalid arguments, cancellation and unexpected
     /// infrastructure failures throw. Changes persist immediately outside transactions;
     /// transactional changes persist on commit. Identify users by UUID, not snapshot equality,
@@ -35,7 +36,7 @@ namespace Lithindium.Identity {
         /// Require serializable isolation or equivalent identity invariants, including concurrent
         /// reads, writes and changes to entity sets. Security decisions require current transactional
         /// state, not stale replicas or external snapshots.
-        /// Report known serialization aborts as <see cref="UserStoreError.ConcurrencyConflict"/> from
+        /// Report known serialization aborts as <see cref="StatusCode.Conflict"/> from
         /// an error-returning operation or <see cref="IUserStoreTransaction.CommitAsync"/>.
         /// Disposal rolls back uncommitted changes.
         /// </remarks>
@@ -63,11 +64,12 @@ namespace Lithindium.Identity {
         /// <param name="user">New user.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.DuplicateIdentifier"/>,
-        /// <see cref="UserStoreError.DuplicateUsername"/>.
+        /// <see cref="OperationCode.StoreCreateUser"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Identifier"/>.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Username"/>.
         /// </returns>
-        Task<UserStoreError> CreateAsync(User user, CancellationToken cancellationToken = default);
+        Task<OperationResult> CreateAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Attempts a conditional user update.
@@ -76,16 +78,17 @@ namespace Lithindium.Identity {
         /// <param name="user">Updated user.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.ConcurrencyConflict"/>,
-        /// <see cref="UserStoreError.DuplicateUsername"/>.
+        /// <see cref="OperationCode.StoreUpdateUser"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.Conflict"/>.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Username"/>.
         /// </returns>
         /// <remarks>
         /// Both snapshots must identify the same user. Atomically compare all expected persisted
         /// values exactly before replacing them.
         /// </remarks>
-        Task<UserStoreError> TryUpdateAsync(User expected, User user, CancellationToken cancellationToken = default);
+        Task<OperationResult> TryUpdateAsync(User expected, User user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes a user.
@@ -93,10 +96,11 @@ namespace Lithindium.Identity {
         /// <param name="uuid">User UUID.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>.
+        /// <see cref="OperationCode.StoreDeleteUser"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
         /// </returns>
-        Task<UserStoreError> DeleteAsync(Guid uuid, CancellationToken cancellationToken = default);
+        Task<OperationResult> DeleteAsync(Guid uuid, CancellationToken cancellationToken = default);
 
     }
 

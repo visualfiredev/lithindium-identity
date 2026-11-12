@@ -50,15 +50,16 @@ namespace Lithindium.Identity {
         /// <param name="session">Session.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.DuplicateIdentifier"/>.
+        /// <see cref="OperationCode.StoreAddSession"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Identifier"/>.
         /// </returns>
         /// <remarks>
         /// Expiration must follow authentication. Issue within the transaction validating
         /// the authorizing authentication state, including required verification state changes.
         /// </remarks>
-        Task<UserStoreError> AddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
+        Task<OperationResult> AddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a session.
@@ -67,11 +68,12 @@ namespace Lithindium.Identity {
         /// <param name="session">Session.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>.
+        /// <see cref="OperationCode.StoreRemoveSession"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
         /// </returns>
-        Task<UserStoreError> RemoveSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
+        Task<OperationResult> RemoveSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a user's sessions.
@@ -80,13 +82,14 @@ namespace Lithindium.Identity {
         /// <param name="exceptUuid">Session UUID to preserve, or <see langword="null"/> for all.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>.
+        /// <see cref="OperationCode.StoreRemoveSessions"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
         /// </returns>
         /// <remarks>
         /// Remove matching sessions atomically; no matches is success.
         /// </remarks>
-        Task<UserStoreError> RemoveSessionsAsync(User user, Guid? exceptUuid = null, CancellationToken cancellationToken = default);
+        Task<OperationResult> RemoveSessionsAsync(User user, Guid? exceptUuid = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes expired sessions.

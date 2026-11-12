@@ -48,13 +48,14 @@ namespace Lithindium.Identity {
         /// <param name="audit">Audit record.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.DuplicateIdentifier"/>.
+        /// <see cref="OperationCode.StoreAddAudit"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Identifier"/>.
         /// </returns>
         /// <remarks>
         /// Preserve audits even after associated users or entities are deleted.
         /// </remarks>
-        Task<UserStoreError> AddAuditAsync(UserAudit audit, CancellationToken cancellationToken = default);
+        Task<OperationResult> AddAuditAsync(UserAudit audit, CancellationToken cancellationToken = default);
 
     }
 

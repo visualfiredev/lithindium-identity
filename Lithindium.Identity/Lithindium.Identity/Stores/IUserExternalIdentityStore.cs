@@ -54,15 +54,16 @@ namespace Lithindium.Identity {
         /// <param name="identity">External identity.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.DuplicateIdentifier"/>,
-        /// <see cref="UserStoreError.DuplicateExternalIdentity"/>.
+        /// <see cref="OperationCode.StoreAddExternalIdentity"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Identifier"/>.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.ExternalIdentity"/>.
         /// </returns>
         /// <remarks>
         /// Issuer and subject pairs must be unique across the store.
         /// </remarks>
-        Task<UserStoreError> AddExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
+        Task<OperationResult> AddExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Attempts a conditional metadata update.
@@ -72,16 +73,17 @@ namespace Lithindium.Identity {
         /// <param name="identity">Identity with updated metadata.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>,
-        /// <see cref="UserStoreError.ConcurrencyConflict"/>.
+        /// <see cref="OperationCode.StoreUpdateExternalIdentity"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
+        /// <see cref="StatusCode.Conflict"/>.
         /// </returns>
         /// <remarks>
         /// Atomically compare expected metadata exactly and update only name and email.
         /// Both snapshots must identify the same identity; UUID, issuer and subject are immutable.
         /// </remarks>
-        Task<UserStoreError> TryUpdateExternalIdentityAsync(User user, UserExternalIdentity expected, UserExternalIdentity identity, CancellationToken cancellationToken = default);
+        Task<OperationResult> TryUpdateExternalIdentityAsync(User user, UserExternalIdentity expected, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes an external identity.
@@ -90,11 +92,12 @@ namespace Lithindium.Identity {
         /// <param name="identity">External identity.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>.
+        /// <see cref="OperationCode.StoreRemoveExternalIdentity"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
         /// </returns>
-        Task<UserStoreError> RemoveExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
+        Task<OperationResult> RemoveExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 
     }
 

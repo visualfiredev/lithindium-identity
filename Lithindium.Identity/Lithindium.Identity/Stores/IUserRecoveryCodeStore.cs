@@ -33,15 +33,16 @@ namespace Lithindium.Identity {
         /// <param name="codes">Replacement codes.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.DuplicateIdentifier"/>,
-        /// <see cref="UserStoreError.DuplicateRecoveryCode"/>.
+        /// <see cref="OperationCode.StoreReplaceRecoveryCodes"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Identifier"/>.
+        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.RecoveryCode"/>.
         /// </returns>
         /// <remarks>
         /// Replace the set atomically; an empty set removes all codes.
         /// </remarks>
-        Task<UserStoreError> ReplaceRecoveryCodesAsync(User user, IReadOnlyCollection<UserRecoveryCode> codes, CancellationToken cancellationToken = default);
+        Task<OperationResult> ReplaceRecoveryCodesAsync(User user, IReadOnlyCollection<UserRecoveryCode> codes, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Attempts to consume a recovery code.
@@ -50,15 +51,16 @@ namespace Lithindium.Identity {
         /// <param name="codeHash">Cryptographic code hash.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        /// <see cref="UserStoreError.None"/> on success;
-        /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>.
+        /// <see cref="OperationCode.StoreConsumeRecoveryCode"/>:
+        /// <see cref="StatusCode.Success"/> on success.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
+        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
         /// </returns>
         /// <remarks>
         /// Atomically find and delete the code to prevent reuse. Missing, consumed or
-        /// differently owned codes return <see cref="UserStoreError.EntityNotFound"/>.
+        /// differently owned codes return <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
         /// </remarks>
-        Task<UserStoreError> TryConsumeRecoveryCodeAsync(User user, ImmutableArray<byte> codeHash, CancellationToken cancellationToken = default);
+        Task<OperationResult> TryConsumeRecoveryCodeAsync(User user, ImmutableArray<byte> codeHash, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Counts a user's unused recovery codes.
