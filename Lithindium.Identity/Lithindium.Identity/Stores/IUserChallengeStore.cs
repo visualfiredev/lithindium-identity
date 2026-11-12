@@ -13,134 +13,120 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Provides persistence operations for user authentication and verification challenges.
+    /// Authentication and verification challenge persistence.
     /// </summary>
     /// <remarks>
-    /// Challenge identifiers uniquely identify pending authentication
-    /// or verification operations and must never be reused.
-    /// Consuming or revoking a challenge permanently removes it from the store.
-    /// All outstanding challenges associated with a user must be removed
-    /// atomically whenever the user's authentication generation changes.
+    /// Never reuse challenge UUIDs. Consumption or revocation permanently deletes challenges.
+    /// Remove all outstanding user challenges atomically when authentication generation changes.
     /// </remarks>
     public interface IUserChallengeStore : IUserStore {
 
         /// <summary>
-        /// Retrieves the specified challenge associated with a user.
+        /// Gets a user's challenge by UUID.
         /// </summary>
-        /// <param name="user">The user associated with the challenge.</param>
-        /// <param name="uuid">The universally unique identifier of the challenge.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The challenge, or <see langword="null"/> if no matching challenge exists.</returns>
+        /// <param name="user">User.</param>
+        /// <param name="uuid">Challenge UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Challenge, or <see langword="null"/> if absent.</returns>
         /// <remarks>
-        /// Retrieving a challenge does not establish its validity.
+        /// Retrieval alone does not establish validity.
         /// </remarks>
         Task<UserChallenge?> GetChallengeAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds an authentication or verification challenge to the specified user.
+        /// Adds a challenge.
         /// </summary>
-        /// <param name="user">The user to associate with the challenge.</param>
-        /// <param name="challenge">The challenge to add.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="challenge">Challenge.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.DuplicateIdentifier"/>, as applicable.
+        /// <see cref="UserStoreError.DuplicateIdentifier"/>.
         /// </returns>
         /// <remarks>
-        /// The challenge must have no previous attempts, a positive maximum
-        /// attempt count, and an expiration later than its creation.
-        /// Challenge identifiers must never be reused.
-        /// Challenge issuance must occur within the same transaction
-        /// as the validation of the user state authorizing its creation.
+        /// Require zero attempts, a positive attempt limit and expiration after creation.
+        /// Issue within the transaction validating the authorizing user state.
         /// </remarks>
         Task<UserStoreError> AddChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Attempts to reserve a verification attempt for the specified challenge.
+        /// Attempts to reserve a verification attempt.
         /// </summary>
-        /// <param name="user">The user associated with the challenge.</param>
-        /// <param name="challenge">The challenge for which to reserve an attempt.</param>
-        /// <param name="now">The current UTC date and time.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="challenge">Challenge.</param>
+        /// <param name="now">Current UTC time.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
         /// <see cref="UserStoreError.EntityNotFound"/>,
         /// <see cref="UserStoreError.ChallengeExpired"/>,
-        /// <see cref="UserStoreError.ChallengeAttemptsExhausted"/>, as applicable.
+        /// <see cref="UserStoreError.ChallengeAttemptsExhausted"/>.
         /// </returns>
         /// <remarks>
-        /// The challenge must exist, remain unexpired,
-        /// and have remaining verification attempts.
-        /// Validation and incrementing the attempt count must be performed atomically.
-        /// The attempt count must be read from persisted state, not the supplied snapshot.
-        /// If verification fails, the transaction must commit the reserved attempt
-        /// without applying the challenged operation. A reservation rolled back by
-        /// a transaction failure does not count; a retry requires a new reservation.
+        /// Atomically validate existence, expiration and remaining attempts, then increment
+        /// the persisted count, not the supplied snapshot. Commit failed verification attempts
+        /// without applying the challenged operation. Rolled-back reservations do not count;
+        /// retry with a new reservation.
         /// </remarks>
         Task<UserStoreError> TryReserveChallengeAttemptAsync(User user, UserChallenge challenge, DateTime now, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Attempts to consume a successfully verified challenge.
+        /// Attempts to consume a verified challenge.
         /// </summary>
-        /// <param name="user">The user associated with the challenge.</param>
-        /// <param name="challenge">The challenge to consume.</param>
-        /// <param name="now">The current UTC date and time.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="challenge">Challenge.</param>
+        /// <param name="now">Current UTC time.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
         /// <see cref="UserStoreError.EntityNotFound"/>,
-        /// <see cref="UserStoreError.ChallengeExpired"/>, as applicable.
+        /// <see cref="UserStoreError.ChallengeExpired"/>.
         /// </returns>
         /// <remarks>
-        /// The challenge must exist and remain unexpired.
-        /// Validation and removal must be performed atomically.
-        /// This operation requires a successful attempt reservation within the same
-        /// transaction and must only be invoked after successful verification.
-        /// The final permitted attempt may still consume the challenge.
-        /// Consumption and the resulting identity mutation must commit atomically.
-        /// The supplied time must reflect the time of consumption, not reservation.
+        /// Atomically validate existence and expiration, then delete. Reserve and verify successfully in
+        /// the same transaction before consuming, including on the final attempt.
+        /// Commit consumption and the resulting identity mutation together. Use consumption time,
+        /// not reservation time.
         /// </remarks>
         Task<UserStoreError> TryConsumeChallengeAsync(User user, UserChallenge challenge, DateTime now, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes an authentication or verification challenge from the specified user.
+        /// Removes a challenge.
         /// </summary>
-        /// <param name="user">The user associated with the challenge.</param>
-        /// <param name="challenge">The challenge to remove.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="challenge">Challenge.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>, as applicable.
+        /// <see cref="UserStoreError.EntityNotFound"/>.
         /// </returns>
         Task<UserStoreError> RemoveChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes the authentication and verification challenges associated with the specified user.
+        /// Removes a user's challenges.
         /// </summary>
-        /// <param name="user">The user whose challenges to remove.</param>
-        /// <param name="type">The type of challenge to remove,
-        /// or <see langword="null"/> to remove all challenges.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="type">Challenge type, or <see langword="null"/> for all.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>.
         /// </returns>
         /// <remarks>
-        /// The removal of matching challenges must be performed atomically.
-        /// If no challenges match, the operation succeeds without removing anything.
+        /// Remove matching challenges atomically; no matches is success.
         /// </remarks>
         Task<UserStoreError> RemoveChallengesAsync(User user, UserChallengeType? type = null, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes expired authentication and verification challenges from the identity store.
+        /// Removes expired challenges.
         /// </summary>
-        /// <param name="expiresAt">The UTC date and time at or before which challenges must have expired.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The number of challenges removed.</returns>
+        /// <param name="expiresAt">Inclusive UTC expiration cutoff.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Number of challenges removed.</returns>
         Task<int> RemoveExpiredChallengesAsync(DateTime expiresAt, CancellationToken cancellationToken = default);
 
     }

@@ -9,33 +9,32 @@
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents the purpose of an authentication or verification challenge.
+    /// An authentication or verification challenge purpose.
     /// </summary>
     public enum UserChallengeType {
 
         /// <summary>
-        /// Indicates a challenge to verify ownership of an email address.
+        /// Verify email ownership.
         /// </summary>
         EmailVerification,
 
         /// <summary>
-        /// Indicates a challenge to verify ownership of a phone number.
+        /// Verify phone ownership.
         /// </summary>
         PhoneVerification,
 
         /// <summary>
-        /// Indicates a challenge to authorize the resetting of a user's password.
+        /// Authorize a password reset.
         /// </summary>
         PasswordReset,
 
         /// <summary>
-        /// Indicates a challenge to verify and enroll a TOTP authenticator.
+        /// Verify and enroll a TOTP authenticator.
         /// </summary>
         TotpEnrollment,
 
         /// <summary>
-        /// Indicates a challenge to complete a partially authenticated sign-in
-        /// through multifactor authentication.
+        /// Complete a partially authenticated sign-in with MFA.
         /// </summary>
         MultiFactorAuthentication
 

@@ -12,43 +12,40 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents an immutable snapshot of an external identity associated with a user.
+    /// Immutable external identity snapshot.
     /// </summary>
     public readonly record struct UserExternalIdentity {
 
         /// <summary>
-        /// Gets the universally unique identifier of the external identity.
+        /// Gets the identity UUID.
         /// </summary>
         public required Guid Uuid { get; init; }
 
         /// <summary>
-        /// Gets the name of the external identity, or <see langword="null"/> if no name is configured.
+        /// Gets the identity name, or <see langword="null"/> if unset.
         /// </summary>
         public required string? Name { get; init; }
 
         /// <summary>
-        /// Gets the issuer of the external identity.
+        /// Gets the issuer.
         /// </summary>
         public required string Issuer { get; init; }
 
         /// <summary>
-        /// Gets the unique subject identifier assigned by the issuer.
+        /// Gets the issuer-assigned unique subject.
         /// </summary>
         public required string Subject { get; init; }
 
         /// <summary>
-        /// Gets the email address provided by the issuer,
-        /// or <see langword="null"/> if no email address was provided.
+        /// Gets the issuer-provided email, or <see langword="null"/> if absent.
         /// </summary>
         /// <remarks>
-        /// This email address is informational and does not establish
-        /// ownership of a verified email address within the identity system.
+        /// Informational only; does not establish verified email ownership.
         /// </remarks>
         public required string? Email { get; init; }
 
         /// <summary>
-        /// Constructs a new <see cref="UserExternalIdentity"/>
-        /// with the specified parameters.
+        /// Creates a <see cref="UserExternalIdentity"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
         public UserExternalIdentity(Guid uuid, string? name, string issuer, string subject, string? email) {
@@ -60,7 +57,7 @@ namespace Lithindium.Identity {
         }
 
         /// <summary>
-        /// Constructs a new <see cref="UserExternalIdentity"/>.
+        /// Creates a <see cref="UserExternalIdentity"/>.
         /// </summary>
         public UserExternalIdentity() {
             // ...

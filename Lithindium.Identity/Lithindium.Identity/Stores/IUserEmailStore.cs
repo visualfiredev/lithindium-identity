@@ -13,70 +13,69 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Provides persistence operations for verified user email addresses.
+    /// Verified email persistence.
     /// </summary>
     public interface IUserEmailStore : IUserStore {
 
         /// <summary>
-        /// Retrieves the verified email addresses associated with the specified user.
+        /// Gets a user's verified emails.
         /// </summary>
-        /// <param name="user">The user whose email addresses to retrieve.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The email addresses associated with the user.</returns>
+        /// <param name="user">User.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Email addresses.</returns>
         IAsyncEnumerable<UserEmail> GetEmailsAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Retrieves the user associated with the specified email address.
+        /// Finds a user by verified email.
         /// </summary>
-        /// <param name="address">The verified email address of the user.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The user, or <see langword="null"/> if no matching user exists.</returns>
+        /// <param name="address">Verified email address.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>User, or <see langword="null"/> if absent.</returns>
         Task<User?> FindByEmailAsync(string address, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds a verified email address to the specified user.
+        /// Adds a verified email.
         /// </summary>
-        /// <param name="user">The user to associate with the email address.</param>
-        /// <param name="email">The email address to add.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="email">Email address.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.DuplicateEmail"/>, as applicable.
+        /// <see cref="UserStoreError.DuplicateEmail"/>.
         /// </returns>
         /// <remarks>
-        /// If the email address is designated as primary, any existing primary
-        /// designation must be removed atomically.
+        /// Adding a primary email must atomically clear the previous primary.
         /// </remarks>
         Task<UserStoreError> AddEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes a verified email address from the specified user.
+        /// Removes a verified email.
         /// </summary>
-        /// <param name="user">The user associated with the email address.</param>
-        /// <param name="email">The email address to remove.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="email">Email address.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>, as applicable.
+        /// <see cref="UserStoreError.EntityNotFound"/>.
         /// </returns>
         Task<UserStoreError> RemoveEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Sets the primary email address of the specified user.
+        /// Sets the primary email.
         /// </summary>
-        /// <param name="user">The user whose primary email address to set.</param>
-        /// <param name="email">The email address to designate as primary, or <see langword="null"/> to clear the designation.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="email">New primary, or <see langword="null"/> to clear.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>, as applicable.
+        /// <see cref="UserStoreError.EntityNotFound"/>.
         /// </returns>
         /// <remarks>
-        /// Changes to the primary email address must be performed atomically.
-        /// Clearing an absent primary designation succeeds; a non-null email must belong to the user.
+        /// Set the primary atomically. Clearing an absent primary succeeds; a non-null email
+        /// must belong to the user.
         /// </remarks>
         Task<UserStoreError> SetPrimaryEmailAsync(User user, UserEmail? email, CancellationToken cancellationToken = default);
 

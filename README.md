@@ -2,7 +2,7 @@
 
 # Lithindium Identity
 
-**A modern, opinionated identity library for .NET.**
+**A modern identity and authentication library for .NET.**
 
 User accounts, authentication, and credential management — without the unnecessary complexity.
 
@@ -19,87 +19,69 @@ User accounts, authentication, and credential management — without the unneces
 
 ## Overview
 
-Lithindium Identity is an extensible identity and authentication library for .NET applications, developed by [Visual Fire Development](https://www.visualfiredev.com/).
-
-It brings account management, credential verification, multi-factor authentication, and session management together under a cohesive identity model. The goal is to make building an authentication backend straightforward without requiring applications to implement the same security-sensitive workflows over and over again.
-
-Lithindium is inspired by ASP.NET Core Identity, but takes a more opinionated approach to how user accounts, credentials, and sessions are represented and managed. It builds on established .NET security infrastructure rather than reinventing cryptographic primitives.
+Lithindium provides a reusable, consistent identity model for .NET. Inspired by ASP.NET Core Identity, it reuses established security primitives for account and credential management.
 
 > [!IMPORTANT]
-> Lithindium Identity is under active development. Its database model is taking shape, but the public API and authentication workflows are not yet complete. It is not ready for production use.
+> In active development. Authentication workflows and the public API are incomplete; not production-ready.
 
 ## Features
 
-Lithindium is designed around the following capabilities:
+Planned capabilities, not completed or security-reviewed features:
 
 | Capability | Description |
 | :--- | :--- |
-| **User management** | Unique usernames, optional display names, and explicit account suspension. |
-| **Passwords** | Password-based authentication using established password hashing infrastructure. |
-| **Email addresses** | Multiple verified email addresses with optional primary address selection. |
-| **Phone numbers** | Multiple verified phone numbers, including extensions and primary number selection. |
-| **Multi-factor authentication** | Multiple named TOTP authenticators per account. |
-| **Recovery codes** | Secure, single-use recovery codes for account access. |
-| **Session management** | Individually persisted, expiring, and revocable authentication sessions. |
-| **External identities** | Account linking through validated external issuer and subject identifiers. |
-| **Account protection** | Authentication lockouts and invalidation of existing credentials. |
-| **Auditing** | Persistent records of security-relevant account activity. |
-
-These are design goals, not a list of fully implemented or security-reviewed features.
+| **User management** | Unique usernames, optional display names, and account suspension. |
+| **Passwords** | Established password hashing and verification. |
+| **Email addresses** | Multiple verified addresses; optional primary. |
+| **Phone numbers** | Multiple verified numbers with extensions; optional primary. |
+| **Multi-factor authentication** | Multiple named TOTP authenticators. |
+| **Recovery codes** | Secure, single-use access codes. |
+| **Challenges** | Expiring, single-use verification and authentication challenges. |
+| **Sessions** | Persisted, expiring, individually revocable sessions. |
+| **External identities** | Linking by validated issuer and subject. |
+| **Account protection** | Lockouts and credential invalidation. |
+| **Auditing** | Persistent security event history. |
 
 ## Architecture
 
-Lithindium separates application-specific account policy from reusable identity functionality and persistence. Its initial database implementation uses Entity Framework Core, while its identity workflows build on existing .NET security components where appropriate.
+The core library is persistence-independent. An EF Core provider is planned; identity workflows will reuse .NET security infrastructure.
 
 ```mermaid
 flowchart TD
     A[Application] --> B[Lithindium Identity]
-    B --> C[Identity management and authentication]
-    C --> D[Identity persistence]
-    D --> E[Entity Framework Core]
-    E --> F[(Database)]
-    C --> G[.NET security infrastructure]
+    B --> C[Store contracts]
+    C --> D[EF Core provider]
+    D --> E[(Database)]
+    B --> F[.NET security infrastructure]
 ```
 
-The guiding principles are simple:
+- **Consistent:** One strongly typed identity model and predictable API.
+- **Secure:** Established primitives; credential-sensitive operations stay in the identity layer.
+- **Application-independent:** Business rules, authorization and UI remain with the application.
 
-- **Opinionated by design.** A consistent identity model instead of requiring every application to design its own.
-- **Security-conscious.** Reuse established security primitives and keep credential-sensitive operations within the identity layer.
-- **Developer-friendly.** A cohesive, strongly typed API with clear responsibilities and predictable behavior.
-- **Application-independent.** Keep business rules, authorization policies, and user interface concerns within the consuming application.
-
-Lithindium is an identity management library, not a complete OAuth 2.0 or OpenID Connect authorization server.
+Lithindium is not a complete OAuth 2.0 or OpenID Connect authorization server.
 
 ## Getting Started
 
-### Prerequisites
-
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- [Git](https://git-scm.com/)
-
-### Building from source
+Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and [Git](https://git-scm.com/).
 
 ```powershell
-git clone https://github.com/visualfiredev/oidc.git
-cd oidc
-dotnet build dotnet/Lithindium.Identity/Lithindium.Identity/Lithindium.Identity.csproj
+git clone https://github.com/visualfiredev/lithindium-identity.git
+cd lithindium-identity
+dotnet build Lithindium.Identity/Lithindium.Identity/Lithindium.Identity.csproj
 ```
 
-Installation instructions and public API examples will be added as the library becomes ready for release.
+Installation instructions and API examples will follow.
 
 ## Contributing
 
-Contributions, ideas, and constructive feedback are welcome. Bug reports, feature proposals, and pull requests can be submitted through GitHub.
-
-For suspected security vulnerabilities, please use a private reporting channel rather than opening a public issue.
+Ideas, bug reports, proposals and pull requests are welcome on GitHub. Report suspected vulnerabilities privately.
 
 ## AI Assisted Development
 
-Lithindium Identity is developed collaboratively by **human contributors and AI coding agents**, with human direction, engineering oversight, and review.
+Human contributors and AI coding agents collaborate under human direction, engineering oversight and review.
 
-AI-assisted development is an intentional part of this project. All contributions are held to the same standards of correctness, maintainability, security, attribution, and licensing, regardless of how they were produced.
-
-Both human-written and AI-assisted contributions are welcome. Contributors remain responsible for the quality and legality of their work.
+All contributions must meet the same correctness, maintainability, security, attribution and licensing standards. Contributors are responsible for their work's quality and legality.
 
 ## License
 

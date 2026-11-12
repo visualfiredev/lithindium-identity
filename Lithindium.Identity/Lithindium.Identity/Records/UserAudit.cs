@@ -12,58 +12,55 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents an immutable record of an auditable event within the identity system.
+    /// Immutable audit record.
     /// </summary>
     public readonly record struct UserAudit {
 
         /// <summary>
-        /// Gets the universally unique identifier of the audit record.
+        /// Gets the audit UUID.
         /// </summary>
         public required Guid Uuid { get; init; }
 
         /// <summary>
-        /// Gets the universally unique identifier of the user affected by the event.
+        /// Gets the affected user UUID.
         /// </summary>
         public required Guid User { get; init; }
 
         /// <summary>
-        /// Gets the universally unique identifier of the user responsible for the event,
-        /// or <see langword="null"/> if no user is associated with the action.
+        /// Gets the acting user UUID, or <see langword="null"/> if none.
         /// </summary>
         public required Guid? Actor { get; init; }
 
         /// <summary>
-        /// Gets the universally unique identifier of the entity affected by the event,
-        /// or <see langword="null"/> if no entity identifier is applicable.
+        /// Gets the affected entity UUID, or <see langword="null"/> if none.
         /// </summary>
         public required Guid? Entity { get; init; }
 
         /// <summary>
-        /// Gets the type of entity associated with the event.
+        /// Gets the entity type.
         /// </summary>
         public required UserAuditType Type { get; init; }
 
         /// <summary>
-        /// Gets the action performed during the event.
+        /// Gets the action.
         /// </summary>
         public required UserAuditAction Action { get; init; }
 
         /// <summary>
-        /// Gets additional information associated with the event as a JSON object.
+        /// Gets event metadata as a JSON object.
         /// </summary>
         /// <remarks>
-        /// Must not contain credentials or other sensitive authentication material.
+        /// Never include credentials or sensitive authentication material.
         /// </remarks>
         public required string Info { get; init; }
 
         /// <summary>
-        /// Gets the UTC date and time at which the event occurred.
+        /// Gets the UTC event time.
         /// </summary>
         public required DateTime Date { get; init; }
 
         /// <summary>
-        /// Constructs a new <see cref="UserAudit"/>
-        /// with the specified parameters.
+        /// Creates a <see cref="UserAudit"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
         public UserAudit(Guid uuid, Guid user, Guid? actor, Guid? entity, UserAuditType type, UserAuditAction action, string info, DateTime date) {
@@ -78,7 +75,7 @@ namespace Lithindium.Identity {
         }
 
         /// <summary>
-        /// Constructs a new <see cref="UserAudit"/>.
+        /// Creates a <see cref="UserAudit"/>.
         /// </summary>
         public UserAudit() {
             // ...

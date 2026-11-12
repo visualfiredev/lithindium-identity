@@ -11,23 +11,22 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents an immutable snapshot of a verified email address associated with a user.
+    /// Immutable verified user email snapshot.
     /// </summary>
     public readonly record struct UserEmail {
 
         /// <summary>
-        /// Gets the verified email address associated with the user.
+        /// Gets the verified email address.
         /// </summary>
         public required string Address { get; init; }
 
         /// <summary>
-        /// Gets a value indicating whether this is the user's primary email address.
+        /// Gets whether the email is primary.
         /// </summary>
         public required bool Primary { get; init; }
 
         /// <summary>
-        /// Constructs a new <see cref="UserEmail"/>
-        /// with the specified parameters.
+        /// Creates a <see cref="UserEmail"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
         public UserEmail(string address, bool primary) {
@@ -36,7 +35,7 @@ namespace Lithindium.Identity {
         }
 
         /// <summary>
-        /// Constructs a new <see cref="UserEmail"/>.
+        /// Creates a <see cref="UserEmail"/>.
         /// </summary>
         public UserEmail() {
             // ...

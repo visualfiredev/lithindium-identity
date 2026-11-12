@@ -9,42 +9,42 @@
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents the action performed during an auditable event.
+    /// An audited action.
     /// </summary>
     public enum UserAuditAction {
 
         /// <summary>
-        /// Indicates that an entity was created.
+        /// Entity created.
         /// </summary>
         Created,
 
         /// <summary>
-        /// Indicates that an existing entity was modified.
+        /// Entity updated.
         /// </summary>
         Updated,
 
         /// <summary>
-        /// Indicates that an entity was successfully verified.
+        /// Entity verified.
         /// </summary>
         Verified,
 
         /// <summary>
-        /// Indicates that a single-use entity was successfully consumed.
+        /// Single-use entity consumed.
         /// </summary>
         Consumed,
 
         /// <summary>
-        /// Indicates that an entity reached its expiration.
+        /// Entity expired.
         /// </summary>
         Expired,
 
         /// <summary>
-        /// Indicates that an entity was removed from its association with a user.
+        /// Entity unlinked from a user.
         /// </summary>
         Removed,
 
         /// <summary>
-        /// Indicates that an entity was deleted.
+        /// Entity deleted.
         /// </summary>
         Deleted
 

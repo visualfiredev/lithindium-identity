@@ -12,46 +12,45 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents an immutable snapshot of a user within the identity system.
+    /// Immutable user snapshot.
     /// </summary>
     public readonly record struct User {
 
         /// <summary>
-        /// Gets the universally unique identifier of the user.
+        /// Gets the user UUID.
         /// </summary>
         public required Guid Uuid { get; init; }
 
         /// <summary>
-        /// Gets the unique username associated with the user.
+        /// Gets the unique username.
         /// </summary>
         public required string Username { get; init; }
 
         /// <summary>
-        /// Gets the hashed password of the user, or <see langword="null"/> if no password is configured.
+        /// Gets the password hash, or <see langword="null"/> if unset.
         /// </summary>
         public required string? Password { get; init; }
 
         /// <summary>
-        /// Gets the display name of the user, or <see langword="null"/> if no display name is configured.
+        /// Gets the display name, or <see langword="null"/> if unset.
         /// </summary>
         public required string? DisplayName { get; init; }
 
         /// <summary>
-        /// Gets the current authentication generation of the user.
+        /// Gets the authentication generation.
         /// </summary>
         /// <remarks>
-        /// Incremented to invalidate previously issued generation-bound credentials.
+        /// Incremented to invalidate generation-bound credentials.
         /// </remarks>
         public required ushort Rotation { get; init; }
 
         /// <summary>
-        /// Gets the current account status of the user.
+        /// Gets the account status.
         /// </summary>
         public required UserStatus Status { get; init; }
 
         /// <summary>
-        /// Constructs a new <see cref="User"/>
-        /// with the specified parameters.
+        /// Creates a <see cref="User"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
         public User(Guid uuid, string username, string? password, string? displayName, ushort rotation, UserStatus status) {
@@ -64,7 +63,7 @@ namespace Lithindium.Identity {
         }
 
         /// <summary>
-        /// Constructs a new <see cref="User"/>.
+        /// Creates a <see cref="User"/>.
         /// </summary>
         public User() {
             // ...

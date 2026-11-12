@@ -13,94 +13,85 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Provides persistence operations for users within the identity system.
+    /// User persistence.
     /// </summary>
     /// <remarks>
-    /// Methods returning <see cref="UserStoreError"/> return
-    /// <see cref="UserStoreError.None"/> on success and an appropriate error for
-    /// expected persistence conflicts, including <see cref="UserStoreError.ConcurrencyConflict"/>
-    /// when a concurrent operation prevents the requested change. Other methods retain
-    /// their documented return values. Failed mutations must not leave partial changes.
-    /// Invalid arguments, cancellation, and unexpected infrastructure failures are
-    /// reported as exceptions.
-    /// Operations persist immediately unless participating in a transaction;
-    /// successful operations within a transaction are not durable until committed.
-    /// Store capabilities identify users by their UUID, not by snapshot equality.
-    /// Associated entities must be scoped to the specified user.
+    /// Error-returning methods report <see cref="UserStoreError.None"/> on success or an expected conflict,
+    /// including <see cref="UserStoreError.ConcurrencyConflict"/>; other methods retain their documented results.
+    /// Failed mutations leave no partial changes. Invalid arguments, cancellation and unexpected
+    /// infrastructure failures throw. Changes persist immediately outside transactions;
+    /// transactional changes persist on commit. Identify users by UUID, not snapshot equality,
+    /// and scope associated entities to their owner.
     /// </remarks>
     public interface IUserStore {
 
         /// <summary>
-        /// Begins an atomic transaction within the identity store.
+        /// Begins an atomic transaction.
         /// </summary>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The transaction associated with this store instance.</returns>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Transaction.</returns>
         /// <remarks>
-        /// All operations on this store instance, including its implemented capabilities,
-        /// must participate in the transaction until it is completed or disposed.
-        /// Transactions must provide serializable isolation or equivalent guarantees
-        /// for identity invariants, including concurrent reads, writes, and changes
-        /// to associated entity sets. Security-sensitive decisions must not rely on
-        /// stale replica reads or snapshots obtained outside the transaction.
-        /// A known serialization conflict that aborts a transaction must be reported as
-        /// <see cref="UserStoreError.ConcurrencyConflict"/> by an error-returning operation
-        /// or by <see cref="IUserStoreTransaction.CommitAsync"/>.
-        /// Disposing an uncommitted transaction must roll back its changes.
+        /// All operations and capabilities on this instance participate in the transaction until completion or disposal.
+        /// Require serializable isolation or equivalent identity invariants, including concurrent
+        /// reads, writes and changes to entity sets. Security decisions require current transactional
+        /// state, not stale replicas or external snapshots.
+        /// Report known serialization aborts as <see cref="UserStoreError.ConcurrencyConflict"/> from
+        /// an error-returning operation or <see cref="IUserStoreTransaction.CommitAsync"/>.
+        /// Disposal rolls back uncommitted changes.
         /// </remarks>
         Task<IUserStoreTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Retrieves the user with the specified universally unique identifier.
+        /// Finds a user by UUID.
         /// </summary>
-        /// <param name="uuid">The universally unique identifier of the user.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The user, or <see langword="null"/> if no matching user exists.</returns>
+        /// <param name="uuid">User UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>User, or <see langword="null"/> if absent.</returns>
         Task<User?> FindByUuidAsync(Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Retrieves the user with the specified username.
+        /// Finds a user by username.
         /// </summary>
-        /// <param name="username">The unique username of the user.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The user, or <see langword="null"/> if no matching user exists.</returns>
+        /// <param name="username">Unique username.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>User, or <see langword="null"/> if absent.</returns>
         Task<User?> FindByUsernameAsync(string username, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Creates a new user within the identity store.
+        /// Creates a user.
         /// </summary>
-        /// <param name="user">The user to create.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">New user.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.DuplicateIdentifier"/>,
-        /// <see cref="UserStoreError.DuplicateUsername"/>, as applicable.
+        /// <see cref="UserStoreError.DuplicateUsername"/>.
         /// </returns>
         Task<UserStoreError> CreateAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Attempts to update an existing user within the identity store.
+        /// Attempts a conditional user update.
         /// </summary>
-        /// <param name="expected">The expected existing user state.</param>
-        /// <param name="user">The user containing the updated values.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="expected">Expected user.</param>
+        /// <param name="user">Updated user.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
         /// <see cref="UserStoreError.ConcurrencyConflict"/>,
-        /// <see cref="UserStoreError.DuplicateUsername"/>, as applicable.
+        /// <see cref="UserStoreError.DuplicateUsername"/>.
         /// </returns>
         /// <remarks>
-        /// The comparison and update must be performed atomically.
-        /// Both records must identify the same user.
-        /// The expected persisted values must match exactly before applying the replacement.
+        /// Both snapshots must identify the same user. Atomically compare all expected persisted
+        /// values exactly before replacing them.
         /// </remarks>
         Task<UserStoreError> TryUpdateAsync(User expected, User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Deletes an existing user from the identity store.
+        /// Deletes a user.
         /// </summary>
-        /// <param name="uuid">The universally unique identifier of the user.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="uuid">User UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>.

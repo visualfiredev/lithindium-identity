@@ -13,23 +13,22 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents an immutable snapshot of a recovery code associated with a user.
+    /// Immutable user recovery code snapshot.
     /// </summary>
     public readonly record struct UserRecoveryCode {
 
         /// <summary>
-        /// Gets the universally unique identifier of the recovery code.
+        /// Gets the recovery code UUID.
         /// </summary>
         public required Guid Uuid { get; init; }
 
         /// <summary>
-        /// Gets the cryptographic hash of the recovery code.
+        /// Gets the cryptographic code hash.
         /// </summary>
         public required ImmutableArray<byte> CodeHash { get; init; }
 
         /// <summary>
-        /// Constructs a new <see cref="UserRecoveryCode"/>
-        /// with the specified parameters.
+        /// Creates a <see cref="UserRecoveryCode"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
         public UserRecoveryCode(Guid uuid, ImmutableArray<byte> codeHash) {
@@ -38,7 +37,7 @@ namespace Lithindium.Identity {
         }
 
         /// <summary>
-        /// Constructs a new <see cref="UserRecoveryCode"/>.
+        /// Creates a <see cref="UserRecoveryCode"/>.
         /// </summary>
         public UserRecoveryCode() {
             // ...

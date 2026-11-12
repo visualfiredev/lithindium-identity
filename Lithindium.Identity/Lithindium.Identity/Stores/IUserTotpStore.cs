@@ -14,89 +14,86 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Provides persistence operations for user TOTP authenticators.
+    /// TOTP authenticator persistence.
     /// </summary>
     public interface IUserTotpStore : IUserStore {
 
         /// <summary>
-        /// Retrieves the TOTP authenticators associated with the specified user.
+        /// Gets a user's TOTP authenticators.
         /// </summary>
-        /// <param name="user">The user whose authenticators to retrieve.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The authenticators associated with the user.</returns>
+        /// <param name="user">User.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Authenticators.</returns>
         IAsyncEnumerable<UserTotp> GetTotpsAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Retrieves the specified TOTP authenticator associated with a user.
+        /// Gets a user's TOTP authenticator by UUID.
         /// </summary>
-        /// <param name="user">The user associated with the authenticator.</param>
-        /// <param name="uuid">The universally unique identifier of the authenticator.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The authenticator, or <see langword="null"/> if no matching authenticator exists.</returns>
+        /// <param name="user">User.</param>
+        /// <param name="uuid">Authenticator UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Authenticator, or <see langword="null"/> if absent.</returns>
         Task<UserTotp?> GetTotpAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds a TOTP authenticator to the specified user.
+        /// Adds a TOTP authenticator.
         /// </summary>
-        /// <param name="user">The user to associate with the authenticator.</param>
-        /// <param name="totp">The authenticator to add.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="totp">Authenticator.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.DuplicateIdentifier"/>, as applicable.
+        /// <see cref="UserStoreError.DuplicateIdentifier"/>.
         /// </returns>
         Task<UserStoreError> AddTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes a TOTP authenticator from the specified user.
+        /// Removes a TOTP authenticator.
         /// </summary>
-        /// <param name="user">The user associated with the authenticator.</param>
-        /// <param name="totp">The authenticator to remove.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="totp">Authenticator.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>, as applicable.
+        /// <see cref="UserStoreError.EntityNotFound"/>.
         /// </returns>
         Task<UserStoreError> RemoveTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Attempts to change the name of a TOTP authenticator associated with the specified user.
+        /// Attempts a conditional authenticator rename.
         /// </summary>
-        /// <param name="user">The user associated with the authenticator.</param>
-        /// <param name="totp">The authenticator containing the expected existing name.</param>
-        /// <param name="name">The new name, or <see langword="null"/> to remove the name.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="totp">Authenticator with expected name.</param>
+        /// <param name="name">New name, or <see langword="null"/> to clear.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
         /// <see cref="UserStoreError.EntityNotFound"/>,
-        /// <see cref="UserStoreError.ConcurrencyConflict"/>, as applicable.
+        /// <see cref="UserStoreError.ConcurrencyConflict"/>.
         /// </returns>
         /// <remarks>
-        /// The comparison and update must be performed atomically. Only the name is compared
-        /// and changed; concurrent advances of the accepted time step must be preserved.
+        /// Atomically compare and change only the name; preserve concurrent step advances.
         /// </remarks>
         Task<UserStoreError> TryRenameTotpAsync(User user, UserTotp totp, string? name, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Attempts to advance the most recently accepted authentication time step
-        /// of a TOTP authenticator.
+        /// Attempts to advance the accepted TOTP time step.
         /// </summary>
-        /// <param name="user">The user associated with the authenticator.</param>
-        /// <param name="totp">The authenticator whose time step to advance.</param>
-        /// <param name="step">The accepted authentication time step.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="totp">Authenticator.</param>
+        /// <param name="step">Accepted time step.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
         /// <see cref="UserStoreError.EntityNotFound"/>,
-        /// <see cref="UserStoreError.TotpStepAlreadyUsed"/>, as applicable.
+        /// <see cref="UserStoreError.TotpStepAlreadyUsed"/>.
         /// </returns>
         /// <remarks>
-        /// The comparison and update must be performed atomically.
-        /// The supplied step must be strictly greater than the currently persisted step, if one exists.
+        /// Atomically accept only a step strictly greater than the persisted step, if any.
         /// </remarks>
         Task<UserStoreError> TryAdvanceTotpStepAsync(User user, UserTotp totp, ulong step, CancellationToken cancellationToken = default);
 

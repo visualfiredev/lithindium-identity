@@ -9,22 +9,22 @@
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents the hashing algorithm used by a TOTP authenticator.
+    /// TOTP hashing algorithm.
     /// </summary>
     public enum UserTotpAlgorithm {
 
         /// <summary>
-        /// Indicates that the authenticator uses HMAC-SHA1.
+        /// HMAC-SHA1.
         /// </summary>
         Sha1,
 
         /// <summary>
-        /// Indicates that the authenticator uses HMAC-SHA256.
+        /// HMAC-SHA256.
         /// </summary>
         Sha256,
 
         /// <summary>
-        /// Indicates that the authenticator uses HMAC-SHA512.
+        /// HMAC-SHA512.
         /// </summary>
         Sha512
 

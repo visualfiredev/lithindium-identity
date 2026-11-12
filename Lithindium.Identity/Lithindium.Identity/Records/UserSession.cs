@@ -13,57 +13,52 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents an immutable snapshot of an authentication session associated with a user.
+    /// Immutable user authentication session snapshot.
     /// </summary>
     public readonly record struct UserSession {
 
         /// <summary>
-        /// Gets the universally unique identifier of the session.
+        /// Gets the session UUID.
         /// </summary>
         public required Guid Uuid { get; init; }
 
         /// <summary>
-        /// Gets the name of the device associated with the session,
-        /// or <see langword="null"/> if no device name is configured.
+        /// Gets the device name, or <see langword="null"/> if unset.
         /// </summary>
         public required string? DeviceName { get; init; }
 
         /// <summary>
-        /// Gets the IP address associated with the session,
-        /// or <see langword="null"/> if no IP address is available.
+        /// Gets the IP address, or <see langword="null"/> if unavailable.
         /// </summary>
         public required string? IpAddress { get; init; }
 
         /// <summary>
-        /// Gets the user agent associated with the session,
-        /// or <see langword="null"/> if no user agent is available.
+        /// Gets the user agent, or <see langword="null"/> if unavailable.
         /// </summary>
         public required string? UserAgent { get; init; }
 
         /// <summary>
-        /// Gets the authentication methods used to establish the session.
+        /// Gets the authentication methods used.
         /// </summary>
         public required ImmutableArray<string> Amr { get; init; }
 
         /// <summary>
-        /// Gets the authentication context class reference associated with the session,
-        /// or <see langword="null"/> if no context class is specified.
+        /// Gets the authentication context class reference, or <see langword="null"/> if unspecified.
         /// </summary>
         public required string? Acr { get; init; }
 
         /// <summary>
-        /// Gets the UTC date and time at which the user authenticated.
+        /// Gets the UTC authentication time.
         /// </summary>
         public required DateTime AuthenticatedAt { get; init; }
 
         /// <summary>
-        /// Gets the UTC date and time at which the session expires.
+        /// Gets the UTC expiration time.
         /// </summary>
         public required DateTime ExpiresAt { get; init; }
 
         /// <summary>
-        /// Constructs a new <see cref="UserSession"/>
-        /// with the specified parameters.
+        /// Creates a <see cref="UserSession"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
         public UserSession(Guid uuid, string? deviceName, string? ipAddress, string? userAgent, ImmutableArray<string> amr, string? acr, DateTime authenticatedAt, DateTime expiresAt) {
@@ -78,7 +73,7 @@ namespace Lithindium.Identity {
         }
 
         /// <summary>
-        /// Constructs a new <see cref="UserSession"/>.
+        /// Creates a <see cref="UserSession"/>.
         /// </summary>
         public UserSession() {
             // ...

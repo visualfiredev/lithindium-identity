@@ -9,17 +9,17 @@
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents the account status of a user within the identity system.
+    /// User account status.
     /// </summary>
     public enum UserStatus {
 
         /// <summary>
-        /// Indicates that the user is permitted to authenticate and access the system.
+        /// Authentication and access permitted.
         /// </summary>
         Active,
 
         /// <summary>
-        /// Indicates that the user is prohibited from authenticating and accessing the system.
+        /// Authentication and access prohibited.
         /// </summary>
         Suspended
 

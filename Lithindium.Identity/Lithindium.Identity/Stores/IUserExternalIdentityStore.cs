@@ -14,88 +14,85 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Provides persistence operations for user external identities.
+    /// External identity persistence.
     /// </summary>
     public interface IUserExternalIdentityStore : IUserStore {
 
         /// <summary>
-        /// Retrieves the external identities associated with the specified user.
+        /// Gets a user's external identities.
         /// </summary>
-        /// <param name="user">The user whose external identities to retrieve.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The external identities associated with the user.</returns>
+        /// <param name="user">User.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>External identities.</returns>
         IAsyncEnumerable<UserExternalIdentity> GetExternalIdentitiesAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Retrieves the specified external identity associated with a user.
+        /// Gets a user's external identity by UUID.
         /// </summary>
-        /// <param name="user">The user associated with the external identity.</param>
-        /// <param name="uuid">The universally unique identifier of the external identity.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The external identity, or <see langword="null"/> if no matching identity exists.</returns>
+        /// <param name="user">User.</param>
+        /// <param name="uuid">External identity UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>External identity, or <see langword="null"/> if absent.</returns>
         Task<UserExternalIdentity?> GetExternalIdentityAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Retrieves the user associated with the specified external issuer and subject.
+        /// Finds a user by external issuer and subject.
         /// </summary>
-        /// <param name="issuer">The issuer of the external identity.</param>
-        /// <param name="subject">The unique subject identifier assigned by the issuer.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The user, or <see langword="null"/> if no matching user exists.</returns>
+        /// <param name="issuer">External issuer.</param>
+        /// <param name="subject">Issuer-assigned unique subject.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>User, or <see langword="null"/> if absent.</returns>
         /// <remarks>
-        /// Issuer and subject comparisons must be exact and case-sensitive.
+        /// Compare issuer and subject exactly and case-sensitively.
         /// </remarks>
         Task<User?> FindByExternalIdentityAsync(string issuer, string subject, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds an external identity to the specified user.
+        /// Adds an external identity.
         /// </summary>
-        /// <param name="user">The user to associate with the external identity.</param>
-        /// <param name="identity">The external identity to add.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="identity">External identity.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
         /// <see cref="UserStoreError.DuplicateIdentifier"/>,
-        /// <see cref="UserStoreError.DuplicateExternalIdentity"/>, as applicable.
+        /// <see cref="UserStoreError.DuplicateExternalIdentity"/>.
         /// </returns>
         /// <remarks>
-        /// The combination of issuer and subject must be unique
-        /// across all external identities within the identity store.
+        /// Issuer and subject pairs must be unique across the store.
         /// </remarks>
         Task<UserStoreError> AddExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Attempts to update the descriptive metadata of an external identity associated with the specified user.
+        /// Attempts a conditional metadata update.
         /// </summary>
-        /// <param name="user">The user associated with the external identity.</param>
-        /// <param name="expected">The expected existing external identity state.</param>
-        /// <param name="identity">The external identity containing the updated metadata.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="expected">Expected identity.</param>
+        /// <param name="identity">Identity with updated metadata.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
         /// <see cref="UserStoreError.EntityNotFound"/>,
-        /// <see cref="UserStoreError.ConcurrencyConflict"/>, as applicable.
+        /// <see cref="UserStoreError.ConcurrencyConflict"/>.
         /// </returns>
         /// <remarks>
-        /// Only the name and email address may be modified.
-        /// The UUID, issuer and subject must remain unchanged.
-        /// The comparison and update must be performed atomically.
-        /// The expected persisted metadata must match exactly; both records must identify the same external identity.
+        /// Atomically compare expected metadata exactly and update only name and email.
+        /// Both snapshots must identify the same identity; UUID, issuer and subject are immutable.
         /// </remarks>
         Task<UserStoreError> TryUpdateExternalIdentityAsync(User user, UserExternalIdentity expected, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes an external identity from the specified user.
+        /// Removes an external identity.
         /// </summary>
-        /// <param name="user">The user associated with the external identity.</param>
-        /// <param name="identity">The external identity to remove.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="identity">External identity.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>, as applicable.
+        /// <see cref="UserStoreError.EntityNotFound"/>.
         /// </returns>
         Task<UserStoreError> RemoveExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 

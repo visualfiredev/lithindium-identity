@@ -12,29 +12,27 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents an immutable snapshot of a user's authentication lockout state.
+    /// Immutable user lockout snapshot.
     /// </summary>
     public readonly record struct UserLockout {
 
         /// <summary>
-        /// Gets a value indicating whether authentication lockouts are enabled for the user.
+        /// Gets whether lockout is enabled.
         /// </summary>
         public required bool Enabled { get; init; }
 
         /// <summary>
-        /// Gets the number of consecutive failed authentication attempts.
+        /// Gets the consecutive authentication failure count.
         /// </summary>
         public required uint Failures { get; init; }
 
         /// <summary>
-        /// Gets the UTC date and time at which the lockout expires,
-        /// or <see langword="null"/> if no lockout expiration is configured.
+        /// Gets the UTC lockout expiration, or <see langword="null"/> if unset.
         /// </summary>
         public required DateTime? ReleaseAt { get; init; }
 
         /// <summary>
-        /// Constructs a new <see cref="UserLockout"/>
-        /// with the specified parameters.
+        /// Creates a <see cref="UserLockout"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
         public UserLockout(bool enabled, uint failures, DateTime? releaseAt) {
@@ -44,7 +42,7 @@ namespace Lithindium.Identity {
         }
 
         /// <summary>
-        /// Constructs a new <see cref="UserLockout"/>.
+        /// Creates a <see cref="UserLockout"/>.
         /// </summary>
         public UserLockout() {
             // ...

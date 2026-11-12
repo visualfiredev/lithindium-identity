@@ -14,46 +14,45 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Provides persistence operations for user audit records.
+    /// Audit record persistence.
     /// </summary>
     public interface IUserAuditStore : IUserStore {
 
         /// <summary>
-        /// Retrieves the audit records associated with the specified user.
+        /// Gets audits by affected user.
         /// </summary>
-        /// <param name="user">The universally unique identifier of the affected user.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The audit records associated with the user.</returns>
+        /// <param name="user">Affected user UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Audit records.</returns>
         IAsyncEnumerable<UserAudit> GetAuditsAsync(Guid user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Retrieves the audit records associated with actions performed by the specified user.
+        /// Gets audits by actor.
         /// </summary>
-        /// <param name="actor">The universally unique identifier of the acting user.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The audit records associated with the actor.</returns>
+        /// <param name="actor">Acting user UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Audit records.</returns>
         IAsyncEnumerable<UserAudit> GetAuditsByActorAsync(Guid actor, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Retrieves the audit records associated with the specified entity.
+        /// Gets audits by affected entity.
         /// </summary>
-        /// <param name="entity">The universally unique identifier of the affected entity.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The audit records associated with the entity.</returns>
+        /// <param name="entity">Affected entity UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Audit records.</returns>
         IAsyncEnumerable<UserAudit> GetAuditsByEntityAsync(Guid entity, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds an audit record to the identity store.
+        /// Adds an audit record.
         /// </summary>
-        /// <param name="audit">The audit record to add.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="audit">Audit record.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.DuplicateIdentifier"/>.
         /// </returns>
         /// <remarks>
-        /// Audit records must be preserved independently of the existence
-        /// of their associated users and entities.
+        /// Preserve audits even after associated users or entities are deleted.
         /// </remarks>
         Task<UserStoreError> AddAuditAsync(UserAudit audit, CancellationToken cancellationToken = default);
 

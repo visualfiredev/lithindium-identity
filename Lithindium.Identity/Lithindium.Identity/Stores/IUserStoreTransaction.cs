@@ -13,39 +13,34 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents an atomic transaction within an identity store.
+    /// An atomic identity store transaction.
     /// </summary>
     /// <remarks>
-    /// Disposing an uncommitted transaction must roll back its changes.
-    /// A completed or rolled-back transaction cannot be reused.
-    /// Transactions must provide the isolation guarantees specified by
-    /// <see cref="IUserStore.BeginTransactionAsync"/>.
-    /// An aborted transaction must not commit any changes; callers must retry the
-    /// entire transaction from fresh state after a retryable serialization conflict,
-    /// rather than retrying only the failed operation.
+    /// Disposal rolls back uncommitted changes. Completed or rolled-back transactions cannot be reused.
+    /// Follow <see cref="IUserStore.BeginTransactionAsync"/> isolation guarantees.
+    /// Aborted transactions cannot commit; retry the entire transaction from fresh state
+    /// after retryable serialization conflicts, not just the failed operation.
     /// </remarks>
     public interface IUserStoreTransaction : IAsyncDisposable {
 
         /// <summary>
-        /// Commits the changes performed within the transaction.
+        /// Commits the transaction.
         /// </summary>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.ConcurrencyConflict"/>, or another applicable persistence conflict.
         /// </returns>
         /// <remarks>
-        /// If a known persistence conflict prevents commit, return the corresponding error
-        /// and ensure the transaction is rolled back. An uncertain commit outcome must be
-        /// reported as an exception and must not be treated as a confirmed rollback
-        /// or automatically retried.
+        /// On a known commit conflict, return its error and roll back.
+        /// Throw on uncertain commit outcomes; do not assume rollback or automatically retry.
         /// </remarks>
         Task<UserStoreError> CommitAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Rolls back the changes performed within the transaction.
+        /// Rolls back the transaction.
         /// </summary>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         Task RollbackAsync(CancellationToken cancellationToken = default);
 
     }

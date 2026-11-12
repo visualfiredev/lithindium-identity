@@ -11,28 +11,27 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Represents an immutable snapshot of a verified phone number associated with a user.
+    /// Immutable verified user phone snapshot.
     /// </summary>
     public readonly record struct UserPhone {
 
         /// <summary>
-        /// Gets the verified phone number associated with the user in E.164 format.
+        /// Gets the verified E.164 phone number.
         /// </summary>
         public required string Number { get; init; }
 
         /// <summary>
-        /// Gets the phone number extension, or <see langword="null"/> if no extension is configured.
+        /// Gets the extension, or <see langword="null"/> if unset.
         /// </summary>
         public required string? Extension { get; init; }
 
         /// <summary>
-        /// Gets a value indicating whether this is the user's primary phone number.
+        /// Gets whether the phone is primary.
         /// </summary>
         public required bool Primary { get; init; }
 
         /// <summary>
-        /// Constructs a new <see cref="UserPhone"/>
-        /// with the specified parameters.
+        /// Creates a <see cref="UserPhone"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
         public UserPhone(string number, string? extension, bool primary) {
@@ -42,7 +41,7 @@ namespace Lithindium.Identity {
         }
 
         /// <summary>
-        /// Constructs a new <see cref="UserPhone"/>.
+        /// Creates a <see cref="UserPhone"/>.
         /// </summary>
         public UserPhone() {
             // ...

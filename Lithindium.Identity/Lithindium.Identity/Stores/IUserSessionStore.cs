@@ -14,93 +14,86 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Provides persistence operations for user authentication sessions.
+    /// Authentication session persistence.
     /// </summary>
     /// <remarks>
-    /// Session identifiers uniquely identify authentication sessions and must never
-    /// be reused. Revoking or expiring a session permanently removes its validity.
-    /// Authentication state changes and any session revocations required by the
-    /// authentication policy must be performed within the same transaction.
+    /// Never reuse session UUIDs. Revocation or expiration permanently invalidates a session.
+    /// Commit authentication state changes and policy-required revocations together.
     /// </remarks>
     public interface IUserSessionStore : IUserStore {
 
         /// <summary>
-        /// Retrieves the authentication sessions associated with the specified user.
+        /// Gets a user's persisted sessions.
         /// </summary>
-        /// <param name="user">The user whose sessions to retrieve.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The persisted sessions associated with the user.</returns>
+        /// <param name="user">User.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Persisted sessions.</returns>
         IAsyncEnumerable<UserSession> GetSessionsAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Retrieves the specified authentication session associated with a user.
+        /// Gets a user's session by UUID.
         /// </summary>
-        /// <param name="user">The user associated with the session.</param>
-        /// <param name="uuid">The universally unique identifier of the session.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The session, or <see langword="null"/> if no matching session exists.</returns>
+        /// <param name="user">User.</param>
+        /// <param name="uuid">Session UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Session, or <see langword="null"/> if absent.</returns>
         /// <remarks>
-        /// Retrieving a session does not establish its validity. Authentication
-        /// requires an existing, unexpired session belonging to the authenticated user.
+        /// Retrieval alone does not establish validity. Authentication requires an existing,
+        /// unexpired session belonging to the authenticated user.
         /// </remarks>
         Task<UserSession?> GetSessionAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds an authentication session to the specified user.
+        /// Adds an authentication session.
         /// </summary>
-        /// <param name="user">The user to associate with the session.</param>
-        /// <param name="session">The session to add.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="session">Session.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.DuplicateIdentifier"/>, as applicable.
+        /// <see cref="UserStoreError.DuplicateIdentifier"/>.
         /// </returns>
         /// <remarks>
-        /// The expiration must be later than the authentication time.
-        /// Session identifiers must never be reused.
-        /// Session issuance must occur within the same transaction as the validation
-        /// of the authentication state authorizing its creation, including any
-        /// required credential verification state changes.
+        /// Expiration must follow authentication. Issue within the transaction validating
+        /// the authorizing authentication state, including required verification state changes.
         /// </remarks>
         Task<UserStoreError> AddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes an authentication session from the specified user.
+        /// Removes a session.
         /// </summary>
-        /// <param name="user">The user associated with the session.</param>
-        /// <param name="session">The session to remove.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="session">Session.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.EntityNotFound"/>, as applicable.
+        /// <see cref="UserStoreError.EntityNotFound"/>.
         /// </returns>
         Task<UserStoreError> RemoveSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes the authentication sessions associated with the specified user.
+        /// Removes a user's sessions.
         /// </summary>
-        /// <param name="user">The user whose sessions to remove.</param>
-        /// <param name="exceptUuid">The universally unique identifier of a session to preserve,
-        /// or <see langword="null"/> to remove all sessions.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="exceptUuid">Session UUID to preserve, or <see langword="null"/> for all.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>.
         /// </returns>
         /// <remarks>
-        /// The removal of matching sessions must be performed atomically.
-        /// If no sessions match, the operation succeeds without removing anything.
+        /// Remove matching sessions atomically; no matches is success.
         /// </remarks>
         Task<UserStoreError> RemoveSessionsAsync(User user, Guid? exceptUuid = null, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes expired authentication sessions from the identity store.
+        /// Removes expired sessions.
         /// </summary>
-        /// <param name="expiresAt">The UTC date and time at or before which sessions must have expired.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The number of sessions removed.</returns>
+        /// <param name="expiresAt">Inclusive UTC expiration cutoff.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Number of sessions removed.</returns>
         Task<int> RemoveExpiredSessionsAsync(DateTime expiresAt, CancellationToken cancellationToken = default);
 
     }

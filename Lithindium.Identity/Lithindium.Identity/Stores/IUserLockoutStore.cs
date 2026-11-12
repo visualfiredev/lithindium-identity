@@ -12,33 +12,32 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Provides persistence operations for user authentication lockout states.
+    /// Authentication lockout persistence.
     /// </summary>
     public interface IUserLockoutStore : IUserStore {
 
         /// <summary>
-        /// Retrieves the authentication lockout state of the specified user.
+        /// Gets a user's lockout state.
         /// </summary>
-        /// <param name="user">The user whose lockout state to retrieve.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The lockout state, or <see langword="null"/> if no state exists.</returns>
+        /// <param name="user">User.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Lockout state, or <see langword="null"/> if absent.</returns>
         Task<UserLockout?> GetLockoutAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Attempts to update the authentication lockout state of the specified user.
+        /// Attempts a conditional lockout update.
         /// </summary>
-        /// <param name="user">The user whose lockout state to update.</param>
-        /// <param name="expected">The expected existing lockout state, or <see langword="null"/> if no state exists.</param>
-        /// <param name="lockout">The updated lockout state.</param>
-        /// <param name="cancellationToken">The token used to cancel the operation.</param>
+        /// <param name="user">User.</param>
+        /// <param name="expected">Expected lockout, or <see langword="null"/> if absent.</param>
+        /// <param name="lockout">Updated lockout state.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
-        /// <see cref="UserStoreError.ConcurrencyConflict"/>, as applicable.
+        /// <see cref="UserStoreError.ConcurrencyConflict"/>.
         /// </returns>
         /// <remarks>
-        /// The comparison and update must be performed atomically.
-        /// An expected value of <see langword="null"/> requires that no lockout state exists.
+        /// Atomically compare and update; a <see langword="null"/> expectation requires no existing state.
         /// </remarks>
         Task<UserStoreError> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default);
 
