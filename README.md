@@ -11,7 +11,7 @@ User accounts, authentication, and credential management — without the unneces
 ![Status](https://img.shields.io/badge/status-in%20development-orange)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-[Overview](#overview) · [Features](#features) · [Architecture](#architecture) · [Getting Started](#getting-started) · [Contributing](#contributing)
+[Overview](#overview) · [Features](#features) · [Architecture](#architecture) · [Getting Started](#getting-started) · [Contributing](#contributing) · [AI Assisted Development](#ai-assisted-development)
 
 </div>
 
@@ -92,6 +92,14 @@ Installation instructions and public API examples will be added as the library b
 Contributions, ideas, and constructive feedback are welcome. Bug reports, feature proposals, and pull requests can be submitted through GitHub.
 
 For suspected security vulnerabilities, please use a private reporting channel rather than opening a public issue.
+
+## AI Assisted Development
+
+Lithindium Identity is developed collaboratively by **human contributors and AI coding agents**, with human direction, engineering oversight, and review.
+
+AI-assisted development is an intentional part of this project. All contributions are held to the same standards of correctness, maintainability, security, attribution, and licensing, regardless of how they were produced.
+
+Both human-written and AI-assisted contributions are welcome. Contributors remain responsible for the quality and legality of their work.
 
 ## License
 
