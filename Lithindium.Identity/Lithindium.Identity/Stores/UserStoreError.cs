@@ -28,49 +28,66 @@ namespace Lithindium.Identity {
         UserNotFound,
 
         /// <summary>
-        /// Indicates that the specified associated entity does not exist or does not belong to the specified user.
+        /// Indicates that the specified entity does not exist
+        /// or does not belong to the specified user.
         /// </summary>
         EntityNotFound,
 
         /// <summary>
-        /// Indicates that the requested username is already assigned to another user.
-        /// </summary>
-        DuplicateUsername,
-
-        /// <summary>
-        /// Indicates that the email address is already associated with a user.
-        /// </summary>
-        DuplicateEmail,
-
-        /// <summary>
-        /// Indicates that the combination of phone number and extension is already associated with a user.
-        /// </summary>
-        DuplicatePhone,
-
-        /// <summary>
-        /// Indicates that the combination of issuer and subject is already associated with a user.
-        /// </summary>
-        DuplicateExternalIdentity,
-
-        /// <summary>
-        /// Indicates that the supplied universally unique identifier is already in use for an entity of the same type.
+        /// Indicates that the specified universally unique identifier
+        /// is already in use by an entity of the same type.
         /// </summary>
         DuplicateIdentifier,
 
         /// <summary>
-        /// Indicates that a recovery code hash duplicates an existing code outside the replaced set or another code in the replacement set.
+        /// Indicates that the specified username is already assigned to another user.
+        /// </summary>
+        DuplicateUsername,
+
+        /// <summary>
+        /// Indicates that the specified email address is already associated with a user.
+        /// </summary>
+        DuplicateEmail,
+
+        /// <summary>
+        /// Indicates that the specified combination of phone number and extension
+        /// is already associated with a user.
+        /// </summary>
+        DuplicatePhone,
+
+        /// <summary>
+        /// Indicates that the specified combination of issuer and subject
+        /// is already associated with a user.
+        /// </summary>
+        DuplicateExternalIdentity,
+
+        /// <summary>
+        /// Indicates that a recovery code hash duplicates an existing code outside
+        /// the replaced set or another code within the replacement set.
         /// </summary>
         DuplicateRecoveryCode,
 
         /// <summary>
-        /// Indicates that persisted state no longer matches the expected state or that a concurrent operation prevented the requested change.
+        /// Indicates that persisted state no longer matches the expected state
+        /// or that a concurrent operation prevented the requested change.
         /// </summary>
         ConcurrencyConflict,
 
         /// <summary>
-        /// Indicates that the supplied TOTP time step is less than or equal to the most recently accepted time step.
+        /// Indicates that the specified TOTP time step is less than or equal
+        /// to the most recently accepted time step.
         /// </summary>
-        TotpStepAlreadyUsed
+        TotpStepAlreadyUsed,
+
+        /// <summary>
+        /// Indicates that the specified authentication or verification challenge has expired.
+        /// </summary>
+        ChallengeExpired,
+
+        /// <summary>
+        /// Indicates that the specified challenge has exhausted its permitted verification attempts.
+        /// </summary>
+        ChallengeAttemptsExhausted
 
     }
 
