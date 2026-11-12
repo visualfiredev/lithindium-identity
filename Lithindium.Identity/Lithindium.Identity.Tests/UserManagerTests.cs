@@ -163,12 +163,19 @@ namespace Lithindium.Identity.Tests {
         private static UserChallenge NewChallenge() => new(Guid.NewGuid(), UserChallengeType.PasswordReset, null, null, 0, 5, DateTime.UtcNow, DateTime.UtcNow.AddMinutes(5));
 
         // Single-user transactional fake; not a concurrency or provider conformance test.
-        private sealed class TestStore : IUserStore, IUserSessionStore, IUserChallengeStore, IUserAuditStore, IUserExternalIdentityStore {
+        internal sealed class TestStore : IUserStore, IUserSessionStore, IUserChallengeStore, IUserAuditStore, IUserExternalIdentityStore, IUserEmailStore, IUserPhoneStore, IUserTotpStore, IUserRecoveryCodeStore {
 
             public Dictionary<Guid, User> Users { get; private set; } = [];
             public Dictionary<Guid, UserSession> Sessions { get; private set; } = [];
             public Dictionary<Guid, UserChallenge> Challenges { get; private set; } = [];
             public Dictionary<Guid, UserExternalIdentity> Identities { get; private set; } = [];
+            public List<UserEmail> Emails { get; private set; } = [];
+            public List<UserPhone> Phones { get; private set; } = [];
+            public Dictionary<Guid, UserTotp> Totps { get; private set; } = [];
+            public List<UserRecoveryCode> RecoveryCodes { get; private set; } = [];
+            public bool FailEmailAddition { get; set; }
+            private HashSet<Guid> Reserved { get; } = [];
+
             public List<UserAudit> Audits { get; private set; } = [];
             public bool FailSessionRemoval { get; set; }
             public bool FailAudit { get; init; }
@@ -176,8 +183,10 @@ namespace Lithindium.Identity.Tests {
             private static Task<OperationResult> Ok(OperationCode operation) => Task.FromResult(new OperationResult(StatusCode.Success, operation: operation));
             private static Task<OperationResult> Fail(StatusCode status, ContextCode context, OperationCode operation) => Task.FromResult(new OperationResult(status, context, operation));
 
-            public Task<IUserStoreTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
-                Task.FromResult<IUserStoreTransaction>(new Transaction(this));
+            public Task<IUserStoreTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) {
+                Reserved.Clear();
+                return Task.FromResult<IUserStoreTransaction>(new Transaction(this));
+            }
 
             public Task<User?> FindByUuidAsync(Guid uuid, CancellationToken cancellationToken = default) =>
                 Task.FromResult(Users.TryGetValue(uuid, out User user) ? (User?)user : null);
@@ -204,6 +213,10 @@ namespace Lithindium.Identity.Tests {
                 Sessions.Clear();
                 Challenges.Clear();
                 Identities.Clear();
+                Emails.Clear();
+                Phones.Clear();
+                Totps.Clear();
+                RecoveryCodes.Clear();
                 return Ok(OperationCode.StoreDeleteUser);
             }
 
@@ -233,17 +246,45 @@ namespace Lithindium.Identity.Tests {
             public Task<UserChallenge?> GetChallengeAsync(User user, Guid uuid, CancellationToken cancellationToken = default) =>
                 Task.FromResult(Challenges.TryGetValue(uuid, out UserChallenge challenge) ? (UserChallenge?)challenge : null);
 
-            public Task<OperationResult> AddChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default) => throw new NotSupportedException();
-            public Task<OperationResult> TryReserveChallengeAttemptAsync(User user, UserChallenge challenge, DateTime now, CancellationToken cancellationToken = default) => throw new NotSupportedException();
-            public Task<OperationResult> TryConsumeChallengeAsync(User user, UserChallenge challenge, DateTime now, CancellationToken cancellationToken = default) => throw new NotSupportedException();
-            public Task<OperationResult> RemoveChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+            public Task<OperationResult> AddChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default) {
+                Challenges.Add(challenge.Uuid, challenge);
+                return Ok(OperationCode.StoreAddChallenge);
+            }
+
+            public Task<OperationResult> TryReserveChallengeAttemptAsync(User user, UserChallenge challenge, DateTime now, CancellationToken cancellationToken = default) {
+                if (!Challenges.TryGetValue(challenge.Uuid, out UserChallenge current))
+                    return Fail(StatusCode.NotFound, ContextCode.Entity, OperationCode.StoreReserveChallengeAttempt);
+                if (current.ExpiresAt <= now) return Fail(StatusCode.Expired, ContextCode.Challenge, OperationCode.StoreReserveChallengeAttempt);
+                if (current.Attempts >= current.MaxAttempts) return Fail(StatusCode.AttemptsExhausted, ContextCode.Challenge, OperationCode.StoreReserveChallengeAttempt);
+                Challenges[current.Uuid] = current with { Attempts = current.Attempts + 1 };
+                Reserved.Add(current.Uuid);
+                return Ok(OperationCode.StoreReserveChallengeAttempt);
+            }
+
+            public Task<OperationResult> TryConsumeChallengeAsync(User user, UserChallenge challenge, DateTime now, CancellationToken cancellationToken = default) {
+                if (!Challenges.TryGetValue(challenge.Uuid, out UserChallenge current))
+                    return Fail(StatusCode.NotFound, ContextCode.Entity, OperationCode.StoreConsumeChallenge);
+                if (current.ExpiresAt <= now) return Fail(StatusCode.Expired, ContextCode.Challenge, OperationCode.StoreConsumeChallenge);
+                if (!Reserved.Remove(challenge.Uuid)) throw new InvalidOperationException("No reserved attempt.");
+                Challenges.Remove(challenge.Uuid);
+                return Ok(OperationCode.StoreConsumeChallenge);
+            }
+
+            public Task<OperationResult> RemoveChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default) {
+                if (!Challenges.Remove(challenge.Uuid)) return Fail(StatusCode.NotFound, ContextCode.Entity, OperationCode.StoreRemoveChallenge);
+                return Ok(OperationCode.StoreRemoveChallenge);
+            }
 
             public Task<OperationResult> RemoveChallengesAsync(User user, UserChallengeType? type = null, CancellationToken cancellationToken = default) {
                 foreach (Guid uuid in Challenges.Values.Where(c => type is null || c.Type == type).Select(c => c.Uuid).ToArray()) Challenges.Remove(uuid);
                 return Ok(OperationCode.StoreRemoveChallenges);
             }
 
-            public Task<int> RemoveExpiredChallengesAsync(DateTime expiresAt, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+            public Task<int> RemoveExpiredChallengesAsync(DateTime expiresAt, CancellationToken cancellationToken = default) {
+                Guid[] expired = Challenges.Values.Where(c => c.ExpiresAt <= expiresAt).Select(c => c.Uuid).ToArray();
+                foreach (Guid uuid in expired) Challenges.Remove(uuid);
+                return Task.FromResult(expired.Length);
+            }
 
             public IAsyncEnumerable<UserAudit> GetAuditsAsync(Guid user, CancellationToken cancellationToken = default) => Stream(Audits.Where(a => a.User == user));
             public IAsyncEnumerable<UserAudit> GetAuditsByActorAsync(Guid actor, CancellationToken cancellationToken = default) => Stream(Audits.Where(a => a.Actor == actor));
@@ -277,6 +318,71 @@ namespace Lithindium.Identity.Tests {
                 return Ok(OperationCode.StoreRemoveExternalIdentity);
             }
 
+            public IAsyncEnumerable<UserEmail> GetEmailsAsync(User user, CancellationToken cancellationToken = default) => Stream(Emails);
+            public Task<User?> FindByEmailAsync(string address, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+            public Task<OperationResult> AddEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default) {
+                if (FailEmailAddition) return Fail(StatusCode.Conflict, ContextCode.None, OperationCode.StoreAddEmail);
+                if (Emails.Any(e => string.Equals(e.Address, email.Address, StringComparison.OrdinalIgnoreCase)))
+                    return Fail(StatusCode.AlreadyExists, ContextCode.Email, OperationCode.StoreAddEmail);
+                if (email.Primary) for (int i = 0; i < Emails.Count; i++) Emails[i] = Emails[i] with { Primary = false };
+                Emails.Add(email);
+                return Ok(OperationCode.StoreAddEmail);
+            }
+
+            public Task<OperationResult> RemoveEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default) {
+                Emails.RemoveAll(e => e.Address == email.Address);
+                return Ok(OperationCode.StoreRemoveEmail);
+            }
+
+            public Task<OperationResult> SetPrimaryEmailAsync(User user, UserEmail? email, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+            public IAsyncEnumerable<UserPhone> GetPhonesAsync(User user, CancellationToken cancellationToken = default) => Stream(Phones);
+            public Task<User?> FindByPhoneAsync(string number, string? extension = null, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+            public Task<OperationResult> AddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default) {
+                if (phone.Primary) for (int i = 0; i < Phones.Count; i++) Phones[i] = Phones[i] with { Primary = false };
+                Phones.Add(phone);
+                return Ok(OperationCode.StoreAddPhone);
+            }
+
+            public Task<OperationResult> RemovePhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+            public Task<OperationResult> SetPrimaryPhoneAsync(User user, UserPhone? phone, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+            public IAsyncEnumerable<UserTotp> GetTotpsAsync(User user, CancellationToken cancellationToken = default) => Stream(Totps.Values);
+
+            public Task<UserTotp?> GetTotpAsync(User user, Guid uuid, CancellationToken cancellationToken = default) =>
+                Task.FromResult(Totps.TryGetValue(uuid, out UserTotp totp) ? (UserTotp?)totp : null);
+
+            public Task<OperationResult> AddTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default) {
+                Totps.Add(totp.Uuid, totp);
+                return Ok(OperationCode.StoreAddTotp);
+            }
+
+            public Task<OperationResult> RemoveTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+            public Task<OperationResult> TryRenameTotpAsync(User user, UserTotp totp, string? name, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+            public Task<OperationResult> TryAdvanceTotpStepAsync(User user, UserTotp totp, ulong step, CancellationToken cancellationToken = default) {
+                if (!Totps.TryGetValue(totp.Uuid, out UserTotp current)) return Fail(StatusCode.NotFound, ContextCode.Entity, OperationCode.StoreAdvanceTotpStep);
+                if (current.LastStep is { } previous && step <= previous) return Fail(StatusCode.AlreadyUsed, ContextCode.Totp, OperationCode.StoreAdvanceTotpStep);
+                Totps[totp.Uuid] = current with { LastStep = step };
+                return Ok(OperationCode.StoreAdvanceTotpStep);
+            }
+
+            public IAsyncEnumerable<UserRecoveryCode> GetRecoveryCodesAsync(User user, CancellationToken cancellationToken = default) => Stream(RecoveryCodes);
+
+            public Task<OperationResult> ReplaceRecoveryCodesAsync(User user, IReadOnlyCollection<UserRecoveryCode> codes, CancellationToken cancellationToken = default) {
+                RecoveryCodes = codes.ToList();
+                return Ok(OperationCode.StoreReplaceRecoveryCodes);
+            }
+
+            public Task<OperationResult> TryConsumeRecoveryCodeAsync(User user, ImmutableArray<byte> codeHash, CancellationToken cancellationToken = default) {
+                int removed = RecoveryCodes.RemoveAll(code => code.CodeHash.AsSpan().SequenceEqual(codeHash.AsSpan()));
+                return removed == 0 ? Fail(StatusCode.NotFound, ContextCode.Entity, OperationCode.StoreConsumeRecoveryCode) : Ok(OperationCode.StoreConsumeRecoveryCode);
+            }
+
+            public Task<int> CountRecoveryCodesAsync(User user, CancellationToken cancellationToken = default) => Task.FromResult(RecoveryCodes.Count);
+
             private static async IAsyncEnumerable<T> Stream<T>(IEnumerable<T> items) {
                 await Task.CompletedTask;
                 foreach (T item in items) yield return item;
@@ -288,6 +394,10 @@ namespace Lithindium.Identity.Tests {
                 private readonly Dictionary<Guid, UserSession> _sessions = new(store.Sessions);
                 private readonly Dictionary<Guid, UserChallenge> _challenges = new(store.Challenges);
                 private readonly Dictionary<Guid, UserExternalIdentity> _identities = new(store.Identities);
+                private readonly List<UserEmail> _emails = new(store.Emails);
+                private readonly List<UserPhone> _phones = new(store.Phones);
+                private readonly Dictionary<Guid, UserTotp> _totps = new(store.Totps);
+                private readonly List<UserRecoveryCode> _recoveryCodes = new(store.RecoveryCodes);
                 private readonly List<UserAudit> _audits = new(store.Audits);
                 private bool _completed;
 
@@ -303,6 +413,10 @@ namespace Lithindium.Identity.Tests {
                         store.Challenges = _challenges;
                         store.Identities = _identities;
                         store.Audits = _audits;
+                        store.Emails = _emails;
+                        store.Phones = _phones;
+                        store.Totps = _totps;
+                        store.RecoveryCodes = _recoveryCodes;
                         _completed = true;
                     }
                     return Task.CompletedTask;

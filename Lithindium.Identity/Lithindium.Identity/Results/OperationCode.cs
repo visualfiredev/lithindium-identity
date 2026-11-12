@@ -319,7 +319,67 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Gets lockout state.
         /// </summary>
-        UserGetLockout = 0x7E
+        UserGetLockout = 0x7E,
+
+        /// <summary>
+        /// Challenge manager: IssueEmailVerification.
+        /// </summary>
+        ChallengeIssueEmailVerification = 0x80,
+
+        /// <summary>
+        /// Challenge manager: CompleteEmailVerification.
+        /// </summary>
+        ChallengeCompleteEmailVerification = 0x81,
+
+        /// <summary>
+        /// Challenge manager: IssuePhoneVerification.
+        /// </summary>
+        ChallengeIssuePhoneVerification = 0x82,
+
+        /// <summary>
+        /// Challenge manager: CompletePhoneVerification.
+        /// </summary>
+        ChallengeCompletePhoneVerification = 0x83,
+
+        /// <summary>
+        /// Challenge manager: IssuePasswordReset.
+        /// </summary>
+        ChallengeIssuePasswordReset = 0x84,
+
+        /// <summary>
+        /// Challenge manager: CompletePasswordReset.
+        /// </summary>
+        ChallengeCompletePasswordReset = 0x85,
+
+        /// <summary>
+        /// Challenge manager: IssueTotpEnrollment.
+        /// </summary>
+        ChallengeIssueTotpEnrollment = 0x86,
+
+        /// <summary>
+        /// Challenge manager: CompleteTotpEnrollment.
+        /// </summary>
+        ChallengeCompleteTotpEnrollment = 0x87,
+
+        /// <summary>
+        /// Challenge manager: IssueMultiFactor.
+        /// </summary>
+        ChallengeIssueMultiFactor = 0x88,
+
+        /// <summary>
+        /// Challenge manager: CompleteMultiFactor.
+        /// </summary>
+        ChallengeCompleteMultiFactor = 0x89,
+
+        /// <summary>
+        /// Challenge manager: Cancel.
+        /// </summary>
+        ChallengeCancel = 0x8A,
+
+        /// <summary>
+        /// Challenge manager: RemoveExpired.
+        /// </summary>
+        ChallengeRemoveExpired = 0x8B
 
     }
 

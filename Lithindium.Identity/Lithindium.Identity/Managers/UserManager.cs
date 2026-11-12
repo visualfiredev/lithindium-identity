@@ -35,6 +35,9 @@ namespace Lithindium.Identity {
         private readonly UserManagerOptions _options;
         private readonly TimeProvider _timeProvider;
 
+        internal IUserStore Store => _store;
+        internal TimeProvider Clock => _timeProvider;
+
         /// <summary>
         /// Creates a user manager.
         /// </summary>
@@ -295,7 +298,9 @@ namespace Lithindium.Identity {
         /// </summary>
         /// <remarks>
         /// Trusted callers must verify enrollment and protect the secret before calling.
-        /// Do not use this method to complete a persisted challenge.
+        /// Do not use this method to complete a persisted challenge. Imported secrets must
+        /// use the same data protection provider and purposes as ChallengeManager:
+        /// Lithindium.Identity.Totp.v1, user UUID (N), authenticator UUID (N).
         /// </remarks>
         public virtual Task<OperationResult> AddVerifiedTotpAsync(Guid uuid, UserTotp totp, Guid? actor = null, CancellationToken cancellationToken = default) {
             const OperationCode op = OperationCode.UserAddVerifiedTotp;
@@ -578,7 +583,7 @@ namespace Lithindium.Identity {
             return StoreSucceeded(commit) ? new OperationResult<T>(Success(op), value) : new OperationResult<T>(commit);
         }
 
-        private async Task<OperationResult> RotateAsync(User current, User replacement, Guid? exceptSessionUuid, OperationCode op, CancellationToken cancellationToken) {
+        internal async Task<OperationResult> RotateAsync(User current, User replacement, Guid? exceptSessionUuid, OperationCode op, CancellationToken cancellationToken) {
             bool exhausted = current.Rotation == ushort.MaxValue;
             // Suspension must remain possible even when the generation is exhausted.
             if (exhausted && !(current.Status == UserStatus.Active && replacement.Status == UserStatus.Suspended))
@@ -603,12 +608,12 @@ namespace Lithindium.Identity {
             return Success(op);
         }
 
-        private Task<OperationResult> AuditAsync(User user, Guid? actor, Guid? entity, UserAuditType type, UserAuditAction action, CancellationToken cancellationToken) =>
+        internal Task<OperationResult> AuditAsync(User user, Guid? actor, Guid? entity, UserAuditType type, UserAuditAction action, CancellationToken cancellationToken) =>
             _store is IUserAuditStore audits
                 ? audits.AddAuditAsync(new UserAudit(Guid.CreateVersion7(), user.Uuid, actor, entity, type, action, "{}", _timeProvider.GetUtcNow().UtcDateTime), cancellationToken)
                 : Task.FromResult(new OperationResult(StatusCode.Success));
 
-        private string HashPassword(User user, string password) {
+        internal string HashPassword(User user, string password) {
             string hash = _passwordHasher.HashPassword(user, password);
             if (string.IsNullOrEmpty(hash) || hash.Length > 255) throw new InvalidOperationException("Password hasher returned an invalid hash.");
             return hash;
@@ -617,7 +622,7 @@ namespace Lithindium.Identity {
         internal static ImmutableArray<byte> HashRecoveryCode(string code) =>
             ImmutableArray.CreateRange(SHA256.HashData(Encoding.UTF8.GetBytes(code)));
 
-        private OperationResult ValidatePassword(string? password, OperationCode op) {
+        internal OperationResult ValidatePassword(string? password, OperationCode op) {
             if (string.IsNullOrEmpty(password) || password.Length < _options.MinimumPasswordLength)
                 return Failure(StatusCode.PolicyViolation, ContextCode.Password, op, DetailCode.TooShort);
             if (password.Length > _options.MaximumPasswordLength)
@@ -634,19 +639,19 @@ namespace Lithindium.Identity {
             return Success(op);
         }
 
-        private static bool ValidOptionalName(string? value, int maxLength) {
+        internal static bool ValidOptionalName(string? value, int maxLength) {
             if (value is null) return true;
             if (value.Length > maxLength || string.IsNullOrWhiteSpace(value)) return false;
             foreach (char c in value) if (char.IsControl(c)) return false;
             return true;
         }
 
-        private static bool ValidEmail(UserEmail email) =>
+        internal static bool ValidEmail(UserEmail email) =>
             !string.IsNullOrWhiteSpace(email.Address) && email.Address.Length <= 254 &&
             MailAddress.TryCreate(email.Address, out MailAddress? parsed) &&
             string.Equals(parsed.Address, email.Address, StringComparison.Ordinal);
 
-        private static bool ValidPhone(UserPhone phone) {
+        internal static bool ValidPhone(UserPhone phone) {
             if (phone.Number is not { Length: >= 2 and <= 16 } number || number[0] != '+' || number[1] is < '1' or > '9') return false;
             for (int i = 1; i < number.Length; i++) if (number[i] is < '0' or > '9') return false;
             if (phone.Extension is { } extension) {
@@ -677,7 +682,7 @@ namespace Lithindium.Identity {
             return false;
         }
 
-        private static bool StoreSucceeded(OperationResult result) {
+        internal static bool StoreSucceeded(OperationResult result) {
             if (result.Status is StatusCode.Success or StatusCode.NoOp) return true;
             if (result.IsFailure) return false;
             throw new InvalidOperationException("Unexpected store result: " + result);

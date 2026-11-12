@@ -68,7 +68,8 @@ namespace Lithindium.Identity {
         /// </returns>
         /// <remarks>
         /// Atomically validate existence, expiration and remaining attempts, then increment
-        /// the persisted count, not the supplied snapshot. Commit failed verification attempts
+        /// the persisted count, not the supplied snapshot. Success requires an increment;
+        /// a no-op is not valid. Commit failed verification attempts
         /// without applying the challenged operation. Rolled-back reservations do not count;
         /// retry with a new reservation.
         /// </remarks>
@@ -91,6 +92,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Atomically validate existence and expiration, then delete. Reserve and verify successfully in
         /// the same transaction before consuming, including on the final attempt.
+        /// Success requires deletion; a no-op is not valid.
         /// Commit consumption and the resulting identity mutation together. Use consumption time,
         /// not reservation time.
         /// </remarks>
