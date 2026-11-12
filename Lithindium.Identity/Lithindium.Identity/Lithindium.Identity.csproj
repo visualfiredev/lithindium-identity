@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- Project Properties -->
+    <PropertyGroup>
+        <!-- Package Identity -->
+        <Title>Lithindium Identity</Title>
+        <RootNamespace>Lithindium.Identity</RootNamespace>
+        <PackageId>Lithindium.Identity</PackageId>
+        <Version>1.0.0</Version>
+
+        <!-- Package Information -->
+        <Authors>Visual Fire Development LLC</Authors>
+        <Company>Visual Fire Development LLC</Company>
+        <Copyright>Copyright © 2026 Visual Fire Development LLC</Copyright>
+        <Description>Extensible identity and authentication infrastructure for .NET applications, providing user management, credential management, multi-factor authentication, and session management.</Description>
+        <PackageTags>lithindium;identity;authentication;accounts;credentials;mfa;totp;sessions;aot;nativeaot;vfd;visualfire;visualfiredevelopment</PackageTags>
+
+        <!-- Package Links -->
+        <PackageProjectUrl>https://github.com/visualfiredev/lithindium-identity</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/visualfiredev/lithindium-identity.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+
+        <!-- Package Licensing -->
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+
+        <!-- Packing, Symbols, & Documentation -->
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <IsPackable>true</IsPackable>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <!-- NativeAOT -->
+        <IsAotCompatible>true</IsAotCompatible>
+        <IsTrimmable>true</IsTrimmable>
+        <EnableAotAnalyzer>true</EnableAotAnalyzer>
+        <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+        <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
+        <VerifyReferenceAotCompatibility>true</VerifyReferenceAotCompatibility>
+    </PropertyGroup>
+
+</Project>
