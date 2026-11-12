@@ -46,7 +46,12 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Indicates an event associated with a user external identity.
         /// </summary>
-        ExternalIdentity
+        ExternalIdentity,
+
+        /// <summary>
+        /// Indicates an event associated with a user authentication or verification challenge.
+        /// </summary>
+        Challenge
 
     }
 

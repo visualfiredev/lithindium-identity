@@ -18,6 +18,11 @@ namespace Lithindium.Identity {
     /// <remarks>
     /// Disposing an uncommitted transaction must roll back its changes.
     /// A completed or rolled-back transaction cannot be reused.
+    /// Transactions must provide the isolation guarantees specified by
+    /// <see cref="IUserStore.BeginTransactionAsync"/>.
+    /// An aborted transaction must not commit any changes; callers must retry the
+    /// entire transaction from fresh state after a retryable serialization conflict,
+    /// rather than retrying only the failed operation.
     /// </remarks>
     public interface IUserStoreTransaction : IAsyncDisposable {
 
@@ -32,7 +37,8 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// If a known persistence conflict prevents commit, return the corresponding error
         /// and ensure the transaction is rolled back. An uncertain commit outcome must be
-        /// reported as an exception.
+        /// reported as an exception and must not be treated as a confirmed rollback
+        /// or automatically retried.
         /// </remarks>
         Task<UserStoreError> CommitAsync(CancellationToken cancellationToken = default);
 

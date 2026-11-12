@@ -36,6 +36,12 @@ namespace Lithindium.Identity {
         /// </remarks>
         Task<UserChallenge?> GetChallengeAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Adds an authentication or verification challenge to the specified user.
+        /// </summary>
+        /// <param name="user">The user to associate with the challenge.</param>
+        /// <param name="challenge">The challenge to add.</param>
+        /// <param name="cancellationToken">The token used to cancel the operation.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
@@ -50,6 +56,13 @@ namespace Lithindium.Identity {
         /// </remarks>
         Task<UserStoreError> AddChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Attempts to reserve a verification attempt for the specified challenge.
+        /// </summary>
+        /// <param name="user">The user associated with the challenge.</param>
+        /// <param name="challenge">The challenge for which to reserve an attempt.</param>
+        /// <param name="now">The current UTC date and time.</param>
+        /// <param name="cancellationToken">The token used to cancel the operation.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
@@ -61,10 +74,20 @@ namespace Lithindium.Identity {
         /// The challenge must exist, remain unexpired,
         /// and have remaining verification attempts.
         /// Validation and incrementing the attempt count must be performed atomically.
-        /// Unsuccessful verification attempts must remain counted.
+        /// The attempt count must be read from persisted state, not the supplied snapshot.
+        /// If verification fails, the transaction must commit the reserved attempt
+        /// without applying the challenged operation. A reservation rolled back by
+        /// a transaction failure does not count; a retry requires a new reservation.
         /// </remarks>
         Task<UserStoreError> TryReserveChallengeAttemptAsync(User user, UserChallenge challenge, DateTime now, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Attempts to consume a successfully verified challenge.
+        /// </summary>
+        /// <param name="user">The user associated with the challenge.</param>
+        /// <param name="challenge">The challenge to consume.</param>
+        /// <param name="now">The current UTC date and time.</param>
+        /// <param name="cancellationToken">The token used to cancel the operation.</param>
         /// <returns>
         /// <see cref="UserStoreError.None"/> on success;
         /// <see cref="UserStoreError.UserNotFound"/>,
@@ -77,6 +100,8 @@ namespace Lithindium.Identity {
         /// This operation requires a successful attempt reservation within the same
         /// transaction and must only be invoked after successful verification.
         /// The final permitted attempt may still consume the challenge.
+        /// Consumption and the resulting identity mutation must commit atomically.
+        /// The supplied time must reflect the time of consumption, not reservation.
         /// </remarks>
         Task<UserStoreError> TryConsumeChallengeAsync(User user, UserChallenge challenge, DateTime now, CancellationToken cancellationToken = default);
 
@@ -86,7 +111,11 @@ namespace Lithindium.Identity {
         /// <param name="user">The user associated with the challenge.</param>
         /// <param name="challenge">The challenge to remove.</param>
         /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The outcome of the persistence operation.</returns>
+        /// <returns>
+        /// <see cref="UserStoreError.None"/> on success;
+        /// <see cref="UserStoreError.UserNotFound"/>,
+        /// <see cref="UserStoreError.EntityNotFound"/>, as applicable.
+        /// </returns>
         Task<UserStoreError> RemoveChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -96,7 +125,10 @@ namespace Lithindium.Identity {
         /// <param name="type">The type of challenge to remove,
         /// or <see langword="null"/> to remove all challenges.</param>
         /// <param name="cancellationToken">The token used to cancel the operation.</param>
-        /// <returns>The outcome of the persistence operation.</returns>
+        /// <returns>
+        /// <see cref="UserStoreError.None"/> on success;
+        /// <see cref="UserStoreError.UserNotFound"/>.
+        /// </returns>
         /// <remarks>
         /// The removal of matching challenges must be performed atomically.
         /// If no challenges match, the operation succeeds without removing anything.

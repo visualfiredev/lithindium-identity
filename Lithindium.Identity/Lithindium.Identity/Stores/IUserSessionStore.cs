@@ -16,6 +16,12 @@ namespace Lithindium.Identity {
     /// <summary>
     /// Provides persistence operations for user authentication sessions.
     /// </summary>
+    /// <remarks>
+    /// Session identifiers uniquely identify authentication sessions and must never
+    /// be reused. Revoking or expiring a session permanently removes its validity.
+    /// Authentication state changes and any session revocations required by the
+    /// authentication policy must be performed within the same transaction.
+    /// </remarks>
     public interface IUserSessionStore : IUserStore {
 
         /// <summary>
@@ -33,6 +39,10 @@ namespace Lithindium.Identity {
         /// <param name="uuid">The universally unique identifier of the session.</param>
         /// <param name="cancellationToken">The token used to cancel the operation.</param>
         /// <returns>The session, or <see langword="null"/> if no matching session exists.</returns>
+        /// <remarks>
+        /// Retrieving a session does not establish its validity. Authentication
+        /// requires an existing, unexpired session belonging to the authenticated user.
+        /// </remarks>
         Task<UserSession?> GetSessionAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -46,6 +56,13 @@ namespace Lithindium.Identity {
         /// <see cref="UserStoreError.UserNotFound"/>,
         /// <see cref="UserStoreError.DuplicateIdentifier"/>, as applicable.
         /// </returns>
+        /// <remarks>
+        /// The expiration must be later than the authentication time.
+        /// Session identifiers must never be reused.
+        /// Session issuance must occur within the same transaction as the validation
+        /// of the authentication state authorizing its creation, including any
+        /// required credential verification state changes.
+        /// </remarks>
         Task<UserStoreError> AddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>

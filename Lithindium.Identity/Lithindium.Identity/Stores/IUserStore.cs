@@ -38,6 +38,13 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// All operations on this store instance, including its implemented capabilities,
         /// must participate in the transaction until it is completed or disposed.
+        /// Transactions must provide serializable isolation or equivalent guarantees
+        /// for identity invariants, including concurrent reads, writes, and changes
+        /// to associated entity sets. Security-sensitive decisions must not rely on
+        /// stale replica reads or snapshots obtained outside the transaction.
+        /// A known serialization conflict that aborts a transaction must be reported as
+        /// <see cref="UserStoreError.ConcurrencyConflict"/> by an error-returning operation
+        /// or by <see cref="IUserStoreTransaction.CommitAsync"/>.
         /// Disposing an uncommitted transaction must roll back its changes.
         /// </remarks>
         Task<IUserStoreTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
