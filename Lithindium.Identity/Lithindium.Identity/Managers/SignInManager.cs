@@ -36,8 +36,7 @@ namespace Lithindium.Identity {
         private readonly SignInManagerOptions _options;
 
         // Match the default password hasher's work for unknown or passwordless accounts.
-        private static readonly Lazy<string> DummyHash = new(() =>
-            new PasswordHasher<object>().HashPassword(new object(), Convert.ToHexString(RandomNumberGenerator.GetBytes(32))));
+        private static readonly Lazy<string> DummyHash = new(() => new PasswordHasher<object>().HashPassword(new object(), Convert.ToHexString(RandomNumberGenerator.GetBytes(32))));
 
         /// <summary>
         /// Creates a sign-in manager sharing the user and challenge managers' store.
@@ -52,10 +51,7 @@ namespace Lithindium.Identity {
             _store = users.Store;
             _protector = challenges.Protection.CreateProtector("Lithindium.Identity.Session.v1");
             _options = options ?? new SignInManagerOptions();
-            if (_options.SessionLifetime <= TimeSpan.Zero || _options.SessionLifetime > TimeSpan.FromDays(365) ||
-                _options.LockoutDuration <= TimeSpan.Zero || _options.LockoutDuration > TimeSpan.FromDays(1) ||
-                _options.MaxFailures is < 1 or > 100)
-                throw new ArgumentOutOfRangeException(nameof(options));
+            if (_options.SessionLifetime <= TimeSpan.Zero || _options.SessionLifetime > TimeSpan.FromDays(365) || _options.LockoutDuration <= TimeSpan.Zero || _options.LockoutDuration > TimeSpan.FromDays(1) || _options.MaxFailures is < 1 or > 100) throw new ArgumentOutOfRangeException(nameof(options));
         }
 
         /// <summary>
@@ -64,27 +60,17 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Success may require MFA; check the returned ticket's authentication state.
         /// </remarks>
-        public virtual Task<OperationResult<SignInTicket>> PasswordSignInAsync(string username, string password, SessionMetadata? metadata = null, CancellationToken cancellationToken = default) =>
-            PasswordCoreAsync(() => string.IsNullOrEmpty(username) || username.Length > 21
-                ? Task.FromResult<User?>(null) : _store.FindByUsernameAsync(username, cancellationToken), password, metadata, cancellationToken);
+        public virtual Task<OperationResult<SignInTicket>> PasswordSignInAsync(string username, string password, SessionMetadata? metadata = null, CancellationToken cancellationToken = default) => PasswordCoreAsync(() => string.IsNullOrEmpty(username) || username.Length > 21 ? Task.FromResult<User?>(null) : _store.FindByUsernameAsync(username, cancellationToken), password, metadata, cancellationToken);
 
         /// <summary>
         /// Authenticates a verified email and password.
         /// </summary>
-        public virtual Task<OperationResult<SignInTicket>> EmailSignInAsync(string address, string password, SessionMetadata? metadata = null, CancellationToken cancellationToken = default) =>
-            _store is IUserEmailStore emails
-                ? PasswordCoreAsync(() => UserManager.ValidEmail(new UserEmail(address, false))
-                    ? emails.FindByEmailAsync(address, cancellationToken) : Task.FromResult<User?>(null), password, metadata, cancellationToken)
-                : Task.FromResult(Rejected(StatusCode.NotSupported, ContextCode.Email, OperationCode.SignInPassword));
+        public virtual Task<OperationResult<SignInTicket>> EmailSignInAsync(string address, string password, SessionMetadata? metadata = null, CancellationToken cancellationToken = default) => _store is IUserEmailStore emails ? PasswordCoreAsync(() => UserManager.ValidEmail(new UserEmail(address, false)) ? emails.FindByEmailAsync(address, cancellationToken) : Task.FromResult<User?>(null), password, metadata, cancellationToken) : Task.FromResult(Rejected(StatusCode.NotSupported, ContextCode.Email, OperationCode.SignInPassword));
 
         /// <summary>
         /// Authenticates a verified phone and password.
         /// </summary>
-        public virtual Task<OperationResult<SignInTicket>> PhoneSignInAsync(string number, string? extension, string password, SessionMetadata? metadata = null, CancellationToken cancellationToken = default) =>
-            _store is IUserPhoneStore phones
-                ? PasswordCoreAsync(() => UserManager.ValidPhone(new UserPhone(number, extension, false))
-                    ? phones.FindByPhoneAsync(number, extension, cancellationToken) : Task.FromResult<User?>(null), password, metadata, cancellationToken)
-                : Task.FromResult(Rejected(StatusCode.NotSupported, ContextCode.Phone, OperationCode.SignInPassword));
+        public virtual Task<OperationResult<SignInTicket>> PhoneSignInAsync(string number, string? extension, string password, SessionMetadata? metadata = null, CancellationToken cancellationToken = default) => _store is IUserPhoneStore phones ? PasswordCoreAsync(() => UserManager.ValidPhone(new UserPhone(number, extension, false)) ? phones.FindByPhoneAsync(number, extension, cancellationToken) : Task.FromResult<User?>(null), password, metadata, cancellationToken) : Task.FromResult(Rejected(StatusCode.NotSupported, ContextCode.Phone, OperationCode.SignInPassword));
 
         /// <summary>
         /// Authenticates an already validated external provider assertion.
@@ -96,8 +82,7 @@ namespace Lithindium.Identity {
         public virtual async Task<OperationResult<SignInTicket>> ExternalSignInAsync(string issuer, string subject, SessionMetadata? metadata = null, CancellationToken cancellationToken = default) {
             const OperationCode op = OperationCode.SignInExternal;
             if (_store is not IUserExternalIdentityStore external) return Rejected(StatusCode.NotSupported, ContextCode.ExternalIdentity, op);
-            if (string.IsNullOrWhiteSpace(issuer) || issuer.Length > 512 || string.IsNullOrWhiteSpace(subject) || subject.Length > 255)
-                return Rejected(StatusCode.InvalidCredential, ContextCode.ExternalIdentity, op);
+            if (string.IsNullOrWhiteSpace(issuer) || issuer.Length > 512 || string.IsNullOrWhiteSpace(subject) || subject.Length > 255) return Rejected(StatusCode.InvalidCredential, ContextCode.ExternalIdentity, op);
             OperationResult validation = ValidateConfiguration(metadata, op);
             if (validation.IsFailure) return new OperationResult<SignInTicket>(validation);
 
@@ -113,14 +98,12 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Completes MFA using a TOTP authenticator.
         /// </summary>
-        public virtual Task<OperationResult<SignInTicket>> CompleteTotpAsync(Guid userUuid, Guid challengeUuid, string continuationProof, Guid totpUuid, string code, SessionMetadata? metadata = null, CancellationToken cancellationToken = default) =>
-            CompleteMultiFactorCoreAsync(userUuid, challengeUuid, continuationProof, totpUuid, code, metadata, cancellationToken);
+        public virtual Task<OperationResult<SignInTicket>> CompleteTotpAsync(Guid userUuid, Guid challengeUuid, string continuationProof, Guid totpUuid, string code, SessionMetadata? metadata = null, CancellationToken cancellationToken = default) => CompleteMultiFactorCoreAsync(userUuid, challengeUuid, continuationProof, totpUuid, code, metadata, cancellationToken);
 
         /// <summary>
         /// Completes MFA using a single-use recovery code.
         /// </summary>
-        public virtual Task<OperationResult<SignInTicket>> CompleteRecoveryCodeAsync(Guid userUuid, Guid challengeUuid, string continuationProof, string code, SessionMetadata? metadata = null, CancellationToken cancellationToken = default) =>
-            CompleteMultiFactorCoreAsync(userUuid, challengeUuid, continuationProof, null, code, metadata, cancellationToken);
+        public virtual Task<OperationResult<SignInTicket>> CompleteRecoveryCodeAsync(Guid userUuid, Guid challengeUuid, string continuationProof, string code, SessionMetadata? metadata = null, CancellationToken cancellationToken = default) => CompleteMultiFactorCoreAsync(userUuid, challengeUuid, continuationProof, null, code, metadata, cancellationToken);
 
         /// <summary>
         /// Validates a protected session token against current persisted state.
@@ -132,19 +115,16 @@ namespace Lithindium.Identity {
         public virtual async Task<OperationResult<AuthenticatedSession>> ValidateSessionAsync(string token, CancellationToken cancellationToken = default) {
             const OperationCode op = OperationCode.SignInValidateSession;
             if (_store is not IUserSessionStore sessions) return new OperationResult<AuthenticatedSession>(Failure(StatusCode.NotSupported, ContextCode.Session, op));
-            if (!TryReadToken(token, out Guid userUuid, out Guid sessionUuid))
-                return new OperationResult<AuthenticatedSession>(Failure(StatusCode.InvalidCredential, ContextCode.Session, op));
+            if (!TryReadToken(token, out Guid userUuid, out Guid sessionUuid)) return new OperationResult<AuthenticatedSession>(Failure(StatusCode.InvalidCredential, ContextCode.Session, op));
 
             await using IUserStoreTransaction transaction = await _store.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
             User? found = await _store.FindByUuidAsync(userUuid, cancellationToken).ConfigureAwait(false);
-            if (found is not { } user || user.Status != UserStatus.Active)
-                return new OperationResult<AuthenticatedSession>(Failure(StatusCode.InvalidCredential, ContextCode.Session, op));
+            if (found is not { } user || user.Status != UserStatus.Active) return new OperationResult<AuthenticatedSession>(Failure(StatusCode.InvalidCredential, ContextCode.Session, op));
             UserSession? persisted = await sessions.GetSessionAsync(user, sessionUuid, cancellationToken).ConfigureAwait(false);
             if (persisted is not { } session) return new OperationResult<AuthenticatedSession>(Failure(StatusCode.InvalidCredential, ContextCode.Session, op));
             DateTime now = Now;
             if (session.ExpiresAt <= now) return new OperationResult<AuthenticatedSession>(Failure(StatusCode.Expired, ContextCode.Session, op));
-            if (session.AuthenticatedAt > now || session.ExpiresAt <= session.AuthenticatedAt)
-                return new OperationResult<AuthenticatedSession>(Failure(StatusCode.InvalidState, ContextCode.Session, op));
+            if (session.AuthenticatedAt > now || session.ExpiresAt <= session.AuthenticatedAt) return new OperationResult<AuthenticatedSession>(Failure(StatusCode.InvalidState, ContextCode.Session, op));
             OperationResult commit = await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             if (!Succeeded(commit)) return new OperationResult<AuthenticatedSession>(commit);
             if (session.ExpiresAt <= Now) return new OperationResult<AuthenticatedSession>(Failure(StatusCode.Expired, ContextCode.Session, op));
@@ -154,10 +134,7 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Revokes the session identified by a protected token.
         /// </summary>
-        public virtual Task<OperationResult> SignOutAsync(string token, CancellationToken cancellationToken = default) =>
-            TryReadToken(token, out Guid userUuid, out Guid sessionUuid)
-                ? RevokeCoreAsync(userUuid, sessionUuid, null, OperationCode.SignInSignOut, true, cancellationToken)
-                : Task.FromResult(Failure(StatusCode.InvalidCredential, ContextCode.Session, OperationCode.SignInSignOut));
+        public virtual Task<OperationResult> SignOutAsync(string token, CancellationToken cancellationToken = default) => TryReadToken(token, out Guid userUuid, out Guid sessionUuid) ? RevokeCoreAsync(userUuid, sessionUuid, null, OperationCode.SignInSignOut, true, cancellationToken) : Task.FromResult(Failure(StatusCode.InvalidCredential, ContextCode.Session, OperationCode.SignInSignOut));
 
         /// <summary>
         /// Gets a user's persisted sessions, including expired sessions.
@@ -168,7 +145,7 @@ namespace Lithindium.Identity {
             await using IUserStoreTransaction transaction = await _store.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
             User? found = await _store.FindByUuidAsync(userUuid, cancellationToken).ConfigureAwait(false);
             if (found is not { } user) return new OperationResult<ImmutableArray<UserSession>>(Failure(StatusCode.NotFound, ContextCode.User, op));
-            var result = ImmutableArray.CreateBuilder<UserSession>();
+            ImmutableArray<UserSession>.Builder result = ImmutableArray.CreateBuilder<UserSession>();
             await foreach (UserSession session in sessions.GetSessionsAsync(user, cancellationToken).WithCancellation(cancellationToken).ConfigureAwait(false)) result.Add(session);
             OperationResult commit = await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             return Succeeded(commit) ? new OperationResult<ImmutableArray<UserSession>>(Success(op), result.ToImmutable()) : new OperationResult<ImmutableArray<UserSession>>(commit);
@@ -177,8 +154,7 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Revokes a specific session after caller authorization.
         /// </summary>
-        public virtual Task<OperationResult> RevokeSessionAsync(Guid userUuid, Guid sessionUuid, Guid? actor = null, CancellationToken cancellationToken = default) =>
-            RevokeCoreAsync(userUuid, sessionUuid, actor, OperationCode.SignInRevokeSession, false, cancellationToken);
+        public virtual Task<OperationResult> RevokeSessionAsync(Guid userUuid, Guid sessionUuid, Guid? actor = null, CancellationToken cancellationToken = default) => RevokeCoreAsync(userUuid, sessionUuid, actor, OperationCode.SignInRevokeSession, false, cancellationToken);
 
         /// <summary>
         /// Revokes sessions and pending MFA; optionally preserves one authorized session.
@@ -279,12 +255,11 @@ namespace Lithindium.Identity {
             if (validation.IsFailure) return new OperationResult<SignInTicket>(validation);
 
             SignInTicket? ticket = null;
-            OperationResult result = await _challenges.CompleteMultiFactorAsync(userUuid, challengeUuid, continuationProof, totpUuid, code,
-                async (user, challenge, firstFactor, ct) => {
-                    OperationResult<SignInTicket> issued = await IssueSessionAsync(user, ImmutableArray.Create(firstFactor, totpUuid.HasValue ? "otp" : "recovery", "mfa"), metadata, op, ct).ConfigureAwait(false);
-                    if (issued.HasValue) ticket = issued.Value;
-                    return issued.Result;
-                }, cancellationToken, RecordFailureAsync).ConfigureAwait(false);
+            OperationResult result = await _challenges.CompleteMultiFactorAsync(userUuid, challengeUuid, continuationProof, totpUuid, code, async (user, challenge, firstFactor, ct) => {
+                OperationResult<SignInTicket> issued = await IssueSessionAsync(user, ImmutableArray.Create(firstFactor, totpUuid.HasValue ? "otp" : "recovery", "mfa"), metadata, op, ct).ConfigureAwait(false);
+                if (issued.HasValue) ticket = issued.Value;
+                return issued.Result;
+            }, cancellationToken, RecordFailureAsync).ConfigureAwait(false);
             if (!Succeeded(result)) return new OperationResult<SignInTicket>(result);
             return new OperationResult<SignInTicket>(Success(op), ticket ?? throw new InvalidOperationException("MFA completed without a session."));
         }
@@ -295,7 +270,7 @@ namespace Lithindium.Identity {
             if (!Succeeded(result)) return new OperationResult<SignInTicket>(result);
             DateTime now = Now;
             string? ip = metadata?.IpAddress is { } address ? IPAddress.Parse(address).ToString() : null;
-            var session = new UserSession(Guid.NewGuid(), metadata?.DeviceName, ip, metadata?.UserAgent, amr, null, now, now + _options.SessionLifetime);
+            UserSession session = new UserSession(Guid.NewGuid(), metadata?.DeviceName, ip, metadata?.UserAgent, amr, null, now, now + _options.SessionLifetime);
             string token = CreateToken(user.Uuid, session.Uuid);
             result = await sessions.AddSessionAsync(user, session, cancellationToken).ConfigureAwait(false);
             if (!MutationSucceeded(result)) return new OperationResult<SignInTicket>(result);
@@ -308,8 +283,7 @@ namespace Lithindium.Identity {
             if (user.Status != UserStatus.Active) return Failure(StatusCode.AccessDenied, ContextCode.User, op, DetailCode.Suspended);
             if (_store is IUserLockoutStore lockouts) {
                 UserLockout? state = await lockouts.GetLockoutAsync(user, cancellationToken).ConfigureAwait(false);
-                if (state is { Enabled: true, ReleaseAt: { } release } && release > Now)
-                    return Failure(StatusCode.AccessDenied, ContextCode.User, op, DetailCode.LockedOut);
+                if (state is { Enabled: true, ReleaseAt: { } release } && release > Now) return Failure(StatusCode.AccessDenied, ContextCode.User, op, DetailCode.LockedOut);
             }
             return Success(op);
         }
@@ -355,12 +329,8 @@ namespace Lithindium.Identity {
         private OperationResult ValidateConfiguration(SessionMetadata? metadata, OperationCode op) {
             if (_store is not IUserSessionStore) return Failure(StatusCode.NotSupported, ContextCode.Session, op);
             if (_options.RequireLockoutStore && _store is not IUserLockoutStore) return Failure(StatusCode.NotSupported, ContextCode.Lockout, op);
-            if (_options.RequireMultiFactor && (_store is not IUserTotpStore || _store is not IUserChallengeStore))
-                return Failure(StatusCode.NotSupported, ContextCode.Totp, op);
-            if (metadata is not null && (!UserManager.ValidOptionalName(metadata.DeviceName, 64) ||
-                metadata.UserAgent is { Length: > 2048 } ||
-                (metadata.IpAddress is { } ip && (ip.Length > 64 || !IPAddress.TryParse(ip, out IPAddress? parsed) || (parsed.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6 && parsed.ScopeId != 0)))))
-                return Failure(StatusCode.MalformedInput, ContextCode.Session, op);
+            if (_options.RequireMultiFactor && (_store is not IUserTotpStore || _store is not IUserChallengeStore)) return Failure(StatusCode.NotSupported, ContextCode.Totp, op);
+            if (metadata is not null && (!UserManager.ValidOptionalName(metadata.DeviceName, 64) || metadata.UserAgent is { Length: > 2048 } || (metadata.IpAddress is { } ip && (ip.Length > 64 || !IPAddress.TryParse(ip, out IPAddress? parsed) || (parsed.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6 && parsed.ScopeId != 0))))) return Failure(StatusCode.MalformedInput, ContextCode.Session, op);
             return Success(op);
         }
 
@@ -387,8 +357,7 @@ namespace Lithindium.Identity {
             }
         }
 
-        private static void VerifyDummy(string password) =>
-            _ = new PasswordHasher<object>().VerifyHashedPassword(new object(), DummyHash.Value, password);
+        private static void VerifyDummy(string password) => _ = new PasswordHasher<object>().VerifyHashedPassword(new object(), DummyHash.Value, password);
 
         private DateTime Now => _users.Clock.GetUtcNow().UtcDateTime;
 
@@ -401,11 +370,9 @@ namespace Lithindium.Identity {
 
         private static OperationResult Success(OperationCode op) => new(StatusCode.Success, operation: op);
 
-        private static OperationResult Failure(StatusCode status, ContextCode context, OperationCode op, DetailCode detail = DetailCode.None) =>
-            new(status, context, op, detail);
+        private static OperationResult Failure(StatusCode status, ContextCode context, OperationCode op, DetailCode detail = DetailCode.None) => new(status, context, op, detail);
 
-        private static OperationResult<SignInTicket> Rejected(StatusCode status, ContextCode context, OperationCode op, DetailCode detail = DetailCode.None) =>
-            new(Failure(status, context, op, detail));
+        private static OperationResult<SignInTicket> Rejected(StatusCode status, ContextCode context, OperationCode op, DetailCode detail = DetailCode.None) => new(Failure(status, context, op, detail));
 
     }
 

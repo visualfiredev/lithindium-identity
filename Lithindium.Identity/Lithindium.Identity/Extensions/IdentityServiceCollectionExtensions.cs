@@ -24,8 +24,7 @@ namespace Lithindium.Identity {
         /// Registers scoped managers and default policies. Register a scoped user store
         /// and a shared data protection provider separately.
         /// </summary>
-        public static IServiceCollection AddLithindiumIdentity(this IServiceCollection services,
-            UserManagerOptions? users = null, ChallengeManagerOptions? challenges = null, SignInManagerOptions? signIn = null) {
+        public static IServiceCollection AddLithindiumIdentity(this IServiceCollection services, UserManagerOptions? users = null, ChallengeManagerOptions? challenges = null, SignInManagerOptions? signIn = null) {
             ArgumentNullException.ThrowIfNull(services);
 
             if (users is null) services.TryAddSingleton(new UserManagerOptions());
@@ -45,9 +44,7 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Registers identity with a single scoped store implementation.
         /// </summary>
-        public static IServiceCollection AddLithindiumIdentity<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TStore>(this IServiceCollection services,
-            UserManagerOptions? users = null, ChallengeManagerOptions? challenges = null, SignInManagerOptions? signIn = null)
-            where TStore : class, IUserStore {
+        public static IServiceCollection AddLithindiumIdentity<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TStore>(this IServiceCollection services, UserManagerOptions? users = null, ChallengeManagerOptions? challenges = null, SignInManagerOptions? signIn = null) where TStore : class, IUserStore {
             services.AddLithindiumIdentity(users, challenges, signIn);
             services.TryAddScoped<TStore>();
             services.TryAddScoped<IUserStore>(provider => provider.GetRequiredService<TStore>());

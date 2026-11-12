@@ -94,16 +94,14 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Creates a result from its four bytes.
         /// </summary>
-        public OperationResult(StatusCode status, ContextCode context = ContextCode.None, OperationCode operation = OperationCode.Unknown, byte detail = 0)
-            : this(((uint)status << 24) | ((uint)context << 16) | ((uint)operation << 8) | detail) {
+        public OperationResult(StatusCode status, ContextCode context = ContextCode.None, OperationCode operation = OperationCode.Unknown, byte detail = 0) : this(((uint)status << 24) | ((uint)context << 16) | ((uint)operation << 8) | detail) {
             // ...
         }
 
         /// <summary>
         /// Creates a result with a named detail code.
         /// </summary>
-        public OperationResult(StatusCode status, ContextCode context, OperationCode operation, DetailCode detail)
-            : this(status, context, operation, (byte)detail) {
+        public OperationResult(StatusCode status, ContextCode context, OperationCode operation, DetailCode detail) : this(status, context, operation, (byte)detail) {
             // ...
         }
 
