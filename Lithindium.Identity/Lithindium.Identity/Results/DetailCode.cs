@@ -40,7 +40,27 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Account locked out.
         /// </summary>
-        LockedOut = 0x13
+        LockedOut = 0x13,
+
+        /// <summary>
+        /// Value exceeds the maximum length.
+        /// </summary>
+        TooLong = 0x14,
+
+        /// <summary>
+        /// Cannot remove the last sign-in credential.
+        /// </summary>
+        LastCredential = 0x15,
+
+        /// <summary>
+        /// Authentication generation cannot advance safely.
+        /// </summary>
+        RotationExhausted = 0x16,
+
+        /// <summary>
+        /// Value has an invalid format.
+        /// </summary>
+        InvalidFormat = 0x17
 
     }
 

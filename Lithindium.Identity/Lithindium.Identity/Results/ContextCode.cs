@@ -89,7 +89,12 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Audit record.
         /// </summary>
-        Audit = 0x0F
+        Audit = 0x0F,
+
+        /// <summary>
+        /// User display name.
+        /// </summary>
+        DisplayName = 0x10
 
     }
 

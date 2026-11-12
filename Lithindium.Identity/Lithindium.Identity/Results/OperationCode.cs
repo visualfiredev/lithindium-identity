@@ -164,7 +164,162 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Store operation: RemoveChallengesAsync.
         /// </summary>
-        StoreRemoveChallenges = 0x54
+        StoreRemoveChallenges = 0x54,
+
+        /// <summary>
+        /// User manager: CreateUser.
+        /// </summary>
+        UserCreateUser = 0x60,
+
+        /// <summary>
+        /// User manager: CreateExternalUser.
+        /// </summary>
+        UserCreateExternalUser = 0x61,
+
+        /// <summary>
+        /// User manager: UpdateProfile.
+        /// </summary>
+        UserUpdateProfile = 0x62,
+
+        /// <summary>
+        /// User manager: DeleteUser.
+        /// </summary>
+        UserDeleteUser = 0x63,
+
+        /// <summary>
+        /// User manager: ChangePassword.
+        /// </summary>
+        UserChangePassword = 0x64,
+
+        /// <summary>
+        /// User manager: SetStatus.
+        /// </summary>
+        UserSetStatus = 0x65,
+
+        /// <summary>
+        /// User manager: InvalidateAuthentication.
+        /// </summary>
+        UserInvalidateAuthentication = 0x66,
+
+        /// <summary>
+        /// User manager: GetEmails.
+        /// </summary>
+        UserGetEmails = 0x67,
+
+        /// <summary>
+        /// User manager: GetPhones.
+        /// </summary>
+        UserGetPhones = 0x68,
+
+        /// <summary>
+        /// User manager: GetTotps.
+        /// </summary>
+        UserGetTotps = 0x69,
+
+        /// <summary>
+        /// User manager: GetExternalIdentities.
+        /// </summary>
+        UserGetExternalIdentities = 0x6A,
+
+        /// <summary>
+        /// User manager: CountRecoveryCodes.
+        /// </summary>
+        UserCountRecoveryCodes = 0x6B,
+
+        /// <summary>
+        /// User manager: AddVerifiedEmail.
+        /// </summary>
+        UserAddVerifiedEmail = 0x6C,
+
+        /// <summary>
+        /// User manager: RemoveEmail.
+        /// </summary>
+        UserRemoveEmail = 0x6D,
+
+        /// <summary>
+        /// User manager: SetPrimaryEmail.
+        /// </summary>
+        UserSetPrimaryEmail = 0x6E,
+
+        /// <summary>
+        /// User manager: AddVerifiedPhone.
+        /// </summary>
+        UserAddVerifiedPhone = 0x6F,
+
+        /// <summary>
+        /// User manager: RemovePhone.
+        /// </summary>
+        UserRemovePhone = 0x70,
+
+        /// <summary>
+        /// User manager: SetPrimaryPhone.
+        /// </summary>
+        UserSetPrimaryPhone = 0x71,
+
+        /// <summary>
+        /// User manager: AddVerifiedTotp.
+        /// </summary>
+        UserAddVerifiedTotp = 0x72,
+
+        /// <summary>
+        /// User manager: RenameTotp.
+        /// </summary>
+        UserRenameTotp = 0x73,
+
+        /// <summary>
+        /// User manager: RemoveTotp.
+        /// </summary>
+        UserRemoveTotp = 0x74,
+
+        /// <summary>
+        /// User manager: LinkExternalIdentity.
+        /// </summary>
+        UserLinkExternalIdentity = 0x75,
+
+        /// <summary>
+        /// User manager: UpdateExternalIdentity.
+        /// </summary>
+        UserUpdateExternalIdentity = 0x76,
+
+        /// <summary>
+        /// User manager: RemoveExternalIdentity.
+        /// </summary>
+        UserRemoveExternalIdentity = 0x77,
+
+        /// <summary>
+        /// User manager: GenerateRecoveryCodes.
+        /// </summary>
+        UserGenerateRecoveryCodes = 0x78,
+
+        /// <summary>
+        /// User manager: ClearRecoveryCodes.
+        /// </summary>
+        UserClearRecoveryCodes = 0x79,
+
+        /// <summary>
+        /// User manager: SetLockoutEnabled.
+        /// </summary>
+        UserSetLockoutEnabled = 0x7A,
+
+        /// <summary>
+        /// User manager: ResetLockout.
+        /// </summary>
+        UserResetLockout = 0x7B,
+
+        /// <summary>
+        /// Sets the first password.
+        /// </summary>
+        UserSetPassword = 0x7C,
+
+        /// <summary>
+        /// Removes a password.
+        /// </summary>
+        UserRemovePassword = 0x7D,
+
+        /// <summary>
+        /// Gets lockout state.
+        /// </summary>
+        UserGetLockout = 0x7E
 
     }
 

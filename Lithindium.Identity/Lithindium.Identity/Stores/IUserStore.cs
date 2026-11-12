@@ -93,6 +93,9 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Deletes a user.
         /// </summary>
+        /// <remarks>
+        /// Atomically remove all dependent identity state; preserve historical audits.
+        /// </remarks>
         /// <param name="uuid">User UUID.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
