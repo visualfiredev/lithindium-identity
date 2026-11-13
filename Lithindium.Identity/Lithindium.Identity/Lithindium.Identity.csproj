@@ -12,7 +12,7 @@
         <Authors>Visual Fire Development LLC</Authors>
         <Company>Visual Fire Development LLC</Company>
         <Copyright>Copyright © 2026 Visual Fire Development LLC</Copyright>
-        <Description>Extensible identity and authentication infrastructure for .NET applications, providing user management, credential management, multi-factor authentication, and session management.</Description>
+        <Description>Identity records and persistence contracts for .NET applications.</Description>
         <PackageTags>lithindium;identity;authentication;accounts;credentials;mfa;totp;sessions;aot;nativeaot;vfd;visualfire;visualfiredevelopment</PackageTags>
 
         <!-- Package Links -->
@@ -42,10 +42,9 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Lithindium.Identity.Tests" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.15" />
-        <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.15" />
-        <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="10.0.15" />
-        <PackageReference Include="Otp.NET" Version="1.4.1" />
+        <!-- Store contracts depend on the reference-only result system. -->
+        <Compile Remove="Stores/**/*.cs" />
+        <None Include="Stores/**/*.cs" />
     </ItemGroup>
 
 </Project>
