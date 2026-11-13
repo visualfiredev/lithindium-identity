@@ -22,9 +22,9 @@ namespace Lithindium.Identity {
         public required Guid Uuid { get; init; }
 
         /// <summary>
-        /// Gets the cryptographic secret verifier, or <see langword="null"/> if not required.
+        /// Gets the cryptographic verifier for the challenge proof.
         /// </summary>
-        public required string? Secret { get; init; }
+        public required string Secret { get; init; }
 
         /// <summary>
         /// Gets the reserved attempt count.
@@ -45,7 +45,7 @@ namespace Lithindium.Identity {
         /// Creates a <see cref="UserChallenge"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
-        public UserChallenge(Guid uuid, string? secret, uint attempts, DateTime createdAt, DateTime expiresAt) {
+        public UserChallenge(Guid uuid, string secret, uint attempts, DateTime createdAt, DateTime expiresAt) {
             Uuid = uuid;
             Secret = secret;
             Attempts = attempts;
