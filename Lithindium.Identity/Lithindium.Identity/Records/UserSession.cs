@@ -48,9 +48,9 @@ namespace Lithindium.Identity {
         public required string? Acr { get; init; }
 
         /// <summary>
-        /// Gets the UTC authentication time.
+        /// Gets the UTC session creation time.
         /// </summary>
-        public required DateTime AuthenticatedAt { get; init; }
+        public required DateTime CreatedAt { get; init; }
 
         /// <summary>
         /// Gets the UTC expiration time.
@@ -61,14 +61,14 @@ namespace Lithindium.Identity {
         /// Creates a <see cref="UserSession"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
-        public UserSession(Guid uuid, string? deviceName, string? ipAddress, string? userAgent, ImmutableArray<string> amr, string? acr, DateTime authenticatedAt, DateTime expiresAt) {
+        public UserSession(Guid uuid, string? deviceName, string? ipAddress, string? userAgent, ImmutableArray<string> amr, string? acr, DateTime createdAt, DateTime expiresAt) {
             Uuid = uuid;
             DeviceName = deviceName;
             IpAddress = ipAddress;
             UserAgent = userAgent;
             Amr = amr;
             Acr = acr;
-            AuthenticatedAt = authenticatedAt;
+            CreatedAt = createdAt;
             ExpiresAt = expiresAt;
         }
 
