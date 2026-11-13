@@ -6,14 +6,13 @@
 // -------------------------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable once CheckNamespace
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Immutable pending authentication or verification challenge.
+    /// Immutable challenge for a pending user operation.
     /// </summary>
     public readonly record struct UserChallenge {
 
@@ -23,29 +22,14 @@ namespace Lithindium.Identity {
         public required Guid Uuid { get; init; }
 
         /// <summary>
-        /// Gets the challenge purpose.
-        /// </summary>
-        public required UserChallengeType Type { get; init; }
-
-        /// <summary>
         /// Gets the cryptographic secret verifier, or <see langword="null"/> if not required.
         /// </summary>
-        public required ImmutableArray<byte>? SecretHash { get; init; }
-
-        /// <summary>
-        /// Gets the cryptographically protected payload, or <see langword="null"/> if none.
-        /// </summary>
-        public required ImmutableArray<byte>? Payload { get; init; }
+        public required string? Secret { get; init; }
 
         /// <summary>
         /// Gets the reserved attempt count.
         /// </summary>
         public required uint Attempts { get; init; }
-
-        /// <summary>
-        /// Gets the attempt limit.
-        /// </summary>
-        public required uint MaxAttempts { get; init; }
 
         /// <summary>
         /// Gets the UTC creation time.
@@ -61,13 +45,10 @@ namespace Lithindium.Identity {
         /// Creates a <see cref="UserChallenge"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
-        public UserChallenge(Guid uuid, UserChallengeType type, ImmutableArray<byte>? secretHash, ImmutableArray<byte>? payload, uint attempts, uint maxAttempts, DateTime createdAt, DateTime expiresAt) {
+        public UserChallenge(Guid uuid, string? secret, uint attempts, DateTime createdAt, DateTime expiresAt) {
             Uuid = uuid;
-            Type = type;
-            SecretHash = secretHash;
-            Payload = payload;
+            Secret = secret;
             Attempts = attempts;
-            MaxAttempts = maxAttempts;
             CreatedAt = createdAt;
             ExpiresAt = expiresAt;
         }
