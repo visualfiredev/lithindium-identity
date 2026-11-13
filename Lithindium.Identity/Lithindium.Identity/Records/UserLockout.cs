@@ -32,19 +32,19 @@ namespace Lithindium.Identity {
         public required DateTime? LockedAt { get; init; }
 
         /// <summary>
-        /// Gets the UTC lockout expiration, or <see langword="null"/> if unset.
+        /// Gets the scheduled UTC unlock time, or <see langword="null"/> if unset.
         /// </summary>
-        public required DateTime? ReleaseAt { get; init; }
+        public required DateTime? UnlockedAt { get; init; }
 
         /// <summary>
         /// Creates a <see cref="UserLockout"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
-        public UserLockout(bool enabled, uint failures, DateTime? lockedAt, DateTime? releaseAt) {
+        public UserLockout(bool enabled, uint failures, DateTime? lockedAt, DateTime? unlockedAt) {
             Enabled = enabled;
             Failures = failures;
             LockedAt = lockedAt;
-            ReleaseAt = releaseAt;
+            UnlockedAt = unlockedAt;
         }
 
         /// <summary>
