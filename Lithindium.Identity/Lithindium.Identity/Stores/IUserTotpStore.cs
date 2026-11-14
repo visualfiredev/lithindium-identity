@@ -24,24 +24,36 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Gets a user's pending and verified authenticators.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The user's pending and verified authenticators.</returns>
         IAsyncEnumerable<UserTotp> GetTotpsAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets an authenticator by UUID.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="uuid">Authenticator UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The authenticator, or <see langword="null"/> if not found.</returns>
         Task<UserTotp?> GetTotpAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Adds an authenticator.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="totp">New authenticator.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the authenticator was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Conditionally updates an authenticator.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="expected">Expected authenticator.</param>
+        /// <param name="totp">Updated authenticator.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Compares the entire expected state atomically, including the secret by content.
         /// The UUID, secret, algorithm, digits and period are immutable. LastStep never decreases or resets after acceptance.
@@ -53,6 +65,9 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Removes an authenticator.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="totp">Authenticator.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Removes the associated pending challenge in the same transaction, if present.
         /// </remarks>

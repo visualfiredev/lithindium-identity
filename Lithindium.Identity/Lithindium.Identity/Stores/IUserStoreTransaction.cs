@@ -23,6 +23,7 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Commits the transaction.
         /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Throws an exception if the commit outcome is uncertain or an unexpected failure occurs.
         /// </remarks>
@@ -32,6 +33,7 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Rolls back the transaction.
         /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
         Task RollbackAsync(CancellationToken cancellationToken = default);
 
     }

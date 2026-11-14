@@ -21,18 +21,26 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Gets a user's external identities.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The user's external identities.</returns>
         IAsyncEnumerable<UserExternalIdentity> GetExternalIdentitiesAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets an external identity by UUID.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="uuid">External identity UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The external identity, or <see langword="null"/> if not found.</returns>
         Task<UserExternalIdentity?> GetExternalIdentityAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Finds a user by external issuer and subject.
         /// </summary>
+        /// <param name="issuer">External issuer.</param>
+        /// <param name="subject">Issuer-assigned subject.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Compares issuer and subject exactly and case-sensitively.
         /// </remarks>
@@ -42,6 +50,9 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Adds an external identity.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="identity">New external identity.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Issuer and subject pairs are unique across the store.
         /// </remarks>
@@ -51,6 +62,10 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Conditionally updates external identity metadata.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="expected">Expected external identity.</param>
+        /// <param name="identity">Updated external identity.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Compares the entire expected state atomically. The UUID, issuer and subject are immutable.
         /// </remarks>
@@ -60,6 +75,9 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Removes an external identity.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="identity">External identity.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the external identity was removed, otherwise <see langword="false"/>.</returns>
         Task<bool> TryRemoveExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 

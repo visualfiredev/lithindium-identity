@@ -21,24 +21,32 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Gets audits by affected user UUID.
         /// </summary>
+        /// <param name="user">Affected user UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The affected user's audit records.</returns>
         IAsyncEnumerable<UserAudit> GetAuditsAsync(Guid user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets audits by acting user UUID.
         /// </summary>
+        /// <param name="actor">Acting user UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Audit records for the acting user.</returns>
         IAsyncEnumerable<UserAudit> GetAuditsByActorAsync(Guid actor, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets audits by affected entity UUID.
         /// </summary>
+        /// <param name="entity">Affected entity UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Audit records for the affected entity.</returns>
         IAsyncEnumerable<UserAudit> GetAuditsByEntityAsync(Guid entity, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Adds an audit record.
         /// </summary>
+        /// <param name="audit">Audit record.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Preserves audits after associated users or entities are deleted.
         /// </remarks>

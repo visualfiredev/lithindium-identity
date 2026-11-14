@@ -25,12 +25,17 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Gets a user's pending and authenticated sessions.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The user's pending and authenticated sessions.</returns>
         IAsyncEnumerable<UserSession> GetSessionsAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets a session by UUID.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="uuid">Session UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Only an existing, unexpired session with no challenge can authenticate its owner.
         /// </remarks>
@@ -40,6 +45,9 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Adds a pending or authenticated session.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="session">New session.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Requires expiration after creation. The session is issued within the transaction validating the authorizing authentication state.
         /// </remarks>
@@ -49,6 +57,10 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Conditionally updates a session.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="expected">Expected session.</param>
+        /// <param name="session">Updated session.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Compares the entire expected state atomically, including authentication methods by content.
         /// The UUID and creation time are immutable. Successful proof clears the pending challenge and updates authentication evidence in the same transaction as consumption.
@@ -60,6 +72,9 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Removes a session.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="session">Session.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Removes the associated pending challenge in the same transaction, if present.
         /// </remarks>
@@ -69,6 +84,9 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Removes a user's sessions, optionally preserving one UUID.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="exceptUuid">Session UUID to preserve, or <see langword="null"/> to remove all sessions.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Removes matching sessions and their pending challenges in the same transaction. No matching sessions is a successful outcome.
         /// </remarks>
@@ -78,6 +96,8 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Removes sessions expiring at or before the UTC cutoff.
         /// </summary>
+        /// <param name="expiresAt">Inclusive UTC expiration cutoff.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Removes associated pending challenges in the same transaction.
         /// </remarks>

@@ -24,18 +24,25 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Gets a user's pending and verified emails.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The user's pending and verified emails.</returns>
         IAsyncEnumerable<UserEmail> GetEmailsAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Finds a user by verified email address.
         /// </summary>
+        /// <param name="address">Verified email address.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The user, or <see langword="null"/> if not found.</returns>
         Task<User?> FindByEmailAsync(string address, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Adds an email.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="email">New email.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Rejects pending primary emails. Adding a verified primary clears the previous primary in the same transaction.
         /// </remarks>
@@ -45,6 +52,10 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Conditionally updates an email.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="expected">Expected email.</param>
+        /// <param name="email">Updated email.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Compares the entire expected state atomically. The address is immutable.
         /// A non-null challenge is replaced or cleared only in the transaction binding or consuming it.
@@ -56,6 +67,9 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Removes an email.
         /// </summary>
+        /// <param name="user">Owning user.</param>
+        /// <param name="email">Email.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Removes the associated pending challenge in the same transaction, if present.
         /// Removal of a verified recovery contact invalidates outstanding account recovery.

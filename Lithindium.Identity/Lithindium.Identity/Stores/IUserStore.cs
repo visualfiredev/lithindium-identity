@@ -27,6 +27,7 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Begins an atomic transaction.
         /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// All capabilities on the same instance participate until commit, rollback or disposal.
         /// The transaction provides serializable isolation or equivalent guarantees for current reads, writes and entity sets. Nested transactions are unsupported.
@@ -37,18 +38,24 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Finds a user by UUID.
         /// </summary>
+        /// <param name="uuid">User UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The user, or <see langword="null"/> if not found.</returns>
         Task<User?> FindByUuidAsync(Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Finds a user by username.
         /// </summary>
+        /// <param name="username">Username.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The user, or <see langword="null"/> if not found.</returns>
         Task<User?> FindByUsernameAsync(string username, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Creates a user.
         /// </summary>
+        /// <param name="user">New user.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// UUIDs are never reused, and usernames are unique.
         /// </remarks>
@@ -58,6 +65,9 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Conditionally updates a user.
         /// </summary>
+        /// <param name="expected">Expected user.</param>
+        /// <param name="user">Updated user.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Compares all expected persisted values atomically. The UUID is immutable.
         /// </remarks>
@@ -67,6 +77,8 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Deletes a user.
         /// </summary>
+        /// <param name="uuid">User UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Removes all dependent identity state, including challenges, in the same transaction. Historical audits are preserved.
         /// </remarks>
