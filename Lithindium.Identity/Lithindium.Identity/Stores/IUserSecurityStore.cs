@@ -34,7 +34,7 @@ namespace Lithindium.Identity {
         /// </summary>
         /// <remarks>
         /// <para>Compares the entire persisted security state against <paramref name="expected"/> atomically. A <see langword="null"/> expectation requires that no security record exists.</para>
-        /// <para>The recovery challenge is bound or cleared in the same transaction as its creation or consumption. Changes to <see cref="UserSecurity.Rotation"/> are committed with required revocations. The rotation value never wraps or decreases.</para>
+        /// <para>Binding or clearing the recovery challenge is atomic with its creation or consumption. Changes to <see cref="UserSecurity.Rotation"/> are atomic with required revocations. The rotation value never wraps or decreases.</para>
         /// </remarks>
         /// <param name="user">The user to whom the security state belongs.</param>
         /// <param name="expected">The expected persisted security state, or <see langword="null"/> if no record is expected to exist.</param>

@@ -42,7 +42,7 @@ namespace Lithindium.Identity {
         /// Attempts to add an email address asynchronously.
         /// </summary>
         /// <remarks>
-        /// Rejects a pending email address marked as primary. Adding a verified primary address clears the previous primary address in the same transaction.
+        /// Rejects a pending email address marked as primary. Adding a verified primary address atomically clears the previous primary address.
         /// </remarks>
         /// <param name="user">The user to whom the email address belongs.</param>
         /// <param name="email">The email address to add.</param>
@@ -55,8 +55,8 @@ namespace Lithindium.Identity {
         /// Attempts to conditionally update an email address asynchronously.
         /// </summary>
         /// <remarks>
-        /// <para>Compares the entire persisted email record against <paramref name="expected"/> atomically. The email address is immutable. A non-null challenge reference is replaced or cleared only in the transaction that binds or consumes it.</para>
-        /// <para>Only verified email addresses can be primary. Setting a primary address clears the previous primary address in the same transaction.</para>
+        /// <para>Compares the entire persisted email record against <paramref name="expected"/> atomically. The email address is immutable. Replacing or clearing a non-null challenge reference is atomic with binding or consuming the challenge.</para>
+        /// <para>Only verified email addresses can be primary. Setting a primary address atomically clears the previous primary address.</para>
         /// </remarks>
         /// <param name="user">The user to whom the email address belongs.</param>
         /// <param name="expected">The expected persisted record.</param>
@@ -70,7 +70,7 @@ namespace Lithindium.Identity {
         /// Attempts to remove an email address asynchronously.
         /// </summary>
         /// <remarks>
-        /// Removes the associated pending challenge in the same transaction, if present. Removing a verified recovery contact invalidates outstanding account recovery.
+        /// Atomically removes the associated pending challenge, if present. Removing a verified recovery contact invalidates outstanding account recovery.
         /// </remarks>
         /// <param name="user">The user to whom the email address belongs.</param>
         /// <param name="email">The email address to remove.</param>

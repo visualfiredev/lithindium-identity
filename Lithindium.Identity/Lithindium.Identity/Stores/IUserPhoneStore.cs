@@ -43,7 +43,7 @@ namespace Lithindium.Identity {
         /// Attempts to add a phone number asynchronously.
         /// </summary>
         /// <remarks>
-        /// Rejects a pending phone number marked as primary. Adding a verified primary number clears the previous primary number in the same transaction.
+        /// Rejects a pending phone number marked as primary. Adding a verified primary number atomically clears the previous primary number.
         /// </remarks>
         /// <param name="user">The user to whom the phone number belongs.</param>
         /// <param name="phone">The phone number to add.</param>
@@ -56,8 +56,8 @@ namespace Lithindium.Identity {
         /// Attempts to conditionally update a phone number asynchronously.
         /// </summary>
         /// <remarks>
-        /// <para>Compares the entire persisted phone record against <paramref name="expected"/> atomically. The number and extension are immutable. A non-null challenge reference is replaced or cleared only in the transaction that binds or consumes it.</para>
-        /// <para>Only verified phone numbers can be primary. Setting a primary number clears the previous primary number in the same transaction.</para>
+        /// <para>Compares the entire persisted phone record against <paramref name="expected"/> atomically. The number and extension are immutable. Replacing or clearing a non-null challenge reference is atomic with binding or consuming the challenge.</para>
+        /// <para>Only verified phone numbers can be primary. Setting a primary number atomically clears the previous primary number.</para>
         /// </remarks>
         /// <param name="user">The user to whom the phone number belongs.</param>
         /// <param name="expected">The expected persisted record.</param>
@@ -71,7 +71,7 @@ namespace Lithindium.Identity {
         /// Attempts to remove a phone number asynchronously.
         /// </summary>
         /// <remarks>
-        /// Removes the associated pending challenge in the same transaction, if present. Removing a verified recovery contact invalidates outstanding account recovery.
+        /// Atomically removes the associated pending challenge, if present. Removing a verified recovery contact invalidates outstanding account recovery.
         /// </remarks>
         /// <param name="user">The user to whom the phone number belongs.</param>
         /// <param name="phone">The phone number to remove.</param>

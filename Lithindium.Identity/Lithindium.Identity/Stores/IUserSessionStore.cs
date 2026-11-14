@@ -17,7 +17,7 @@ namespace Lithindium.Identity {
     /// Defines the persistence contract for pending and authenticated user sessions.
     /// </summary>
     /// <remarks>
-    /// Session identifiers are never reused. Revocation or expiration permanently invalidates a session. Authentication changes and required revocations are committed together.
+    /// Session identifiers are never reused. Revocation or expiration permanently invalidates a session. Authentication changes and required revocations are atomic.
     /// </remarks>
     public interface IUserSessionStore : IUserStore {
 
@@ -47,7 +47,7 @@ namespace Lithindium.Identity {
         /// Attempts to add a pending or authenticated session asynchronously.
         /// </summary>
         /// <remarks>
-        /// Requires an expiration time after creation. The session is issued in the transaction that validates the authorizing authentication state.
+        /// Requires an expiration time after creation. Session issuance and validation of the authorizing authentication state are atomic.
         /// </remarks>
         /// <param name="user">The user to whom the session belongs.</param>
         /// <param name="session">The session to add.</param>
@@ -61,7 +61,7 @@ namespace Lithindium.Identity {
         /// </summary>
         /// <remarks>
         /// <para>Compares the entire persisted session against <paramref name="expected"/> atomically, including authentication methods by content. The identifier and creation time are immutable.</para>
-        /// <para>Successful proof clears the pending challenge and updates authentication evidence in the same transaction as consumption. Expired sessions cannot be reactivated.</para>
+        /// <para>Successful proof atomically clears and consumes the pending challenge and updates authentication evidence. Expired sessions cannot be reactivated.</para>
         /// </remarks>
         /// <param name="user">The user to whom the session belongs.</param>
         /// <param name="expected">The expected persisted session.</param>
@@ -75,7 +75,7 @@ namespace Lithindium.Identity {
         /// Attempts to remove a session asynchronously.
         /// </summary>
         /// <remarks>
-        /// Removes the associated pending challenge in the same transaction, if present.
+        /// Atomically removes the associated pending challenge, if present.
         /// </remarks>
         /// <param name="user">The user to whom the session belongs.</param>
         /// <param name="session">The session to remove.</param>
@@ -88,7 +88,7 @@ namespace Lithindium.Identity {
         /// Attempts to remove a user's sessions asynchronously, optionally preserving one session.
         /// </summary>
         /// <remarks>
-        /// Removes matching sessions and their pending challenges in the same transaction. Having no matching sessions is a successful outcome.
+        /// Atomically removes matching sessions and their pending challenges. Having no matching sessions is a successful outcome.
         /// </remarks>
         /// <param name="user">The user whose sessions are removed.</param>
         /// <param name="exceptUuid">The unique identifier of the session to preserve, or <see langword="null"/> to remove all sessions.</param>
@@ -101,7 +101,7 @@ namespace Lithindium.Identity {
         /// Asynchronously removes sessions that expire at or before a specified time.
         /// </summary>
         /// <remarks>
-        /// Removes associated pending challenges in the same transaction.
+        /// Atomically removes associated pending challenges.
         /// </remarks>
         /// <param name="expiresAt">The inclusive expiration cutoff, in UTC.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>

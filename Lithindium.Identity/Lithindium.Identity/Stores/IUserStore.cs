@@ -13,25 +13,13 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Defines the persistence contract for user accounts and shared store transactions.
+    /// Defines the persistence contract for user accounts.
     /// </summary>
     /// <remarks>
     /// <para>All writes are atomic. A mutation returns <see langword="false"/> for an expected rejection, such as a missing entity, a uniqueness violation, or a stale expectation, without leaving partial changes. Invalid arguments, cancellation, and unexpected infrastructure failures throw exceptions.</para>
-    /// <para>Successful mutations persist immediately outside a transaction and on commit within a transaction. Associated state is scoped to the owner's UUID. Record snapshots do not establish authorization.</para>
-    /// <para>A known transaction abort prevents commit. A retry requires a new transaction and fresh state. An uncertain commit outcome is not safe to retry automatically.</para>
+    /// <para>Associated state is scoped to the owner's UUID. Record snapshots do not establish authorization.</para>
     /// </remarks>
     public interface IUserStore {
-
-        /// <summary>
-        /// Asynchronously begins an atomic identity store transaction.
-        /// </summary>
-        /// <remarks>
-        /// All capabilities on the same store instance participate in the transaction until it is committed, rolled back, or disposed. The transaction provides serializable isolation or equivalent guarantees for current reads, writes, and entity sets. Nested transactions are not supported.
-        /// </remarks>
-        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the new transaction.</returns>
-        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
-        Task<IUserStoreTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Asynchronously finds a user by unique identifier.
@@ -80,7 +68,7 @@ namespace Lithindium.Identity {
         /// Attempts to delete a user asynchronously.
         /// </summary>
         /// <remarks>
-        /// Removes all dependent identity state, including challenges, in the same transaction. Historical audit records are preserved.
+        /// Atomically removes all dependent identity state, including challenges. Historical audit records are preserved.
         /// </remarks>
         /// <param name="uuid">The unique identifier of the user to delete.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>

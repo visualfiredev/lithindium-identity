@@ -17,7 +17,7 @@ namespace Lithindium.Identity {
     /// </summary>
     /// <remarks>
     /// <para>Challenge identifiers are never reused. Each challenge belongs to one user and one intended operation.</para>
-    /// <para>Failed proof attempts persist without applying the operation. Successful completion applies the operation and consumes the challenge in the same transaction.</para>
+    /// <para>Failed proof attempts persist without applying the operation. Successful completion applies the operation and consumes the challenge atomically.</para>
     /// </remarks>
     public interface IUserChallengeStore : IUserStore {
 
@@ -35,7 +35,7 @@ namespace Lithindium.Identity {
         /// Attempts to add a challenge asynchronously.
         /// </summary>
         /// <remarks>
-        /// Requires an initial attempt count of zero, a nonempty proof verifier, and an expiration time after creation. The challenge is bound to exactly one operation of the same user in the same transaction.
+        /// Requires an initial attempt count of zero, a nonempty proof verifier, and an expiration time after creation. Challenge creation and binding to exactly one operation of the same user are atomic.
         /// </remarks>
         /// <param name="user">The user to whom the challenge belongs.</param>
         /// <param name="challenge">The challenge to add.</param>
@@ -49,7 +49,7 @@ namespace Lithindium.Identity {
         /// </summary>
         /// <remarks>
         /// <para>Compares the entire persisted challenge against <paramref name="expected"/> atomically. The identifier, secret, and timestamps are immutable. The replacement increments <see cref="UserChallenge.Attempts"/> by exactly one without overflow.</para>
-        /// <para>The caller applies attempt-limit and expiration policies using current transactional state.</para>
+        /// <para>The caller applies attempt-limit and expiration policies using current persisted state.</para>
         /// </remarks>
         /// <param name="user">The user to whom the challenge belongs.</param>
         /// <param name="expected">The expected persisted challenge.</param>
@@ -63,7 +63,7 @@ namespace Lithindium.Identity {
         /// Attempts to remove an unreferenced challenge asynchronously.
         /// </summary>
         /// <remarks>
-        /// Compares the persisted challenge against <paramref name="challenge"/> before removal and rejects challenges that are still referenced. Successful verification clears the reference and applies the challenged operation in the same transaction.
+        /// Compares the persisted challenge against <paramref name="challenge"/> before removal and rejects challenges that are still referenced. Successful verification clears the reference, applies the challenged operation, and removes the challenge atomically.
         /// </remarks>
         /// <param name="user">The user to whom the challenge belongs.</param>
         /// <param name="challenge">The expected persisted challenge to remove.</param>
@@ -76,7 +76,7 @@ namespace Lithindium.Identity {
         /// Asynchronously removes challenges that expire at or before a specified time.
         /// </summary>
         /// <remarks>
-        /// Deletes the associated pending email addresses, phone numbers, authenticators, and sessions in the same transaction. For account recovery, only the recovery challenge reference is cleared. Expiration never clears a pending credential or session reference.
+        /// Atomically deletes the associated pending email addresses, phone numbers, authenticators, and sessions. For account recovery, only the recovery challenge reference is cleared. Expiration never clears a pending credential or session reference.
         /// </remarks>
         /// <param name="expiresAt">The inclusive expiration cutoff, in UTC.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
