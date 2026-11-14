@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // -------------------------------------------------------------------------------------------------
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable once CheckNamespace
@@ -26,12 +27,18 @@ namespace Lithindium.Identity {
         public required bool Primary { get; init; }
 
         /// <summary>
+        /// Gets the email verification challenge UUID, or <see langword="null"/> if none.
+        /// </summary>
+        public required Guid? Challenge { get; init; }
+
+        /// <summary>
         /// Creates a <see cref="UserEmail"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
-        public UserEmail(string address, bool primary) {
+        public UserEmail(string address, bool primary, Guid? challenge) {
             Address = address;
             Primary = primary;
+            Challenge = challenge;
         }
 
         /// <summary>

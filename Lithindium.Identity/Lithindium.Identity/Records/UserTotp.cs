@@ -48,6 +48,11 @@ namespace Lithindium.Identity {
         public required byte Period { get; init; }
 
         /// <summary>
+        /// Gets the TOTP verification challenge UUID, or <see langword="null"/> if none.
+        /// </summary>
+        public required Guid? Challenge { get; init; }
+
+        /// <summary>
         /// Gets the last accepted time step, or <see langword="null"/> if none.
         /// </summary>
         /// <remarks>
@@ -59,13 +64,14 @@ namespace Lithindium.Identity {
         /// Creates a <see cref="UserTotp"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
-        public UserTotp(Guid uuid, string? name, ImmutableArray<byte> secret, UserTotpAlgorithm algorithm, byte digits, byte period, ulong? lastStep) {
+        public UserTotp(Guid uuid, string? name, ImmutableArray<byte> secret, UserTotpAlgorithm algorithm, byte digits, byte period, Guid? challenge, ulong? lastStep) {
             Uuid = uuid;
             Name = name;
             Secret = secret;
             Algorithm = algorithm;
             Digits = digits;
             Period = period;
+            Challenge = challenge;
             LastStep = lastStep;
         }
 

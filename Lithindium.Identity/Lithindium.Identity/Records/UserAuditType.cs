@@ -39,6 +39,11 @@ namespace Lithindium.Identity {
         Session,
 
         /// <summary>
+        /// User operation challenge.
+        /// </summary>
+        Challenge,
+
+        /// <summary>
         /// Recovery code.
         /// </summary>
         RecoveryCode,
@@ -46,12 +51,7 @@ namespace Lithindium.Identity {
         /// <summary>
         /// External identity.
         /// </summary>
-        ExternalIdentity,
-
-        /// <summary>
-        /// Authentication or verification challenge.
-        /// </summary>
-        Challenge
+        ExternalIdentity
 
     }
 

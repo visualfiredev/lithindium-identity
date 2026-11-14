@@ -45,6 +45,11 @@ namespace Lithindium.Identity {
         public required ushort Rotation { get; init; }
 
         /// <summary>
+        /// Gets the recovery challenge UUID, or <see langword="null"/> if none.
+        /// </summary>
+        public required Guid? Recovery { get; init; }
+
+        /// <summary>
         /// Gets the account status.
         /// </summary>
         public required UserStatus Status { get; init; }

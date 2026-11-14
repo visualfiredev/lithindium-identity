@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // -------------------------------------------------------------------------------------------------
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable once CheckNamespace
@@ -31,13 +32,19 @@ namespace Lithindium.Identity {
         public required bool Primary { get; init; }
 
         /// <summary>
+        /// Gets the phone verification challenge UUID, or <see langword="null"/> if none.
+        /// </summary>
+        public required Guid? Challenge { get; init; }
+
+        /// <summary>
         /// Creates a <see cref="UserPhone"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
-        public UserPhone(string number, string? extension, bool primary) {
+        public UserPhone(string number, string? extension, bool primary, Guid? challenge) {
             Number = number;
             Extension = extension;
             Primary = primary;
+            Challenge = challenge;
         }
 
         /// <summary>

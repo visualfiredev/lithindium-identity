@@ -48,6 +48,11 @@ namespace Lithindium.Identity {
         public required string? Acr { get; init; }
 
         /// <summary>
+        /// Gets the challenge UUID, or <see langword="null"/> if unset.
+        /// </summary>
+        public required Guid? Challenge { get; init; }
+
+        /// <summary>
         /// Gets the UTC session creation time.
         /// </summary>
         public required DateTime CreatedAt { get; init; }
@@ -61,13 +66,14 @@ namespace Lithindium.Identity {
         /// Creates a <see cref="UserSession"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
-        public UserSession(Guid uuid, string? deviceName, string? ipAddress, string? userAgent, ImmutableArray<string> amr, string? acr, DateTime createdAt, DateTime expiresAt) {
+        public UserSession(Guid uuid, string? deviceName, string? ipAddress, string? userAgent, ImmutableArray<string> amr, string? acr, Guid? challenge, DateTime createdAt, DateTime expiresAt) {
             Uuid = uuid;
             DeviceName = deviceName;
             IpAddress = ipAddress;
             UserAgent = userAgent;
             Amr = amr;
             Acr = acr;
+            Challenge = challenge;
             CreatedAt = createdAt;
             ExpiresAt = expiresAt;
         }
