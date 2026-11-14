@@ -16,12 +16,14 @@ namespace Lithindium.Identity {
     /// User persistence.
     /// </summary>
     /// <remarks>
-    /// All writes are atomic. Compare-and-update methods return Conflict on a stale expectation;
-    /// missing users or entities return NotFound and uniqueness violations return AlreadyExists.
+    /// All writes are atomic. Boolean mutation methods return true when the operation succeeds,
+    /// or false for an expected rejection, including missing entities, uniqueness violations or stale expectations.
+    /// A rejected mutation leaves no partial changes.
     /// Invalid arguments, cancellation and unexpected infrastructure failures throw.
     /// Outside a transaction, successful mutations persist immediately. Within a transaction, changes persist on commit.
     /// Scope associated state to the owner's UUID; snapshots do not establish authorization.
-    /// A known transaction abort is a conflict; retry the entire transaction from fresh state, never an uncertain commit.
+    /// A known transaction abort prevents commit; retry the entire transaction from fresh state,
+    /// never an uncertain commit.
     /// </remarks>
     public interface IUserStore {
 
@@ -51,7 +53,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// UUIDs must never be reused; usernames must be unique.
         /// </remarks>
-        Task<StoreResult> CreateAsync(User user, CancellationToken cancellationToken = default);
+        Task<bool> TryCreateAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Conditionally updates a user.
@@ -59,7 +61,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// UUID is immutable. Compare all expected persisted values atomically.
         /// </remarks>
-        Task<StoreResult> TryUpdateAsync(User expected, User user, CancellationToken cancellationToken = default);
+        Task<bool> TryUpdateAsync(User expected, User user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes a user.
@@ -67,7 +69,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Atomically remove dependent identity state, including challenges; preserve historical audits.
         /// </remarks>
-        Task<StoreResult> DeleteAsync(Guid uuid, CancellationToken cancellationToken = default);
+        Task<bool> TryDeleteAsync(Guid uuid, CancellationToken cancellationToken = default);
 
     }
 

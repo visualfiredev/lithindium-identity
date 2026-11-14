@@ -33,7 +33,7 @@ namespace Lithindium.Identity {
         /// Bind or clear the recovery challenge in the same transaction as its creation or consumption.
         /// Rotation changes must commit with required revocations. Never wrap or decrease rotation.
         /// </remarks>
-        Task<StoreResult> TryUpdateSecurityAsync(User user, UserSecurity? expected, UserSecurity security, CancellationToken cancellationToken = default);
+        Task<bool> TryUpdateSecurityAsync(User user, UserSecurity? expected, UserSecurity security, CancellationToken cancellationToken = default);
 
     }
 

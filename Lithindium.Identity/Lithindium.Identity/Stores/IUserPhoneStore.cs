@@ -40,7 +40,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// A pending phone must not be primary. A verified primary atomically replaces the previous primary.
         /// </remarks>
-        Task<StoreResult> AddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
+        Task<bool> TryAddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Conditionally updates a phone.
@@ -50,7 +50,7 @@ namespace Lithindium.Identity {
         /// A non-null challenge may be replaced or cleared only in the transaction binding or consuming it.
         /// Only verified records may be primary; setting a primary atomically clears the previous primary.
         /// </remarks>
-        Task<StoreResult> TryUpdatePhoneAsync(User user, UserPhone expected, UserPhone phone, CancellationToken cancellationToken = default);
+        Task<bool> TryUpdatePhoneAsync(User user, UserPhone expected, UserPhone phone, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a phone.
@@ -58,7 +58,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Remove its pending challenge atomically. Removing a verified recovery contact must invalidate outstanding account recovery.
         /// </remarks>
-        Task<StoreResult> RemovePhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
+        Task<bool> TryRemovePhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
 
     }
 

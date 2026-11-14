@@ -34,7 +34,7 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Adds an authenticator.
         /// </summary>
-        Task<StoreResult> AddTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
+        Task<bool> TryAddTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Conditionally updates an authenticator.
@@ -44,7 +44,7 @@ namespace Lithindium.Identity {
         /// UUID, secret, algorithm, digits and period are immutable. LastStep must never decrease or reset after acceptance.
         /// Accepting a code requires advancing LastStep strictly. Clear the challenge only on successful enrollment in the same transaction as consumption.
         /// </remarks>
-        Task<StoreResult> TryUpdateTotpAsync(User user, UserTotp expected, UserTotp totp, CancellationToken cancellationToken = default);
+        Task<bool> TryUpdateTotpAsync(User user, UserTotp expected, UserTotp totp, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes an authenticator.
@@ -52,7 +52,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Remove its pending challenge atomically.
         /// </remarks>
-        Task<StoreResult> RemoveTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
+        Task<bool> TryRemoveTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
 
     }
 

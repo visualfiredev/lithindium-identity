@@ -39,7 +39,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Preserve audits after associated users or entities are deleted.
         /// </remarks>
-        Task<StoreResult> AddAuditAsync(UserAudit audit, CancellationToken cancellationToken = default);
+        Task<bool> TryAddAuditAsync(UserAudit audit, CancellationToken cancellationToken = default);
 
     }
 

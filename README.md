@@ -23,7 +23,7 @@ dotnet build Lithindium.Identity/Lithindium.Identity.sln
 
 The library is being redesigned and does not yet provide a working authentication implementation.
 
-Store mutations return `StoreResult`. The interfaces define persistence outcomes, conditional updates, and atomic transactions; authentication and verification policy belong to the calling code. Pending credentials and sessions are not usable until their challenges are satisfied.
+Store mutation attempts return `bool`: `true` on success, `false` on expected rejection. Unexpected failures throw. The interfaces define persistence outcomes, conditional updates, and atomic transactions; authentication and verification policy belong to the calling code. Pending credentials and sessions are not usable until their challenges are satisfied.
 
 ## Contributing
 

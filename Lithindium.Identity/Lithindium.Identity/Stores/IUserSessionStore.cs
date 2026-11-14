@@ -41,7 +41,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Expiration must follow creation. Issue within the transaction validating the authorizing authentication state.
         /// </remarks>
-        Task<StoreResult> AddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
+        Task<bool> TryAddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Conditionally updates a session.
@@ -51,7 +51,7 @@ namespace Lithindium.Identity {
         /// UUID and creation time are immutable. Clear a pending challenge and update authentication evidence only after successful proof, atomically with consumption.
         /// Never reactivate an expired session.
         /// </remarks>
-        Task<StoreResult> TryUpdateSessionAsync(User user, UserSession expected, UserSession session, CancellationToken cancellationToken = default);
+        Task<bool> TryUpdateSessionAsync(User user, UserSession expected, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a session.
@@ -59,7 +59,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Remove its pending challenge atomically.
         /// </remarks>
-        Task<StoreResult> RemoveSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
+        Task<bool> TryRemoveSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a user's sessions, optionally preserving one UUID.
@@ -67,7 +67,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Remove matching sessions and associated pending challenges atomically; no matches is success.
         /// </remarks>
-        Task<StoreResult> RemoveSessionsAsync(User user, Guid? exceptUuid = null, CancellationToken cancellationToken = default);
+        Task<bool> TryRemoveSessionsAsync(User user, Guid? exceptUuid = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes sessions expiring at or before the UTC cutoff.

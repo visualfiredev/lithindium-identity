@@ -33,7 +33,7 @@ namespace Lithindium.Identity {
         /// Require zero attempts, a nonempty verifier and expiration after creation.
         /// Bind it to exactly one operation of the same owner within the same transaction.
         /// </remarks>
-        Task<StoreResult> AddChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
+        Task<bool> TryAddChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Conditionally updates a challenge's attempt count.
@@ -43,7 +43,7 @@ namespace Lithindium.Identity {
         /// The replacement must increment attempts by exactly one without overflow.
         /// The caller supplies attempt-limit and expiration policy using current transactional state.
         /// </remarks>
-        Task<StoreResult> TryUpdateChallengeAsync(User user, UserChallenge expected, UserChallenge challenge, CancellationToken cancellationToken = default);
+        Task<bool> TryUpdateChallengeAsync(User user, UserChallenge expected, UserChallenge challenge, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes an unreferenced challenge.
@@ -52,7 +52,7 @@ namespace Lithindium.Identity {
         /// Compare the expected challenge before removal. A referenced challenge must not be removed.
         /// Successful verification clears the reference and applies the operation in the same transaction.
         /// </remarks>
-        Task<StoreResult> RemoveChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
+        Task<bool> TryRemoveChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes challenges expiring at or before the UTC cutoff.

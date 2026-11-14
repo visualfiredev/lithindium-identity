@@ -29,15 +29,15 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Replace the set atomically; an empty set removes all codes. UUIDs and code hashes must be unique as applicable.
         /// </remarks>
-        Task<StoreResult> ReplaceRecoveryCodesAsync(User user, IReadOnlyCollection<UserRecoveryCode> codes, CancellationToken cancellationToken = default);
+        Task<bool> TryReplaceRecoveryCodesAsync(User user, IReadOnlyCollection<UserRecoveryCode> codes, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Attempts to consume a recovery code.
         /// </summary>
         /// <remarks>
-        /// Atomically find and delete the matching code by hash content. Missing or differently owned codes return NotFound.
+        /// Atomically find and delete the matching code by hash content. Missing or differently owned codes return false.
         /// </remarks>
-        Task<StoreResult> TryConsumeRecoveryCodeAsync(User user, ImmutableArray<byte> codeHash, CancellationToken cancellationToken = default);
+        Task<bool> TryConsumeRecoveryCodeAsync(User user, ImmutableArray<byte> codeHash, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Counts a user's unused recovery codes.

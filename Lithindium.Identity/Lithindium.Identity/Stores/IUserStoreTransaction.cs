@@ -24,9 +24,10 @@ namespace Lithindium.Identity {
         /// Commits the transaction.
         /// </summary>
         /// <remarks>
-        /// Return Conflict for a known serialization abort. Throw if the commit outcome is uncertain.
+        /// Return true on commit, or false only for a known transaction abort with no committed changes.
+        /// Throw if the commit outcome is uncertain or an unexpected failure occurs.
         /// </remarks>
-        Task<StoreResult> CommitAsync(CancellationToken cancellationToken = default);
+        Task<bool> TryCommitAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Rolls back the transaction.

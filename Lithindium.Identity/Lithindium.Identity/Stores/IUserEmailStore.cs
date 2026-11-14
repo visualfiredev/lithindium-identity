@@ -40,7 +40,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// A pending email must not be primary. A verified primary atomically replaces the previous primary.
         /// </remarks>
-        Task<StoreResult> AddEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
+        Task<bool> TryAddEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Conditionally updates a email.
@@ -50,7 +50,7 @@ namespace Lithindium.Identity {
         /// A non-null challenge may be replaced or cleared only in the transaction binding or consuming it.
         /// Only verified records may be primary; setting a primary atomically clears the previous primary.
         /// </remarks>
-        Task<StoreResult> TryUpdateEmailAsync(User user, UserEmail expected, UserEmail email, CancellationToken cancellationToken = default);
+        Task<bool> TryUpdateEmailAsync(User user, UserEmail expected, UserEmail email, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a email.
@@ -58,7 +58,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Remove its pending challenge atomically. Removing a verified recovery contact must invalidate outstanding account recovery.
         /// </remarks>
-        Task<StoreResult> RemoveEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
+        Task<bool> TryRemoveEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
 
     }
 

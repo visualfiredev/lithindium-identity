@@ -42,7 +42,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Issuer and subject pairs must be unique across the store.
         /// </remarks>
-        Task<StoreResult> AddExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
+        Task<bool> TryAddExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Conditionally updates external identity metadata.
@@ -50,12 +50,12 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Compare the entire expected state atomically. UUID, issuer and subject are immutable.
         /// </remarks>
-        Task<StoreResult> TryUpdateExternalIdentityAsync(User user, UserExternalIdentity expected, UserExternalIdentity identity, CancellationToken cancellationToken = default);
+        Task<bool> TryUpdateExternalIdentityAsync(User user, UserExternalIdentity expected, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes an external identity.
         /// </summary>
-        Task<StoreResult> RemoveExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
+        Task<bool> TryRemoveExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 
     }
 

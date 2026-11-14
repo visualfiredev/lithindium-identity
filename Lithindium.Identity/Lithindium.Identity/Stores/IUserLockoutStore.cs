@@ -27,7 +27,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Compare the entire expected state atomically; a null expectation requires no existing row.
         /// </remarks>
-        Task<StoreResult> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default);
+        Task<bool> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default);
 
     }
 
