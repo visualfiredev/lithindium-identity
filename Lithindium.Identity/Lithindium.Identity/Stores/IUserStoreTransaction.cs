@@ -24,9 +24,9 @@ namespace Lithindium.Identity {
         /// Commits the transaction.
         /// </summary>
         /// <remarks>
-        /// Return true on commit, or false only for a known transaction abort with no committed changes.
         /// Throw if the commit outcome is uncertain or an unexpected failure occurs.
         /// </remarks>
+        /// <returns><see langword="true"/> if committed, or <see langword="false"/> for a known transaction abort with no committed changes.</returns>
         Task<bool> TryCommitAsync(CancellationToken cancellationToken = default);
 
         /// <summary>

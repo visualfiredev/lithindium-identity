@@ -17,8 +17,9 @@ namespace Lithindium.Identity {
     public interface IUserLockoutStore : IUserStore {
 
         /// <summary>
-        /// Gets a user's lockout state, or returns null.
+        /// Gets a user's lockout state.
         /// </summary>
+        /// <returns>The lockout state, or <see langword="null"/> if not found.</returns>
         Task<UserLockout?> GetLockoutAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -27,6 +28,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Compare the entire expected state atomically; a null expectation requires no existing row.
         /// </remarks>
+        /// <returns><see langword="true"/> if the lockout state was saved, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default);
 
     }

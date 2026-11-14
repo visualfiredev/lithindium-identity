@@ -24,40 +24,45 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Gets a user's pending and verified emails.
         /// </summary>
+        /// <returns>The user's pending and verified emails.</returns>
         IAsyncEnumerable<UserEmail> GetEmailsAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Finds a user by verified email address, or returns null.
+        /// Finds a user by verified email address.
         /// </summary>
         /// <remarks>
         /// Pending records are never returned by this lookup.
         /// </remarks>
+        /// <returns>The user, or <see langword="null"/> if not found.</returns>
         Task<User?> FindByEmailAsync(string address, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds a email.
+        /// Adds an email.
         /// </summary>
         /// <remarks>
         /// A pending email must not be primary. A verified primary atomically replaces the previous primary.
         /// </remarks>
+        /// <returns><see langword="true"/> if the email was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Conditionally updates a email.
+        /// Conditionally updates an email.
         /// </summary>
         /// <remarks>
         /// Compare the entire expected state atomically; address is immutable.
         /// A non-null challenge may be replaced or cleared only in the transaction binding or consuming it.
         /// Only verified records may be primary; setting a primary atomically clears the previous primary.
         /// </remarks>
+        /// <returns><see langword="true"/> if the email was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateEmailAsync(User user, UserEmail expected, UserEmail email, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes a email.
+        /// Removes an email.
         /// </summary>
         /// <remarks>
         /// Remove its pending challenge atomically. Removing a verified recovery contact must invalidate outstanding account recovery.
         /// </remarks>
+        /// <returns><see langword="true"/> if the email was removed, otherwise <see langword="false"/>.</returns>
         Task<bool> TryRemoveEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
 
     }

@@ -25,14 +25,16 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Gets a user's pending and authenticated sessions.
         /// </summary>
+        /// <returns>The user's pending and authenticated sessions.</returns>
         IAsyncEnumerable<UserSession> GetSessionsAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a session by UUID, or returns null.
+        /// Gets a session by UUID.
         /// </summary>
         /// <remarks>
         /// Only an existing, unexpired session with no challenge can authenticate its owner.
         /// </remarks>
+        /// <returns>The session, or <see langword="null"/> if not found.</returns>
         Task<UserSession?> GetSessionAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -41,6 +43,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Expiration must follow creation. Issue within the transaction validating the authorizing authentication state.
         /// </remarks>
+        /// <returns><see langword="true"/> if the session was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -51,6 +54,7 @@ namespace Lithindium.Identity {
         /// UUID and creation time are immutable. Clear a pending challenge and update authentication evidence only after successful proof, atomically with consumption.
         /// Never reactivate an expired session.
         /// </remarks>
+        /// <returns><see langword="true"/> if the session was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateSessionAsync(User user, UserSession expected, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -59,6 +63,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Remove its pending challenge atomically.
         /// </remarks>
+        /// <returns><see langword="true"/> if the session was removed, otherwise <see langword="false"/>.</returns>
         Task<bool> TryRemoveSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -67,14 +72,16 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Remove matching sessions and associated pending challenges atomically; no matches is success.
         /// </remarks>
+        /// <returns><see langword="true"/> if the removal succeeded, otherwise <see langword="false"/>.</returns>
         Task<bool> TryRemoveSessionsAsync(User user, Guid? exceptUuid = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes sessions expiring at or before the UTC cutoff.
         /// </summary>
         /// <remarks>
-        /// Remove associated pending challenges atomically; return the number of sessions removed.
+        /// Remove associated pending challenges atomically.
         /// </remarks>
+        /// <returns>The number of sessions removed.</returns>
         Task<int> RemoveExpiredSessionsAsync(DateTime expiresAt, CancellationToken cancellationToken = default);
 
     }

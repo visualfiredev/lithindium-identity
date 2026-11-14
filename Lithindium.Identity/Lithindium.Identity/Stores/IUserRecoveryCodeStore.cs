@@ -21,6 +21,7 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Gets a user's unused recovery codes.
         /// </summary>
+        /// <returns>The user's unused recovery codes.</returns>
         IAsyncEnumerable<UserRecoveryCode> GetRecoveryCodesAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -29,19 +30,22 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Replace the set atomically; an empty set removes all codes. UUIDs and code hashes must be unique as applicable.
         /// </remarks>
+        /// <returns><see langword="true"/> if the recovery codes were replaced, otherwise <see langword="false"/>.</returns>
         Task<bool> TryReplaceRecoveryCodesAsync(User user, IReadOnlyCollection<UserRecoveryCode> codes, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Attempts to consume a recovery code.
         /// </summary>
         /// <remarks>
-        /// Atomically find and delete the matching code by hash content. Missing or differently owned codes return false.
+        /// Atomically find and delete the matching code by hash content; scope it to the owner.
         /// </remarks>
+        /// <returns><see langword="true"/> if the recovery code was consumed, otherwise <see langword="false"/>.</returns>
         Task<bool> TryConsumeRecoveryCodeAsync(User user, ImmutableArray<byte> codeHash, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Counts a user's unused recovery codes.
         /// </summary>
+        /// <returns>The number of unused recovery codes.</returns>
         Task<int> CountRecoveryCodesAsync(User user, CancellationToken cancellationToken = default);
 
     }

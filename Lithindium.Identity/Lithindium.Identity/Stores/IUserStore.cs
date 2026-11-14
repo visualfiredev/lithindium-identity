@@ -35,16 +35,19 @@ namespace Lithindium.Identity {
         /// Use serializable isolation or equivalent guarantees for current reads, writes and entity sets.
         /// Do not nest transactions.
         /// </remarks>
+        /// <returns>The transaction.</returns>
         Task<IUserStoreTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Finds a user by UUID, or returns null.
+        /// Finds a user by UUID.
         /// </summary>
+        /// <returns>The user, or <see langword="null"/> if not found.</returns>
         Task<User?> FindByUuidAsync(Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Finds a user by username, or returns null.
+        /// Finds a user by username.
         /// </summary>
+        /// <returns>The user, or <see langword="null"/> if not found.</returns>
         Task<User?> FindByUsernameAsync(string username, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -53,6 +56,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// UUIDs must never be reused; usernames must be unique.
         /// </remarks>
+        /// <returns><see langword="true"/> if the user was created, otherwise <see langword="false"/>.</returns>
         Task<bool> TryCreateAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -61,6 +65,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// UUID is immutable. Compare all expected persisted values atomically.
         /// </remarks>
+        /// <returns><see langword="true"/> if the user was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateAsync(User expected, User user, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -69,6 +74,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Atomically remove dependent identity state, including challenges; preserve historical audits.
         /// </remarks>
+        /// <returns><see langword="true"/> if the user was deleted, otherwise <see langword="false"/>.</returns>
         Task<bool> TryDeleteAsync(Guid uuid, CancellationToken cancellationToken = default);
 
     }

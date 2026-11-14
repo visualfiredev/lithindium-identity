@@ -21,8 +21,9 @@ namespace Lithindium.Identity {
     public interface IUserSecurityStore : IUserStore {
 
         /// <summary>
-        /// Gets a user's security state, or returns null.
+        /// Gets a user's security state.
         /// </summary>
+        /// <returns>The security state, or <see langword="null"/> if not found.</returns>
         Task<UserSecurity?> GetSecurityAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -33,6 +34,7 @@ namespace Lithindium.Identity {
         /// Bind or clear the recovery challenge in the same transaction as its creation or consumption.
         /// Rotation changes must commit with required revocations. Never wrap or decrease rotation.
         /// </remarks>
+        /// <returns><see langword="true"/> if the security state was saved, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateSecurityAsync(User user, UserSecurity? expected, UserSecurity security, CancellationToken cancellationToken = default);
 
     }

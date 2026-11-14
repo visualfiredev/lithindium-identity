@@ -21,16 +21,19 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Gets audits by affected user UUID.
         /// </summary>
+        /// <returns>The affected user's audit records.</returns>
         IAsyncEnumerable<UserAudit> GetAuditsAsync(Guid user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets audits by acting user UUID.
         /// </summary>
+        /// <returns>Audit records for the acting user.</returns>
         IAsyncEnumerable<UserAudit> GetAuditsByActorAsync(Guid actor, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets audits by affected entity UUID.
         /// </summary>
+        /// <returns>Audit records for the affected entity.</returns>
         IAsyncEnumerable<UserAudit> GetAuditsByEntityAsync(Guid entity, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -39,6 +42,7 @@ namespace Lithindium.Identity {
         /// <remarks>
         /// Preserve audits after associated users or entities are deleted.
         /// </remarks>
+        /// <returns><see langword="true"/> if the audit record was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddAuditAsync(UserAudit audit, CancellationToken cancellationToken = default);
 
     }
