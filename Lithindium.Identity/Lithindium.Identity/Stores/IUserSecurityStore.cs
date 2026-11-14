@@ -13,34 +13,35 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Account security persistence.
+    /// Defines the persistence contract for user account security state.
     /// </summary>
     /// <remarks>
-    /// Security is one-to-one with the user. A recovery challenge does not disable the current password.
+    /// Each user has at most one security record. A pending recovery challenge does not disable the current password.
     /// </remarks>
     public interface IUserSecurityStore : IUserStore {
 
         /// <summary>
-        /// Gets a user's security state.
+        /// Asynchronously gets a user's account security state.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The security state, or <see langword="null"/> if not found.</returns>
+        /// <param name="user">The user to whom the security state belongs.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the security state, or <see langword="null"/> if not found.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<UserSecurity?> GetSecurityAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Conditionally creates or updates security state.
+        /// Attempts to create or conditionally update a user's security state asynchronously.
         /// </summary>
         /// <remarks>
-        /// Compares the entire expected state atomically; a <see langword="null"/> expectation requires no existing row.
-        /// Binds or clears the recovery challenge in the same transaction as its creation or consumption.
-        /// Rotation changes are committed with required revocations. Rotation never wraps or decreases.
+        /// <para>Compares the entire persisted security state against <paramref name="expected"/> atomically. A <see langword="null"/> expectation requires that no security record exists.</para>
+        /// <para>The recovery challenge is bound or cleared in the same transaction as its creation or consumption. Changes to <see cref="UserSecurity.Rotation"/> are committed with required revocations. The rotation value never wraps or decreases.</para>
         /// </remarks>
-        /// <param name="user">Owning user.</param>
-        /// <param name="expected">Expected security state, or <see langword="null"/> if absent.</param>
-        /// <param name="security">Updated security state.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the security state was saved, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user to whom the security state belongs.</param>
+        /// <param name="expected">The expected persisted security state, or <see langword="null"/> if no record is expected to exist.</param>
+        /// <param name="security">The replacement security state.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the security state was saved; otherwise, <see langword="false"/> (for example, if the expected state does not match).</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryUpdateSecurityAsync(User user, UserSecurity? expected, UserSecurity security, CancellationToken cancellationToken = default);
 
     }

@@ -13,27 +13,30 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// An atomic identity store transaction.
+    /// Represents an atomic transaction across identity store operations.
     /// </summary>
     /// <remarks>
-    /// Disposal rolls back uncommitted changes. Completed or aborted transactions cannot be reused.
+    /// Disposing of an uncommitted transaction rolls back its changes. Completed or aborted transactions cannot be reused.
     /// </remarks>
     public interface IUserStoreTransaction : IAsyncDisposable {
 
         /// <summary>
-        /// Commits the transaction.
+        /// Attempts to commit the transaction asynchronously.
         /// </summary>
         /// <remarks>
-        /// Throws an exception if the commit outcome is uncertain or an unexpected failure occurs.
+        /// An uncertain commit outcome or an unexpected failure results in an exception.
         /// </remarks>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if committed, or <see langword="false"/> for a known transaction abort with no committed changes.</returns>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the transaction was committed; otherwise, <see langword="false"/> if the transaction is known to have aborted without committing any changes.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryCommitAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Rolls back the transaction.
+        /// Asynchronously rolls back the transaction.
         /// </summary>
-        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous rollback operation.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task RollbackAsync(CancellationToken cancellationToken = default);
 
     }

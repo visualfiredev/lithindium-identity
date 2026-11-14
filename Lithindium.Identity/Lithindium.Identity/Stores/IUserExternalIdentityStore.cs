@@ -14,71 +14,77 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// External identity persistence.
+    /// Defines the persistence contract for identities associated with external issuers.
     /// </summary>
     public interface IUserExternalIdentityStore : IUserStore {
 
         /// <summary>
-        /// Gets a user's external identities.
+        /// Gets an asynchronous sequence of a user's external identities.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The user's external identities.</returns>
+        /// <param name="user">The user whose external identities are retrieved.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>An asynchronous sequence of the user's external identities.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         IAsyncEnumerable<UserExternalIdentity> GetExternalIdentitiesAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets an external identity by UUID.
+        /// Asynchronously gets a user's external identity by unique identifier.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="uuid">External identity UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The external identity, or <see langword="null"/> if not found.</returns>
+        /// <param name="user">The user to whom the external identity belongs.</param>
+        /// <param name="uuid">The unique identifier of the external identity to find.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the external identity, or <see langword="null"/> if not found.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<UserExternalIdentity?> GetExternalIdentityAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Finds a user by external issuer and subject.
+        /// Asynchronously finds a user by external issuer and subject.
         /// </summary>
         /// <remarks>
-        /// Compares issuer and subject exactly and case-sensitively.
+        /// Compares <paramref name="issuer"/> and <paramref name="subject"/> exactly and case-sensitively.
         /// </remarks>
-        /// <param name="issuer">External issuer.</param>
-        /// <param name="subject">Issuer-assigned subject.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The user, or <see langword="null"/> if not found.</returns>
+        /// <param name="issuer">The issuer of the external identity to find.</param>
+        /// <param name="subject">The unique subject identifier assigned by the issuer.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the user, or <see langword="null"/> if not found.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<User?> FindByExternalIdentityAsync(string issuer, string subject, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds an external identity.
+        /// Attempts to add an external identity asynchronously.
         /// </summary>
         /// <remarks>
         /// Issuer and subject pairs are unique across the store.
         /// </remarks>
-        /// <param name="user">Owning user.</param>
-        /// <param name="identity">New external identity.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the external identity was added, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user to whom the external identity belongs.</param>
+        /// <param name="identity">The external identity to add.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the external identity was added; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryAddExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Conditionally updates external identity metadata.
+        /// Attempts to conditionally update external identity metadata asynchronously.
         /// </summary>
         /// <remarks>
-        /// Compares the entire expected state atomically. The UUID, issuer and subject are immutable.
+        /// Compares the entire persisted external identity against <paramref name="expected"/> atomically. The identifier, issuer, and subject are immutable.
         /// </remarks>
-        /// <param name="user">Owning user.</param>
-        /// <param name="expected">Expected external identity.</param>
-        /// <param name="identity">Updated external identity.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the external identity was updated, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user to whom the external identity belongs.</param>
+        /// <param name="expected">The expected persisted external identity.</param>
+        /// <param name="identity">The replacement external identity.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the external identity was updated; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryUpdateExternalIdentityAsync(User user, UserExternalIdentity expected, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes an external identity.
+        /// Attempts to remove an external identity asynchronously.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="identity">External identity.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the external identity was removed, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user to whom the external identity belongs.</param>
+        /// <param name="identity">The external identity to remove.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the external identity was removed; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryRemoveExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 
     }

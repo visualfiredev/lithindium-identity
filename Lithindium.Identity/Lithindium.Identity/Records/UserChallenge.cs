@@ -12,12 +12,12 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Immutable challenge for a pending user operation.
+    /// Represents an immutable challenge for a pending user operation.
     /// </summary>
     public readonly record struct UserChallenge {
 
         /// <summary>
-        /// Gets the challenge UUID.
+        /// Gets the unique identifier of the challenge.
         /// </summary>
         public required Guid Uuid { get; init; }
 
@@ -27,17 +27,17 @@ namespace Lithindium.Identity {
         public required string Secret { get; init; }
 
         /// <summary>
-        /// Gets the reserved attempt count.
+        /// Gets the number of reserved verification attempts.
         /// </summary>
         public required uint Attempts { get; init; }
 
         /// <summary>
-        /// Gets the UTC creation time.
+        /// Gets the date and time at which the challenge was created, in UTC.
         /// </summary>
         public required DateTime CreatedAt { get; init; }
 
         /// <summary>
-        /// Gets the UTC expiration time.
+        /// Gets the date and time at which the challenge expires, in UTC.
         /// </summary>
         public required DateTime ExpiresAt { get; init; }
 

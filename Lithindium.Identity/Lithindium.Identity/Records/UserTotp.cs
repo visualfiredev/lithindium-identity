@@ -13,51 +13,54 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Immutable user TOTP authenticator snapshot.
+    /// Represents an immutable snapshot of a pending or verified time-based one-time password (TOTP) authenticator.
     /// </summary>
     public readonly record struct UserTotp {
 
         /// <summary>
-        /// Gets the authenticator UUID.
+        /// Gets the unique identifier of the authenticator.
         /// </summary>
         public required Guid Uuid { get; init; }
 
         /// <summary>
-        /// Gets the name, or <see langword="null"/> if unset.
+        /// Gets the name of the authenticator.
         /// </summary>
+        /// <value>The name, or <see langword="null"/> if not set.</value>
         public required string? Name { get; init; }
 
         /// <summary>
-        /// Gets the cryptographically protected shared secret.
+        /// Gets the cryptographically protected shared secret of the authenticator.
         /// </summary>
         public required ImmutableArray<byte> Secret { get; init; }
 
         /// <summary>
-        /// Gets the hashing algorithm.
+        /// Gets the hashing algorithm used to generate one-time passwords.
         /// </summary>
         public required UserTotpAlgorithm Algorithm { get; init; }
 
         /// <summary>
-        /// Gets the code digit count.
+        /// Gets the number of digits in a one-time password.
         /// </summary>
         public required byte Digits { get; init; }
 
         /// <summary>
-        /// Gets the code validity period in seconds.
+        /// Gets the validity period of a one-time password, in seconds.
         /// </summary>
         public required byte Period { get; init; }
 
         /// <summary>
-        /// Gets the TOTP verification challenge UUID, or <see langword="null"/> if none.
+        /// Gets the unique identifier of the pending enrollment challenge.
         /// </summary>
+        /// <value>The challenge UUID for a pending authenticator, or <see langword="null"/> for a verified authenticator.</value>
         public required Guid? Challenge { get; init; }
 
         /// <summary>
-        /// Gets the last accepted time step, or <see langword="null"/> if none.
+        /// Gets the last accepted time step.
         /// </summary>
         /// <remarks>
-        /// Prevents replay of accepted authentication codes.
+        /// This value prevents replay of accepted authentication codes.
         /// </remarks>
+        /// <value>The last accepted time step, or <see langword="null"/> if no time step has been accepted.</value>
         public required ulong? LastStep { get; init; }
 
         /// <summary>

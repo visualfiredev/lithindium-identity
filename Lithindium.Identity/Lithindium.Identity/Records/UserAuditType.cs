@@ -9,47 +9,47 @@
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// An audited entity type.
+    /// Specifies the type of entity affected by an audited action.
     /// </summary>
     public enum UserAuditType {
 
         /// <summary>
-        /// User account.
+        /// The affected entity is a user account.
         /// </summary>
         User,
 
         /// <summary>
-        /// User email address.
+        /// The affected entity is a user email address.
         /// </summary>
         Email,
 
         /// <summary>
-        /// User phone number.
+        /// The affected entity is a user phone number.
         /// </summary>
         Phone,
 
         /// <summary>
-        /// TOTP authenticator.
+        /// The affected entity is a TOTP authenticator.
         /// </summary>
         Totp,
 
         /// <summary>
-        /// Authentication session.
+        /// The affected entity is an authentication session.
         /// </summary>
         Session,
 
         /// <summary>
-        /// User operation challenge.
+        /// The affected entity is a user operation challenge.
         /// </summary>
         Challenge,
 
         /// <summary>
-        /// Recovery code.
+        /// The affected entity is a recovery code.
         /// </summary>
         RecoveryCode,
 
         /// <summary>
-        /// External identity.
+        /// The affected entity is an external identity.
         /// </summary>
         ExternalIdentity
 

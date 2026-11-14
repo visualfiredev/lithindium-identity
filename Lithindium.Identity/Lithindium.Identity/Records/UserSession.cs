@@ -13,52 +13,57 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Immutable user authentication session snapshot.
+    /// Represents an immutable snapshot of a pending or authenticated user session.
     /// </summary>
     public readonly record struct UserSession {
 
         /// <summary>
-        /// Gets the session UUID.
+        /// Gets the unique identifier of the session.
         /// </summary>
         public required Guid Uuid { get; init; }
 
         /// <summary>
-        /// Gets the device name, or <see langword="null"/> if unset.
+        /// Gets the name of the device associated with the session.
         /// </summary>
+        /// <value>The device name, or <see langword="null"/> if not set.</value>
         public required string? DeviceName { get; init; }
 
         /// <summary>
-        /// Gets the IP address, or <see langword="null"/> if unavailable.
+        /// Gets the IP address associated with the session.
         /// </summary>
+        /// <value>The IP address, or <see langword="null"/> if unavailable.</value>
         public required string? IpAddress { get; init; }
 
         /// <summary>
-        /// Gets the user agent, or <see langword="null"/> if unavailable.
+        /// Gets the user agent associated with the session.
         /// </summary>
+        /// <value>The user agent, or <see langword="null"/> if unavailable.</value>
         public required string? UserAgent { get; init; }
 
         /// <summary>
-        /// Gets the authentication methods used.
+        /// Gets the authentication methods used for the session.
         /// </summary>
         public required ImmutableArray<string> Amr { get; init; }
 
         /// <summary>
-        /// Gets the authentication context class reference, or <see langword="null"/> if unspecified.
+        /// Gets the authentication context class reference for the session.
         /// </summary>
+        /// <value>The authentication context class reference, or <see langword="null"/> if unspecified.</value>
         public required string? Acr { get; init; }
 
         /// <summary>
-        /// Gets the challenge UUID, or <see langword="null"/> if unset.
+        /// Gets the unique identifier of the pending authentication challenge.
         /// </summary>
+        /// <value>The challenge UUID for a pending session, or <see langword="null"/> for an authenticated session.</value>
         public required Guid? Challenge { get; init; }
 
         /// <summary>
-        /// Gets the UTC session creation time.
+        /// Gets the date and time at which the session was created, in UTC.
         /// </summary>
         public required DateTime CreatedAt { get; init; }
 
         /// <summary>
-        /// Gets the UTC expiration time.
+        /// Gets the date and time at which the session expires, in UTC.
         /// </summary>
         public required DateTime ExpiresAt { get; init; }
 

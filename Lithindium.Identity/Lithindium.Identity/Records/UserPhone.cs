@@ -12,28 +12,31 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Immutable verified user phone snapshot.
+    /// Represents an immutable snapshot of a pending or verified user phone number.
     /// </summary>
     public readonly record struct UserPhone {
 
         /// <summary>
-        /// Gets the verified E.164 phone number.
+        /// Gets the phone number of the user in E.164 format.
         /// </summary>
         public required string Number { get; init; }
 
         /// <summary>
-        /// Gets the extension, or <see langword="null"/> if unset.
+        /// Gets the extension of the phone number.
         /// </summary>
+        /// <value>The extension, or <see langword="null"/> if not set.</value>
         public required string? Extension { get; init; }
 
         /// <summary>
-        /// Gets whether the phone is primary.
+        /// Gets a value indicating whether the phone number is the primary number.
         /// </summary>
+        /// <value><see langword="true"/> if the phone number is primary; otherwise, <see langword="false"/>.</value>
         public required bool Primary { get; init; }
 
         /// <summary>
-        /// Gets the phone verification challenge UUID, or <see langword="null"/> if none.
+        /// Gets the unique identifier of the pending phone verification challenge.
         /// </summary>
+        /// <value>The challenge UUID for a pending phone number, or <see langword="null"/> for a verified phone number.</value>
         public required Guid? Challenge { get; init; }
 
         /// <summary>

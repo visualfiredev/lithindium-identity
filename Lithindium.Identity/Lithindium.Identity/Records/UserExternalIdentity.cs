@@ -12,36 +12,38 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Immutable external identity snapshot.
+    /// Represents an immutable snapshot of an identity associated with an external issuer.
     /// </summary>
     public readonly record struct UserExternalIdentity {
 
         /// <summary>
-        /// Gets the identity UUID.
+        /// Gets the unique identifier of the external identity.
         /// </summary>
         public required Guid Uuid { get; init; }
 
         /// <summary>
-        /// Gets the identity name, or <see langword="null"/> if unset.
+        /// Gets the name associated with the external identity.
         /// </summary>
+        /// <value>The name, or <see langword="null"/> if not set.</value>
         public required string? Name { get; init; }
 
         /// <summary>
-        /// Gets the issuer.
+        /// Gets the issuer of the external identity.
         /// </summary>
         public required string Issuer { get; init; }
 
         /// <summary>
-        /// Gets the issuer-assigned unique subject.
+        /// Gets the unique subject identifier assigned by the issuer.
         /// </summary>
         public required string Subject { get; init; }
 
         /// <summary>
-        /// Gets the issuer-provided email, or <see langword="null"/> if absent.
+        /// Gets the email address provided by the issuer.
         /// </summary>
         /// <remarks>
-        /// Informational only; does not establish verified email ownership.
+        /// This address is informational and does not establish verified email ownership.
         /// </remarks>
+        /// <value>The email address, or <see langword="null"/> if not provided.</value>
         public required string? Email { get; init; }
 
         /// <summary>

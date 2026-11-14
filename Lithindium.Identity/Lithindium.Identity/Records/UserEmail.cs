@@ -12,23 +12,25 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Immutable verified user email snapshot.
+    /// Represents an immutable snapshot of a pending or verified user email address.
     /// </summary>
     public readonly record struct UserEmail {
 
         /// <summary>
-        /// Gets the verified email address.
+        /// Gets the email address of the user.
         /// </summary>
         public required string Address { get; init; }
 
         /// <summary>
-        /// Gets whether the email is primary.
+        /// Gets a value indicating whether the email address is the primary address.
         /// </summary>
+        /// <value><see langword="true"/> if the email address is primary; otherwise, <see langword="false"/>.</value>
         public required bool Primary { get; init; }
 
         /// <summary>
-        /// Gets the email verification challenge UUID, or <see langword="null"/> if none.
+        /// Gets the unique identifier of the pending email verification challenge.
         /// </summary>
+        /// <value>The challenge UUID for a pending email address, or <see langword="null"/> for a verified email address.</value>
         public required Guid? Challenge { get; init; }
 
         /// <summary>

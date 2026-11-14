@@ -12,26 +12,28 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Immutable user security snapshot.
+    /// Represents an immutable snapshot of a user's account security state.
     /// </summary>
     public readonly record struct UserSecurity {
 
         /// <summary>
-        /// Gets the password hash, or <see langword="null"/> if unset.
+        /// Gets the password hash of the user.
         /// </summary>
+        /// <value>The password hash, or <see langword="null"/> if no password is set.</value>
         public required string? Password { get; init; }
 
         /// <summary>
-        /// Gets the authentication generation.
+        /// Gets the authentication generation of the user.
         /// </summary>
         /// <remarks>
-        /// Incrementing the generation invalidates generation-bound credentials.
+        /// Incrementing this value invalidates generation-bound credentials.
         /// </remarks>
         public required ushort Rotation { get; init; }
 
         /// <summary>
-        /// Gets the recovery challenge UUID, or <see langword="null"/> if none.
+        /// Gets the unique identifier of the pending account recovery challenge.
         /// </summary>
+        /// <value>The recovery challenge UUID, or <see langword="null"/> if no recovery is pending.</value>
         public required Guid? Challenge { get; init; }
 
         /// <summary>

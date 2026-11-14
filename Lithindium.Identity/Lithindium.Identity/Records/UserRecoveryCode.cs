@@ -13,17 +13,17 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Immutable user recovery code snapshot.
+    /// Represents an immutable snapshot of a user's recovery code.
     /// </summary>
     public readonly record struct UserRecoveryCode {
 
         /// <summary>
-        /// Gets the recovery code UUID.
+        /// Gets the unique identifier of the recovery code.
         /// </summary>
         public required Guid Uuid { get; init; }
 
         /// <summary>
-        /// Gets the cryptographic code hash.
+        /// Gets the cryptographic hash of the recovery code.
         /// </summary>
         public required ImmutableArray<byte> CodeHash { get; init; }
 

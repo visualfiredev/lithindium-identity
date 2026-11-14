@@ -12,28 +12,31 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Immutable user lockout snapshot.
+    /// Represents an immutable snapshot of a user's authentication lockout state.
     /// </summary>
     public readonly record struct UserLockout {
 
         /// <summary>
-        /// Gets whether lockout is enabled.
+        /// Gets a value indicating whether lockout is enabled.
         /// </summary>
+        /// <value><see langword="true"/> if lockout is enabled; otherwise, <see langword="false"/>.</value>
         public required bool Enabled { get; init; }
 
         /// <summary>
-        /// Gets the consecutive authentication failure count.
+        /// Gets the number of consecutive authentication failures.
         /// </summary>
         public required uint Failures { get; init; }
 
         /// <summary>
-        /// Gets the UTC lockout start time, or <see langword="null"/> if unset.
+        /// Gets the date and time at which the lockout began, in UTC.
         /// </summary>
+        /// <value>The lockout start time, or <see langword="null"/> if not set.</value>
         public required DateTime? LockedAt { get; init; }
 
         /// <summary>
-        /// Gets the scheduled UTC unlock time, or <see langword="null"/> if unset.
+        /// Gets the scheduled date and time at which the lockout ends, in UTC.
         /// </summary>
+        /// <value>The scheduled unlock time, or <see langword="null"/> if not set.</value>
         public required DateTime? UnlockedAt { get; init; }
 
         /// <summary>

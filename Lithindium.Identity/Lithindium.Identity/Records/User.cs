@@ -12,27 +12,28 @@ using System.Diagnostics.CodeAnalysis;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Immutable user snapshot.
+    /// Represents an immutable snapshot of a user account.
     /// </summary>
     public readonly record struct User {
 
         /// <summary>
-        /// Gets the user UUID.
+        /// Gets the unique identifier of the user.
         /// </summary>
         public required Guid Uuid { get; init; }
 
         /// <summary>
-        /// Gets the unique username.
+        /// Gets the unique username of the user.
         /// </summary>
         public required string Username { get; init; }
 
         /// <summary>
-        /// Gets the display name, or <see langword="null"/> if unset.
+        /// Gets the display name of the user.
         /// </summary>
+        /// <value>The display name, or <see langword="null"/> if not set.</value>
         public required string? DisplayName { get; init; }
 
         /// <summary>
-        /// Gets the account status.
+        /// Gets the status of the user account.
         /// </summary>
         public required UserStatus Status { get; init; }
 

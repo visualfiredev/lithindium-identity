@@ -13,69 +13,71 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// User phone persistence.
+    /// Defines the persistence contract for pending and verified user phone numbers.
     /// </summary>
     /// <remarks>
-    /// Phone number and extension pairs are unique per owner, and verified pairs are unique across users.
-    /// Pending phones are not credentials and do not reserve another user's verified lookup.
+    /// Phone number and extension pairs are unique per user, and verified pairs are unique across users. Pending numbers are not credentials and do not prevent another user from being found by a verified number.
     /// </remarks>
     public interface IUserPhoneStore : IUserStore {
 
         /// <summary>
-        /// Gets a user's pending and verified phones.
+        /// Gets an asynchronous sequence of a user's pending and verified phone numbers.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The user's pending and verified phones.</returns>
+        /// <param name="user">The user whose phone numbers are retrieved.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>An asynchronous sequence of the user's pending and verified phone numbers.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         IAsyncEnumerable<UserPhone> GetPhonesAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Finds a user by verified phone number and extension.
+        /// Asynchronously finds a user by verified phone number and extension.
         /// </summary>
-        /// <param name="number">Verified phone number.</param>
-        /// <param name="extension">Phone extension, or <see langword="null"/> if absent.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The user, or <see langword="null"/> if not found.</returns>
+        /// <param name="number">The verified phone number to find.</param>
+        /// <param name="extension">The extension of the phone number, or <see langword="null"/> if the number has no extension.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the user, or <see langword="null"/> if not found.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<User?> FindByPhoneAsync(string number, string? extension = null, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds a phone.
+        /// Attempts to add a phone number asynchronously.
         /// </summary>
         /// <remarks>
-        /// Rejects pending primary phones. Adding a verified primary clears the previous primary in the same transaction.
+        /// Rejects a pending phone number marked as primary. Adding a verified primary number clears the previous primary number in the same transaction.
         /// </remarks>
-        /// <param name="user">Owning user.</param>
-        /// <param name="phone">New phone.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the phone was added, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user to whom the phone number belongs.</param>
+        /// <param name="phone">The phone number to add.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the phone number was added; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryAddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Conditionally updates a phone.
+        /// Attempts to conditionally update a phone number asynchronously.
         /// </summary>
         /// <remarks>
-        /// Compares the entire expected state atomically. The number and extension are immutable.
-        /// A non-null challenge is replaced or cleared only in the transaction binding or consuming it.
-        /// Only verified phones can be primary; setting a primary clears the previous primary in the same transaction.
+        /// <para>Compares the entire persisted phone record against <paramref name="expected"/> atomically. The number and extension are immutable. A non-null challenge reference is replaced or cleared only in the transaction that binds or consumes it.</para>
+        /// <para>Only verified phone numbers can be primary. Setting a primary number clears the previous primary number in the same transaction.</para>
         /// </remarks>
-        /// <param name="user">Owning user.</param>
-        /// <param name="expected">Expected phone.</param>
-        /// <param name="phone">Updated phone.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the phone was updated, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user to whom the phone number belongs.</param>
+        /// <param name="expected">The expected persisted record.</param>
+        /// <param name="phone">The replacement record.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the phone number was updated; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryUpdatePhoneAsync(User user, UserPhone expected, UserPhone phone, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes a phone.
+        /// Attempts to remove a phone number asynchronously.
         /// </summary>
         /// <remarks>
-        /// Removes the associated pending challenge in the same transaction, if present.
-        /// Removal of a verified recovery contact invalidates outstanding account recovery.
+        /// Removes the associated pending challenge in the same transaction, if present. Removing a verified recovery contact invalidates outstanding account recovery.
         /// </remarks>
-        /// <param name="user">Owning user.</param>
-        /// <param name="phone">Phone.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the phone was removed, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user to whom the phone number belongs.</param>
+        /// <param name="phone">The phone number to remove.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the phone number was removed; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryRemovePhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
 
     }

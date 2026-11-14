@@ -14,43 +14,47 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Audit record persistence.
+    /// Defines the persistence contract for identity audit records.
     /// </summary>
     public interface IUserAuditStore : IUserStore {
 
         /// <summary>
-        /// Gets audits by affected user UUID.
+        /// Gets an asynchronous sequence of audit records for an affected user.
         /// </summary>
-        /// <param name="user">Affected user UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The affected user's audit records.</returns>
+        /// <param name="user">The unique identifier of the affected user.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>An asynchronous sequence of the affected user's audit records.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         IAsyncEnumerable<UserAudit> GetAuditsAsync(Guid user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets audits by acting user UUID.
+        /// Gets an asynchronous sequence of audit records for an acting user.
         /// </summary>
-        /// <param name="actor">Acting user UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Audit records for the acting user.</returns>
+        /// <param name="actor">The unique identifier of the user who performed the audited action.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>An asynchronous sequence of audit records for the acting user.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         IAsyncEnumerable<UserAudit> GetAuditsByActorAsync(Guid actor, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets audits by affected entity UUID.
+        /// Gets an asynchronous sequence of audit records for an affected entity.
         /// </summary>
-        /// <param name="entity">Affected entity UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Audit records for the affected entity.</returns>
+        /// <param name="entity">The unique identifier of the entity affected by the audited action.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>An asynchronous sequence of audit records for the affected entity.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         IAsyncEnumerable<UserAudit> GetAuditsByEntityAsync(Guid entity, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds an audit record.
+        /// Attempts to add an audit record asynchronously.
         /// </summary>
         /// <remarks>
-        /// Preserves audits after associated users or entities are deleted.
+        /// Audit records are preserved after associated users or entities are deleted.
         /// </remarks>
-        /// <param name="audit">Audit record.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the audit record was added, otherwise <see langword="false"/>.</returns>
+        /// <param name="audit">The audit record to add.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the audit record was added; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryAddAuditAsync(UserAudit audit, CancellationToken cancellationToken = default);
 
     }

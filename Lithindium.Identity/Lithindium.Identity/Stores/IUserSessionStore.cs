@@ -14,94 +14,99 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Authentication session persistence.
+    /// Defines the persistence contract for pending and authenticated user sessions.
     /// </summary>
     /// <remarks>
-    /// Session UUIDs are never reused. Revocation or expiration permanently invalidates a session.
-    /// Authentication changes and required revocations are committed together.
+    /// Session identifiers are never reused. Revocation or expiration permanently invalidates a session. Authentication changes and required revocations are committed together.
     /// </remarks>
     public interface IUserSessionStore : IUserStore {
 
         /// <summary>
-        /// Gets a user's pending and authenticated sessions.
+        /// Gets an asynchronous sequence of a user's pending and authenticated sessions.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The user's pending and authenticated sessions.</returns>
+        /// <param name="user">The user whose sessions are retrieved.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>An asynchronous sequence of the user's pending and authenticated sessions.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         IAsyncEnumerable<UserSession> GetSessionsAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a session by UUID.
+        /// Asynchronously gets a user's session by unique identifier.
         /// </summary>
         /// <remarks>
-        /// Only an existing, unexpired session with no challenge can authenticate its owner.
+        /// Retrieving a session does not establish authentication. Only an existing, unexpired session without a pending challenge can authenticate its owner.
         /// </remarks>
-        /// <param name="user">Owning user.</param>
-        /// <param name="uuid">Session UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The session, or <see langword="null"/> if not found.</returns>
+        /// <param name="user">The user to whom the session belongs.</param>
+        /// <param name="uuid">The unique identifier of the session to find.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the session, or <see langword="null"/> if not found.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<UserSession?> GetSessionAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds a pending or authenticated session.
+        /// Attempts to add a pending or authenticated session asynchronously.
         /// </summary>
         /// <remarks>
-        /// Requires expiration after creation. The session is issued within the transaction validating the authorizing authentication state.
+        /// Requires an expiration time after creation. The session is issued in the transaction that validates the authorizing authentication state.
         /// </remarks>
-        /// <param name="user">Owning user.</param>
-        /// <param name="session">New session.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the session was added, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user to whom the session belongs.</param>
+        /// <param name="session">The session to add.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the session was added; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryAddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Conditionally updates a session.
+        /// Attempts to conditionally update a session asynchronously.
         /// </summary>
         /// <remarks>
-        /// Compares the entire expected state atomically, including authentication methods by content.
-        /// The UUID and creation time are immutable. Successful proof clears the pending challenge and updates authentication evidence in the same transaction as consumption.
-        /// Expired sessions cannot be reactivated.
+        /// <para>Compares the entire persisted session against <paramref name="expected"/> atomically, including authentication methods by content. The identifier and creation time are immutable.</para>
+        /// <para>Successful proof clears the pending challenge and updates authentication evidence in the same transaction as consumption. Expired sessions cannot be reactivated.</para>
         /// </remarks>
-        /// <param name="user">Owning user.</param>
-        /// <param name="expected">Expected session.</param>
-        /// <param name="session">Updated session.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the session was updated, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user to whom the session belongs.</param>
+        /// <param name="expected">The expected persisted session.</param>
+        /// <param name="session">The replacement session.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the session was updated; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryUpdateSessionAsync(User user, UserSession expected, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes a session.
+        /// Attempts to remove a session asynchronously.
         /// </summary>
         /// <remarks>
         /// Removes the associated pending challenge in the same transaction, if present.
         /// </remarks>
-        /// <param name="user">Owning user.</param>
-        /// <param name="session">Session.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the session was removed, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user to whom the session belongs.</param>
+        /// <param name="session">The session to remove.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the session was removed; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryRemoveSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes a user's sessions, optionally preserving one UUID.
+        /// Attempts to remove a user's sessions asynchronously, optionally preserving one session.
         /// </summary>
         /// <remarks>
-        /// Removes matching sessions and their pending challenges in the same transaction. No matching sessions is a successful outcome.
+        /// Removes matching sessions and their pending challenges in the same transaction. Having no matching sessions is a successful outcome.
         /// </remarks>
-        /// <param name="user">Owning user.</param>
-        /// <param name="exceptUuid">Session UUID to preserve, or <see langword="null"/> to remove all sessions.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the removal succeeded, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user whose sessions are removed.</param>
+        /// <param name="exceptUuid">The unique identifier of the session to preserve, or <see langword="null"/> to remove all sessions.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the removal succeeded, including when no sessions match; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryRemoveSessionsAsync(User user, Guid? exceptUuid = null, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes sessions expiring at or before the UTC cutoff.
+        /// Asynchronously removes sessions that expire at or before a specified time.
         /// </summary>
         /// <remarks>
         /// Removes associated pending challenges in the same transaction.
         /// </remarks>
-        /// <param name="expiresAt">Inclusive UTC expiration cutoff.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The number of sessions removed.</returns>
+        /// <param name="expiresAt">The inclusive expiration cutoff, in UTC.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of sessions removed.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<int> RemoveExpiredSessionsAsync(DateTime expiresAt, CancellationToken cancellationToken = default);
 
     }

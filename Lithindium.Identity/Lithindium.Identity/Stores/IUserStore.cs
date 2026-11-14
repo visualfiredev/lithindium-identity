@@ -13,76 +13,79 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// User persistence.
+    /// Defines the persistence contract for user accounts and shared store transactions.
     /// </summary>
     /// <remarks>
-    /// All writes are atomic. Mutations return <see langword="false"/> for expected rejections, including missing entities, uniqueness violations and stale expectations, without leaving partial changes.
-    /// Invalid arguments, cancellation and unexpected infrastructure failures throw exceptions.
-    /// Successful mutations persist immediately outside transactions and on commit within transactions.
-    /// Associated state is scoped to the owner's UUID; snapshots do not establish authorization.
-    /// A known transaction abort prevents commit. Retries require an entirely new transaction with fresh state; uncertain commits are not retryable.
+    /// <para>All writes are atomic. A mutation returns <see langword="false"/> for an expected rejection, such as a missing entity, a uniqueness violation, or a stale expectation, without leaving partial changes. Invalid arguments, cancellation, and unexpected infrastructure failures throw exceptions.</para>
+    /// <para>Successful mutations persist immediately outside a transaction and on commit within a transaction. Associated state is scoped to the owner's UUID. Record snapshots do not establish authorization.</para>
+    /// <para>A known transaction abort prevents commit. A retry requires a new transaction and fresh state. An uncertain commit outcome is not safe to retry automatically.</para>
     /// </remarks>
     public interface IUserStore {
 
         /// <summary>
-        /// Begins an atomic transaction.
+        /// Asynchronously begins an atomic identity store transaction.
         /// </summary>
         /// <remarks>
-        /// All capabilities on the same instance participate until commit, rollback or disposal.
-        /// The transaction provides serializable isolation or equivalent guarantees for current reads, writes and entity sets. Nested transactions are unsupported.
+        /// All capabilities on the same store instance participate in the transaction until it is committed, rolled back, or disposed. The transaction provides serializable isolation or equivalent guarantees for current reads, writes, and entity sets. Nested transactions are not supported.
         /// </remarks>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The transaction.</returns>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the new transaction.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<IUserStoreTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Finds a user by UUID.
+        /// Asynchronously finds a user by unique identifier.
         /// </summary>
-        /// <param name="uuid">User UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The user, or <see langword="null"/> if not found.</returns>
+        /// <param name="uuid">The unique identifier of the user to find.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the user, or <see langword="null"/> if not found.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<User?> FindByUuidAsync(Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Finds a user by username.
+        /// Asynchronously finds a user by username.
         /// </summary>
-        /// <param name="username">Username.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The user, or <see langword="null"/> if not found.</returns>
+        /// <param name="username">The username of the user to find.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the user, or <see langword="null"/> if not found.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<User?> FindByUsernameAsync(string username, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Creates a user.
+        /// Attempts to create a user asynchronously.
         /// </summary>
         /// <remarks>
-        /// UUIDs are never reused, and usernames are unique.
+        /// User identifiers are never reused, and usernames are unique.
         /// </remarks>
-        /// <param name="user">New user.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the user was created, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user to create.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the user was created; otherwise, <see langword="false"/> (for example, if the identifier or username is already in use).</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryCreateAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Conditionally updates a user.
+        /// Attempts to update a user asynchronously if the persisted state matches the expected state.
         /// </summary>
         /// <remarks>
-        /// Compares all expected persisted values atomically. The UUID is immutable.
+        /// Compares all persisted values against <paramref name="expected"/> atomically before applying <paramref name="user"/>. The user identifier is immutable.
         /// </remarks>
-        /// <param name="expected">Expected user.</param>
-        /// <param name="user">Updated user.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the user was updated, otherwise <see langword="false"/>.</returns>
+        /// <param name="expected">The expected persisted user.</param>
+        /// <param name="user">The replacement user record.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the user was updated; otherwise, <see langword="false"/> (for example, if the user no longer exists, the expected state does not match, or the update is rejected).</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryUpdateAsync(User expected, User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Deletes a user.
+        /// Attempts to delete a user asynchronously.
         /// </summary>
         /// <remarks>
-        /// Removes all dependent identity state, including challenges, in the same transaction. Historical audits are preserved.
+        /// Removes all dependent identity state, including challenges, in the same transaction. Historical audit records are preserved.
         /// </remarks>
-        /// <param name="uuid">User UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the user was deleted, otherwise <see langword="false"/>.</returns>
+        /// <param name="uuid">The unique identifier of the user to delete.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the user was deleted; otherwise, <see langword="false"/> (for example, if the user does not exist).</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryDeleteAsync(Guid uuid, CancellationToken cancellationToken = default);
 
     }

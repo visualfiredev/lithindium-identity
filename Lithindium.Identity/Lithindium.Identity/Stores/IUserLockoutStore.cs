@@ -12,29 +12,31 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Authentication lockout persistence.
+    /// Defines the persistence contract for user authentication lockout state.
     /// </summary>
     public interface IUserLockoutStore : IUserStore {
 
         /// <summary>
-        /// Gets a user's lockout state.
+        /// Asynchronously gets a user's lockout state.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The lockout state, or <see langword="null"/> if not found.</returns>
+        /// <param name="user">The user to whom the lockout state belongs.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the lockout state, or <see langword="null"/> if not found.</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<UserLockout?> GetLockoutAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Conditionally creates or updates lockout state.
+        /// Attempts to create or conditionally update a user's lockout state asynchronously.
         /// </summary>
         /// <remarks>
-        /// Compares the entire expected state atomically; a <see langword="null"/> expectation requires no existing row.
+        /// Compares the entire persisted lockout state against <paramref name="expected"/> atomically. A <see langword="null"/> expectation requires that no lockout record exists.
         /// </remarks>
-        /// <param name="user">Owning user.</param>
-        /// <param name="expected">Expected lockout state, or <see langword="null"/> if absent.</param>
-        /// <param name="lockout">Updated lockout state.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns><see langword="true"/> if the lockout state was saved, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user to whom the lockout state belongs.</param>
+        /// <param name="expected">The expected persisted lockout state, or <see langword="null"/> if no record is expected to exist.</param>
+        /// <param name="lockout">The replacement lockout state.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the lockout state was saved; otherwise, <see langword="false"/> (for example, if the expected state does not match).</returns>
+        /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default);
 
     }
