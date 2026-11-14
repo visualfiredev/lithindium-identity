@@ -25,7 +25,7 @@ namespace Lithindium.Identity {
         /// Gets the authentication generation.
         /// </summary>
         /// <remarks>
-        /// Incremented to invalidate generation-bound credentials.
+        /// Incrementing the generation invalidates generation-bound credentials.
         /// </remarks>
         public required ushort Rotation { get; init; }
 

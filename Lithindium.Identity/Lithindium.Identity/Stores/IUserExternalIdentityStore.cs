@@ -34,7 +34,7 @@ namespace Lithindium.Identity {
         /// Finds a user by external issuer and subject.
         /// </summary>
         /// <remarks>
-        /// Compare issuer and subject exactly and case-sensitively.
+        /// Compares issuer and subject exactly and case-sensitively.
         /// </remarks>
         /// <returns>The user, or <see langword="null"/> if not found.</returns>
         Task<User?> FindByExternalIdentityAsync(string issuer, string subject, CancellationToken cancellationToken = default);
@@ -43,7 +43,7 @@ namespace Lithindium.Identity {
         /// Adds an external identity.
         /// </summary>
         /// <remarks>
-        /// Issuer and subject pairs must be unique across the store.
+        /// Issuer and subject pairs are unique across the store.
         /// </remarks>
         /// <returns><see langword="true"/> if the external identity was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
@@ -52,7 +52,7 @@ namespace Lithindium.Identity {
         /// Conditionally updates external identity metadata.
         /// </summary>
         /// <remarks>
-        /// Compare the entire expected state atomically. UUID, issuer and subject are immutable.
+        /// Compares the entire expected state atomically. The UUID, issuer and subject are immutable.
         /// </remarks>
         /// <returns><see langword="true"/> if the external identity was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateExternalIdentityAsync(User user, UserExternalIdentity expected, UserExternalIdentity identity, CancellationToken cancellationToken = default);

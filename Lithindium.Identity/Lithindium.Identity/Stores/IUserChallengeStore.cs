@@ -16,8 +16,8 @@ namespace Lithindium.Identity {
     /// User challenge persistence.
     /// </summary>
     /// <remarks>
-    /// Never reuse challenge UUIDs. A challenge belongs to one user and one intended operation.
-    /// Failed proof attempts must persist without applying the operation; successful completion must apply the operation and consume its challenge atomically.
+    /// Challenge UUIDs are never reused. Each challenge belongs to one user and one intended operation.
+    /// Failed proof attempts persist without applying the operation. Successful completion applies the operation and consumes the challenge in the same transaction.
     /// </remarks>
     public interface IUserChallengeStore : IUserStore {
 
@@ -31,8 +31,8 @@ namespace Lithindium.Identity {
         /// Adds a challenge.
         /// </summary>
         /// <remarks>
-        /// Require zero attempts, a nonempty verifier and expiration after creation.
-        /// Bind it to exactly one operation of the same owner within the same transaction.
+        /// Requires zero attempts, a nonempty verifier and expiration after creation.
+        /// The challenge is bound to exactly one operation of the same owner within the same transaction.
         /// </remarks>
         /// <returns><see langword="true"/> if the challenge was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddChallengeAsync(User user, UserChallenge challenge, CancellationToken cancellationToken = default);
@@ -41,8 +41,8 @@ namespace Lithindium.Identity {
         /// Conditionally updates a challenge's attempt count.
         /// </summary>
         /// <remarks>
-        /// Compare the entire expected state atomically. UUID, secret and timestamps are immutable.
-        /// The replacement must increment attempts by exactly one without overflow.
+        /// Compares the entire expected state atomically. The UUID, secret and timestamps are immutable.
+        /// The replacement increments attempts by exactly one without overflow.
         /// The caller supplies attempt-limit and expiration policy using current transactional state.
         /// </remarks>
         /// <returns><see langword="true"/> if the challenge was updated, otherwise <see langword="false"/>.</returns>
@@ -52,7 +52,7 @@ namespace Lithindium.Identity {
         /// Removes an unreferenced challenge.
         /// </summary>
         /// <remarks>
-        /// Compare the expected challenge before removal. A referenced challenge must not be removed.
+        /// Compares the expected challenge before removal and rejects referenced challenges.
         /// Successful verification clears the reference and applies the operation in the same transaction.
         /// </remarks>
         /// <returns><see langword="true"/> if the challenge was removed, otherwise <see langword="false"/>.</returns>
@@ -62,8 +62,8 @@ namespace Lithindium.Identity {
         /// Removes challenges expiring at or before the UTC cutoff.
         /// </summary>
         /// <remarks>
-        /// Atomically delete associated pending emails, phones, authenticators and sessions; clear only recovery references.
-        /// Never clear a pending credential or session reference to expire it.
+        /// Deletes associated pending emails, phones, authenticators and sessions in the same transaction, but only clears recovery references.
+        /// Expiration never clears a pending credential or session reference.
         /// </remarks>
         /// <returns>The number of challenges removed.</returns>
         Task<int> RemoveExpiredChallengesAsync(DateTime expiresAt, CancellationToken cancellationToken = default);

@@ -17,7 +17,7 @@ namespace Lithindium.Identity {
     /// TOTP authenticator persistence.
     /// </summary>
     /// <remarks>
-    /// Pending authenticators cannot satisfy authentication. Never reuse authenticator UUIDs.
+    /// Pending authenticators cannot satisfy authentication. Authenticator UUIDs are never reused.
     /// </remarks>
     public interface IUserTotpStore : IUserStore {
 
@@ -43,9 +43,9 @@ namespace Lithindium.Identity {
         /// Conditionally updates an authenticator.
         /// </summary>
         /// <remarks>
-        /// Compare the entire expected state atomically, including the secret by content.
-        /// UUID, secret, algorithm, digits and period are immutable. LastStep must never decrease or reset after acceptance.
-        /// Accepting a code requires advancing LastStep strictly. Clear the challenge only on successful enrollment in the same transaction as consumption.
+        /// Compares the entire expected state atomically, including the secret by content.
+        /// The UUID, secret, algorithm, digits and period are immutable. LastStep never decreases or resets after acceptance.
+        /// Accepting a code requires a strictly greater LastStep. Successful enrollment clears the challenge in the same transaction as consumption.
         /// </remarks>
         /// <returns><see langword="true"/> if the authenticator was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateTotpAsync(User user, UserTotp expected, UserTotp totp, CancellationToken cancellationToken = default);
@@ -54,7 +54,7 @@ namespace Lithindium.Identity {
         /// Removes an authenticator.
         /// </summary>
         /// <remarks>
-        /// Remove its pending challenge atomically.
+        /// Removes the associated pending challenge in the same transaction, if present.
         /// </remarks>
         /// <returns><see langword="true"/> if the authenticator was removed, otherwise <see langword="false"/>.</returns>
         Task<bool> TryRemoveTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);

@@ -30,9 +30,9 @@ namespace Lithindium.Identity {
         /// Conditionally creates or updates security state.
         /// </summary>
         /// <remarks>
-        /// Compare the entire expected state atomically; a null expectation requires no existing row.
-        /// Bind or clear the recovery challenge in the same transaction as its creation or consumption.
-        /// Rotation changes must commit with required revocations. Never wrap or decrease rotation.
+        /// Compares the entire expected state atomically; a <see langword="null"/> expectation requires no existing row.
+        /// Binds or clears the recovery challenge in the same transaction as its creation or consumption.
+        /// Rotation changes are committed with required revocations. Rotation never wraps or decreases.
         /// </remarks>
         /// <returns><see langword="true"/> if the security state was saved, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateSecurityAsync(User user, UserSecurity? expected, UserSecurity security, CancellationToken cancellationToken = default);

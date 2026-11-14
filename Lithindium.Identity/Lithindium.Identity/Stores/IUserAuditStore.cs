@@ -40,7 +40,7 @@ namespace Lithindium.Identity {
         /// Adds an audit record.
         /// </summary>
         /// <remarks>
-        /// Preserve audits after associated users or entities are deleted.
+        /// Preserves audits after associated users or entities are deleted.
         /// </remarks>
         /// <returns><see langword="true"/> if the audit record was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddAuditAsync(UserAudit audit, CancellationToken cancellationToken = default);

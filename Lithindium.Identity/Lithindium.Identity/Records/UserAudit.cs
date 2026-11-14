@@ -50,7 +50,7 @@ namespace Lithindium.Identity {
         /// Gets event metadata as a JSON object.
         /// </summary>
         /// <remarks>
-        /// Never include credentials or sensitive authentication material.
+        /// Audit information excludes credentials and sensitive authentication material.
         /// </remarks>
         public required string Info { get; init; }
 

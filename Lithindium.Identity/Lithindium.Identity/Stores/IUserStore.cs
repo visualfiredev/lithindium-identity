@@ -16,14 +16,11 @@ namespace Lithindium.Identity {
     /// User persistence.
     /// </summary>
     /// <remarks>
-    /// All writes are atomic. Boolean mutation methods return true when the operation succeeds,
-    /// or false for an expected rejection, including missing entities, uniqueness violations or stale expectations.
-    /// A rejected mutation leaves no partial changes.
-    /// Invalid arguments, cancellation and unexpected infrastructure failures throw.
-    /// Outside a transaction, successful mutations persist immediately. Within a transaction, changes persist on commit.
-    /// Scope associated state to the owner's UUID; snapshots do not establish authorization.
-    /// A known transaction abort prevents commit; retry the entire transaction from fresh state,
-    /// never an uncertain commit.
+    /// All writes are atomic. Mutations return <see langword="false"/> for expected rejections, including missing entities, uniqueness violations and stale expectations, without leaving partial changes.
+    /// Invalid arguments, cancellation and unexpected infrastructure failures throw exceptions.
+    /// Successful mutations persist immediately outside transactions and on commit within transactions.
+    /// Associated state is scoped to the owner's UUID; snapshots do not establish authorization.
+    /// A known transaction abort prevents commit. Retries require an entirely new transaction with fresh state; uncertain commits are not retryable.
     /// </remarks>
     public interface IUserStore {
 
@@ -32,8 +29,7 @@ namespace Lithindium.Identity {
         /// </summary>
         /// <remarks>
         /// All capabilities on the same instance participate until commit, rollback or disposal.
-        /// Use serializable isolation or equivalent guarantees for current reads, writes and entity sets.
-        /// Do not nest transactions.
+        /// The transaction provides serializable isolation or equivalent guarantees for current reads, writes and entity sets. Nested transactions are unsupported.
         /// </remarks>
         /// <returns>The transaction.</returns>
         Task<IUserStoreTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
@@ -54,7 +50,7 @@ namespace Lithindium.Identity {
         /// Creates a user.
         /// </summary>
         /// <remarks>
-        /// UUIDs must never be reused; usernames must be unique.
+        /// UUIDs are never reused, and usernames are unique.
         /// </remarks>
         /// <returns><see langword="true"/> if the user was created, otherwise <see langword="false"/>.</returns>
         Task<bool> TryCreateAsync(User user, CancellationToken cancellationToken = default);
@@ -63,7 +59,7 @@ namespace Lithindium.Identity {
         /// Conditionally updates a user.
         /// </summary>
         /// <remarks>
-        /// UUID is immutable. Compare all expected persisted values atomically.
+        /// Compares all expected persisted values atomically. The UUID is immutable.
         /// </remarks>
         /// <returns><see langword="true"/> if the user was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateAsync(User expected, User user, CancellationToken cancellationToken = default);
@@ -72,7 +68,7 @@ namespace Lithindium.Identity {
         /// Deletes a user.
         /// </summary>
         /// <remarks>
-        /// Atomically remove dependent identity state, including challenges; preserve historical audits.
+        /// Removes all dependent identity state, including challenges, in the same transaction. Historical audits are preserved.
         /// </remarks>
         /// <returns><see langword="true"/> if the user was deleted, otherwise <see langword="false"/>.</returns>
         Task<bool> TryDeleteAsync(Guid uuid, CancellationToken cancellationToken = default);

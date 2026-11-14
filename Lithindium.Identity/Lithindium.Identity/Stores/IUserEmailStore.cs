@@ -16,8 +16,8 @@ namespace Lithindium.Identity {
     /// User email persistence.
     /// </summary>
     /// <remarks>
-    /// Pending records are not credentials. The email address must be unique per owner;
-    /// verified emails must also be unique across users. Pending records must not reserve another user's verified lookup.
+    /// Email addresses are unique per owner, and verified addresses are unique across users.
+    /// Pending emails are not credentials and do not reserve another user's verified lookup.
     /// </remarks>
     public interface IUserEmailStore : IUserStore {
 
@@ -30,9 +30,6 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Finds a user by verified email address.
         /// </summary>
-        /// <remarks>
-        /// Pending records are never returned by this lookup.
-        /// </remarks>
         /// <returns>The user, or <see langword="null"/> if not found.</returns>
         Task<User?> FindByEmailAsync(string address, CancellationToken cancellationToken = default);
 
@@ -40,7 +37,7 @@ namespace Lithindium.Identity {
         /// Adds an email.
         /// </summary>
         /// <remarks>
-        /// A pending email must not be primary. A verified primary atomically replaces the previous primary.
+        /// Rejects pending primary emails. Adding a verified primary clears the previous primary in the same transaction.
         /// </remarks>
         /// <returns><see langword="true"/> if the email was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
@@ -49,9 +46,9 @@ namespace Lithindium.Identity {
         /// Conditionally updates an email.
         /// </summary>
         /// <remarks>
-        /// Compare the entire expected state atomically; address is immutable.
-        /// A non-null challenge may be replaced or cleared only in the transaction binding or consuming it.
-        /// Only verified records may be primary; setting a primary atomically clears the previous primary.
+        /// Compares the entire expected state atomically. The address is immutable.
+        /// A non-null challenge is replaced or cleared only in the transaction binding or consuming it.
+        /// Only verified emails can be primary; setting a primary clears the previous primary in the same transaction.
         /// </remarks>
         /// <returns><see langword="true"/> if the email was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateEmailAsync(User user, UserEmail expected, UserEmail email, CancellationToken cancellationToken = default);
@@ -60,7 +57,8 @@ namespace Lithindium.Identity {
         /// Removes an email.
         /// </summary>
         /// <remarks>
-        /// Remove its pending challenge atomically. Removing a verified recovery contact must invalidate outstanding account recovery.
+        /// Removes the associated pending challenge in the same transaction, if present.
+        /// Removal of a verified recovery contact invalidates outstanding account recovery.
         /// </remarks>
         /// <returns><see langword="true"/> if the email was removed, otherwise <see langword="false"/>.</returns>
         Task<bool> TryRemoveEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);

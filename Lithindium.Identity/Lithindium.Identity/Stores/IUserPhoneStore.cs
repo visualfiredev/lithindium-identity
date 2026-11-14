@@ -16,8 +16,8 @@ namespace Lithindium.Identity {
     /// User phone persistence.
     /// </summary>
     /// <remarks>
-    /// Pending records are not credentials. The phone number and extension must be unique per owner;
-    /// verified phones must also be unique across users. Pending records must not reserve another user's verified lookup.
+    /// Phone number and extension pairs are unique per owner, and verified pairs are unique across users.
+    /// Pending phones are not credentials and do not reserve another user's verified lookup.
     /// </remarks>
     public interface IUserPhoneStore : IUserStore {
 
@@ -30,9 +30,6 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Finds a user by verified phone number and extension.
         /// </summary>
-        /// <remarks>
-        /// Pending records are never returned by this lookup.
-        /// </remarks>
         /// <returns>The user, or <see langword="null"/> if not found.</returns>
         Task<User?> FindByPhoneAsync(string number, string? extension = null, CancellationToken cancellationToken = default);
 
@@ -40,7 +37,7 @@ namespace Lithindium.Identity {
         /// Adds a phone.
         /// </summary>
         /// <remarks>
-        /// A pending phone must not be primary. A verified primary atomically replaces the previous primary.
+        /// Rejects pending primary phones. Adding a verified primary clears the previous primary in the same transaction.
         /// </remarks>
         /// <returns><see langword="true"/> if the phone was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
@@ -49,9 +46,9 @@ namespace Lithindium.Identity {
         /// Conditionally updates a phone.
         /// </summary>
         /// <remarks>
-        /// Compare the entire expected state atomically; number and extension are immutable.
-        /// A non-null challenge may be replaced or cleared only in the transaction binding or consuming it.
-        /// Only verified records may be primary; setting a primary atomically clears the previous primary.
+        /// Compares the entire expected state atomically. The number and extension are immutable.
+        /// A non-null challenge is replaced or cleared only in the transaction binding or consuming it.
+        /// Only verified phones can be primary; setting a primary clears the previous primary in the same transaction.
         /// </remarks>
         /// <returns><see langword="true"/> if the phone was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdatePhoneAsync(User user, UserPhone expected, UserPhone phone, CancellationToken cancellationToken = default);
@@ -60,7 +57,8 @@ namespace Lithindium.Identity {
         /// Removes a phone.
         /// </summary>
         /// <remarks>
-        /// Remove its pending challenge atomically. Removing a verified recovery contact must invalidate outstanding account recovery.
+        /// Removes the associated pending challenge in the same transaction, if present.
+        /// Removal of a verified recovery contact invalidates outstanding account recovery.
         /// </remarks>
         /// <returns><see langword="true"/> if the phone was removed, otherwise <see langword="false"/>.</returns>
         Task<bool> TryRemovePhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);

@@ -17,8 +17,8 @@ namespace Lithindium.Identity {
     /// Authentication session persistence.
     /// </summary>
     /// <remarks>
-    /// Never reuse session UUIDs. Revocation or expiration permanently invalidates a session.
-    /// Commit authentication changes and required revocations together.
+    /// Session UUIDs are never reused. Revocation or expiration permanently invalidates a session.
+    /// Authentication changes and required revocations are committed together.
     /// </remarks>
     public interface IUserSessionStore : IUserStore {
 
@@ -41,7 +41,7 @@ namespace Lithindium.Identity {
         /// Adds a pending or authenticated session.
         /// </summary>
         /// <remarks>
-        /// Expiration must follow creation. Issue within the transaction validating the authorizing authentication state.
+        /// Requires expiration after creation. The session is issued within the transaction validating the authorizing authentication state.
         /// </remarks>
         /// <returns><see langword="true"/> if the session was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
@@ -50,9 +50,9 @@ namespace Lithindium.Identity {
         /// Conditionally updates a session.
         /// </summary>
         /// <remarks>
-        /// Compare the entire expected state atomically, including authentication methods by content.
-        /// UUID and creation time are immutable. Clear a pending challenge and update authentication evidence only after successful proof, atomically with consumption.
-        /// Never reactivate an expired session.
+        /// Compares the entire expected state atomically, including authentication methods by content.
+        /// The UUID and creation time are immutable. Successful proof clears the pending challenge and updates authentication evidence in the same transaction as consumption.
+        /// Expired sessions cannot be reactivated.
         /// </remarks>
         /// <returns><see langword="true"/> if the session was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateSessionAsync(User user, UserSession expected, UserSession session, CancellationToken cancellationToken = default);
@@ -61,7 +61,7 @@ namespace Lithindium.Identity {
         /// Removes a session.
         /// </summary>
         /// <remarks>
-        /// Remove its pending challenge atomically.
+        /// Removes the associated pending challenge in the same transaction, if present.
         /// </remarks>
         /// <returns><see langword="true"/> if the session was removed, otherwise <see langword="false"/>.</returns>
         Task<bool> TryRemoveSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
@@ -70,7 +70,7 @@ namespace Lithindium.Identity {
         /// Removes a user's sessions, optionally preserving one UUID.
         /// </summary>
         /// <remarks>
-        /// Remove matching sessions and associated pending challenges atomically; no matches is success.
+        /// Removes matching sessions and their pending challenges in the same transaction. No matching sessions is a successful outcome.
         /// </remarks>
         /// <returns><see langword="true"/> if the removal succeeded, otherwise <see langword="false"/>.</returns>
         Task<bool> TryRemoveSessionsAsync(User user, Guid? exceptUuid = null, CancellationToken cancellationToken = default);
@@ -79,7 +79,7 @@ namespace Lithindium.Identity {
         /// Removes sessions expiring at or before the UTC cutoff.
         /// </summary>
         /// <remarks>
-        /// Remove associated pending challenges atomically.
+        /// Removes associated pending challenges in the same transaction.
         /// </remarks>
         /// <returns>The number of sessions removed.</returns>
         Task<int> RemoveExpiredSessionsAsync(DateTime expiresAt, CancellationToken cancellationToken = default);

@@ -26,7 +26,7 @@ namespace Lithindium.Identity {
         /// Conditionally creates or updates lockout state.
         /// </summary>
         /// <remarks>
-        /// Compare the entire expected state atomically; a null expectation requires no existing row.
+        /// Compares the entire expected state atomically; a <see langword="null"/> expectation requires no existing row.
         /// </remarks>
         /// <returns><see langword="true"/> if the lockout state was saved, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default);
