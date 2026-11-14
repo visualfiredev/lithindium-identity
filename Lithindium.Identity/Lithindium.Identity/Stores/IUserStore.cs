@@ -17,28 +17,53 @@ namespace Lithindium.Identity {
     /// </summary>
     /// <remarks>
     /// <para>All reads and writes, including those on derived store interfaces, require an active transaction.
-    /// Only the store exposed by <see cref="IUserStoreTransaction.Store"/> may perform these operations.
     /// Operations outside an active transaction, including enumeration of asynchronous sequences, throw <see cref="InvalidOperationException"/>.</para>
+    /// <para>Each store instance owns at most one active transaction. All supported store capabilities on that instance share it.
+    /// Store instances must not be shared by concurrent callers. Disposing the store rolls back any unsaved changes.</para>
     /// <para>All writes are atomic within the transaction. A mutation returns <see langword="false"/> for an expected rejection, such as a missing entity, a uniqueness violation, or a stale expectation, without leaving partial changes from that mutation.
-    /// A successful mutation is not durable until <see cref="IUserStoreTransaction.SaveAsync"/> succeeds.
+    /// A successful mutation is not durable until <see cref="SaveAsync"/> succeeds.
     /// Invalid arguments, cancellation, and unexpected infrastructure failures throw exceptions.</para>
     /// <para>Associated state is scoped to the owner's UUID. Record snapshots do not establish authorization.</para>
     /// </remarks>
-    public interface IUserStore {
+    public interface IUserStore : IAsyncDisposable {
 
         /// <summary>
         /// Asynchronously begins an identity store transaction.
         /// </summary>
         /// <remarks>
-        /// The transaction provides serializable isolation and exposes the same supported store capabilities as this store.
-        /// All operations through its store share the transaction and observe its own changes.
-        /// Nested transactions and concurrent operations on the same transaction are not supported.
+        /// The transaction provides serializable isolation. All operations on this store participate in the
+        /// transaction and observe its own changes. Nested transactions and concurrent operations are not supported.
         /// </remarks>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the active transaction.</returns>
-        /// <exception cref="InvalidOperationException">This store is bound to a transaction.</exception>
+        /// <exception cref="InvalidOperationException">A transaction is already active.</exception>
         /// <exception cref="OperationCanceledException">The cancellation token was canceled.</exception>
-        Task<IUserStoreTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
+        Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Asynchronously saves all changes and commits the active transaction.
+        /// </summary>
+        /// <remarks>
+        /// Validates all persistence invariants before committing. A known rejection or commit conflict rolls back
+        /// all changes and returns <see langword="false"/>. An uncertain commit outcome throws and renders the store unusable;
+        /// callers must not assume rollback or blindly retry. A successful save or known rejection ends the transaction.
+        /// An aborted transaction cannot save. Retry known transient conflicts only in a new transaction using fresh state.
+        /// </remarks>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the transaction committed; otherwise, <see langword="false"/> for a known rejection.</returns>
+        /// <exception cref="InvalidOperationException">No usable transaction is active.</exception>
+        /// <exception cref="OperationCanceledException">The cancellation token was canceled.</exception>
+        Task<bool> SaveAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Asynchronously rolls back unsaved changes and ends the active transaction.
+        /// </summary>
+        /// <remarks>
+        /// Does nothing if no transaction is active. After rollback, the store may begin a new transaction
+        /// unless an unexpected failure has rendered the store unusable.
+        /// </remarks>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <exception cref="OperationCanceledException">The cancellation token was canceled.</exception>
+        Task RollbackAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Asynchronously finds a user by unique identifier.

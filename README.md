@@ -23,21 +23,25 @@ dotnet build Lithindium.Identity/Lithindium.Identity.sln
 
 The library is being redesigned and does not yet provide a working authentication implementation.
 
-All identity store reads and writes require an explicit transaction. `IUserStore.BeginTransactionAsync()` exposes a transaction-bound store with the same supported interfaces. Mutation attempts return `bool`: `true` on acceptance within the transaction, `false` on expected rejection. Unexpected failures throw. Only `SaveAsync()` commits changes; disposal rolls back unsaved changes. A known commit rejection returns `false` and rolls back. Transactions provide serializable isolation and cannot be reused after completion.
+All identity store reads and writes require an explicit transaction. Each store instance owns its transaction, shared by all of its supported store interfaces. Mutation attempts return `bool`: `true` on acceptance within the transaction, `false` on expected rejection. Unexpected failures throw. Only `SaveAsync()` commits changes; `RollbackAsync()` or store disposal rolls back unsaved changes. A known commit rejection returns `false` and rolls back. Transactions provide serializable isolation, cannot be nested, and end on save or rollback. Do not share a store instance across concurrent callers.
 
 ```csharp
-await using var transaction = await store.BeginTransactionAsync(cancellationToken);
-var users = transaction.Store;
-var security = (IUserSecurityStore)users;
+var security = (IUserSecurityStore)store;
+await store.BeginTransactionAsync(cancellationToken);
+try {
+    if (!await store.TryCreateAsync(user, cancellationToken))
+        return false;
 
-if (!await users.TryCreateAsync(user, cancellationToken))
-    return false;
+    if (!await security.TryUpdateSecurityAsync(user, null, userSecurity, cancellationToken))
+        return false;
 
-if (!await security.TryUpdateSecurityAsync(user, null, userSecurity, cancellationToken))
-    return false;
-
-return await transaction.SaveAsync(cancellationToken);
+    return await store.SaveAsync(cancellationToken);
+} finally {
+    await store.RollbackAsync();
+}
 ```
+
+Rollback is a no-op when no transaction is active. A store can begin another transaction after a completed save or rollback. Read-only transactions also require explicit completion.
 
 The interfaces define persistence outcomes, conditional updates, and atomic mutations; authentication and verification policy belong to the calling code. Pending credentials and sessions are not usable until their challenges are satisfied. Related challenge bindings, consumption, and authentication-state changes must be saved together. Failed authentication attempts that update lockout or challenge counters must also be explicitly saved.
 
