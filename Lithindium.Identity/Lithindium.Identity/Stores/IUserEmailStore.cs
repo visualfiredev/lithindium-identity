@@ -55,7 +55,7 @@ namespace Lithindium.Identity {
         /// Attempts to conditionally update an email address asynchronously.
         /// </summary>
         /// <remarks>
-        /// <para>Compares the entire persisted email record against <paramref name="expected"/> atomically. The email address is immutable. Replacing or clearing a non-null challenge reference is atomic with binding or consuming the challenge.</para>
+        /// <para>Compares the entire persisted email record against <paramref name="expected"/> atomically. The email address is immutable. The caller binds or consumes the associated challenge in the same transaction when replacing or clearing its reference.</para>
         /// <para>Only verified email addresses can be primary. Setting a primary address atomically clears the previous primary address.</para>
         /// </remarks>
         /// <param name="user">The user to whom the email address belongs.</param>

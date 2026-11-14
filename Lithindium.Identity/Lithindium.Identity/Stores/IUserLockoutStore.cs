@@ -35,7 +35,7 @@ namespace Lithindium.Identity {
         /// <param name="expected">The expected persisted lockout state, or <see langword="null"/> if no record is expected to exist.</param>
         /// <param name="lockout">The replacement lockout state.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the lockout state was saved; otherwise, <see langword="false"/> (for example, if the expected state does not match).</returns>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the lockout state was updated within the transaction; otherwise, <see langword="false"/> (for example, if the expected state does not match).</returns>
         /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default);
 

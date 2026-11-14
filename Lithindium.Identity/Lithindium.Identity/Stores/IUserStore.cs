@@ -16,10 +16,29 @@ namespace Lithindium.Identity {
     /// Defines the persistence contract for user accounts.
     /// </summary>
     /// <remarks>
-    /// <para>All writes are atomic. A mutation returns <see langword="false"/> for an expected rejection, such as a missing entity, a uniqueness violation, or a stale expectation, without leaving partial changes. Invalid arguments, cancellation, and unexpected infrastructure failures throw exceptions.</para>
+    /// <para>All reads and writes, including those on derived store interfaces, require an active transaction.
+    /// Only the store exposed by <see cref="IUserStoreTransaction.Store"/> may perform these operations.
+    /// Operations outside an active transaction, including enumeration of asynchronous sequences, throw <see cref="InvalidOperationException"/>.</para>
+    /// <para>All writes are atomic within the transaction. A mutation returns <see langword="false"/> for an expected rejection, such as a missing entity, a uniqueness violation, or a stale expectation, without leaving partial changes from that mutation.
+    /// A successful mutation is not durable until <see cref="IUserStoreTransaction.SaveAsync"/> succeeds.
+    /// Invalid arguments, cancellation, and unexpected infrastructure failures throw exceptions.</para>
     /// <para>Associated state is scoped to the owner's UUID. Record snapshots do not establish authorization.</para>
     /// </remarks>
     public interface IUserStore {
+
+        /// <summary>
+        /// Asynchronously begins an identity store transaction.
+        /// </summary>
+        /// <remarks>
+        /// The transaction provides serializable isolation and exposes the same supported store capabilities as this store.
+        /// All operations through its store share the transaction and observe its own changes.
+        /// Nested transactions and concurrent operations on the same transaction are not supported.
+        /// </remarks>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the active transaction.</returns>
+        /// <exception cref="InvalidOperationException">This store is bound to a transaction.</exception>
+        /// <exception cref="OperationCanceledException">The cancellation token was canceled.</exception>
+        Task<IUserStoreTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Asynchronously finds a user by unique identifier.

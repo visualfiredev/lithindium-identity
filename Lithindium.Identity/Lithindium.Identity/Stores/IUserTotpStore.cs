@@ -55,7 +55,7 @@ namespace Lithindium.Identity {
         /// </summary>
         /// <remarks>
         /// <para>Compares the entire persisted authenticator against <paramref name="expected"/> atomically, including the secret by content. The identifier, secret, algorithm, digit count, and period are immutable.</para>
-        /// <para>The <see cref="UserTotp.LastStep"/> value never decreases or resets after acceptance. Accepting a code requires a strictly greater time step. Successful enrollment atomically clears and consumes the challenge.</para>
+        /// <para>The <see cref="UserTotp.LastStep"/> value never decreases or resets after acceptance. Accepting a code requires a strictly greater time step. For successful enrollment, the caller clears and consumes the challenge in the same transaction.</para>
         /// </remarks>
         /// <param name="user">The user to whom the authenticator belongs.</param>
         /// <param name="expected">The expected persisted authenticator.</param>

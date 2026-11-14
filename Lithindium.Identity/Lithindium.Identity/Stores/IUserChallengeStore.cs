@@ -17,7 +17,7 @@ namespace Lithindium.Identity {
     /// </summary>
     /// <remarks>
     /// <para>Challenge identifiers are never reused. Each challenge belongs to one user and one intended operation.</para>
-    /// <para>Failed proof attempts persist without applying the operation. Successful completion applies the operation and consumes the challenge atomically.</para>
+    /// <para>Failed proof attempts must be saved without applying the operation. Successful completion applies the operation and consumes the challenge in the same transaction.</para>
     /// </remarks>
     public interface IUserChallengeStore : IUserStore {
 
@@ -35,7 +35,7 @@ namespace Lithindium.Identity {
         /// Attempts to add a challenge asynchronously.
         /// </summary>
         /// <remarks>
-        /// Requires an initial attempt count of zero, a nonempty proof verifier, and an expiration time after creation. Challenge creation and binding to exactly one operation of the same user are atomic.
+        /// Requires an initial attempt count of zero, a nonempty proof verifier, and an expiration time after creation. The caller binds the challenge to exactly one operation of the same user before saving the transaction. A newly added challenge may remain unbound only within the active transaction.
         /// </remarks>
         /// <param name="user">The user to whom the challenge belongs.</param>
         /// <param name="challenge">The challenge to add.</param>
@@ -63,7 +63,7 @@ namespace Lithindium.Identity {
         /// Attempts to remove an unreferenced challenge asynchronously.
         /// </summary>
         /// <remarks>
-        /// Compares the persisted challenge against <paramref name="challenge"/> before removal and rejects challenges that are still referenced. Successful verification clears the reference, applies the challenged operation, and removes the challenge atomically.
+        /// Compares the persisted challenge against <paramref name="challenge"/> before removal and rejects challenges that are still referenced. For successful verification, the caller clears the reference, applies the challenged operation, and removes the challenge in the same transaction.
         /// </remarks>
         /// <param name="user">The user to whom the challenge belongs.</param>
         /// <param name="challenge">The expected persisted challenge to remove.</param>

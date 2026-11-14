@@ -47,7 +47,7 @@ namespace Lithindium.Identity {
         /// Attempts to add a pending or authenticated session asynchronously.
         /// </summary>
         /// <remarks>
-        /// Requires an expiration time after creation. Session issuance and validation of the authorizing authentication state are atomic.
+        /// Requires an expiration time after creation. The caller validates the authorizing authentication state and adds the session in the same transaction.
         /// </remarks>
         /// <param name="user">The user to whom the session belongs.</param>
         /// <param name="session">The session to add.</param>
@@ -61,7 +61,7 @@ namespace Lithindium.Identity {
         /// </summary>
         /// <remarks>
         /// <para>Compares the entire persisted session against <paramref name="expected"/> atomically, including authentication methods by content. The identifier and creation time are immutable.</para>
-        /// <para>Successful proof atomically clears and consumes the pending challenge and updates authentication evidence. Expired sessions cannot be reactivated.</para>
+        /// <para>For successful proof, the caller clears and consumes the pending challenge and updates authentication evidence in the same transaction. Expired sessions cannot be reactivated.</para>
         /// </remarks>
         /// <param name="user">The user to whom the session belongs.</param>
         /// <param name="expected">The expected persisted session.</param>

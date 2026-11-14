@@ -34,13 +34,13 @@ namespace Lithindium.Identity {
         /// </summary>
         /// <remarks>
         /// <para>Compares the entire persisted security state against <paramref name="expected"/> atomically. A <see langword="null"/> expectation requires that no security record exists.</para>
-        /// <para>Binding or clearing the recovery challenge is atomic with its creation or consumption. Changes to <see cref="UserSecurity.Rotation"/> are atomic with required revocations. The rotation value never wraps or decreases.</para>
+        /// <para>The caller creates or consumes the recovery challenge in the same transaction when binding or clearing its reference. Changes to <see cref="UserSecurity.Rotation"/> and required revocations must be saved in the same transaction. The rotation value never wraps or decreases.</para>
         /// </remarks>
         /// <param name="user">The user to whom the security state belongs.</param>
         /// <param name="expected">The expected persisted security state, or <see langword="null"/> if no record is expected to exist.</param>
         /// <param name="security">The replacement security state.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the security state was saved; otherwise, <see langword="false"/> (for example, if the expected state does not match).</returns>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the security state was updated within the transaction; otherwise, <see langword="false"/> (for example, if the expected state does not match).</returns>
         /// <exception cref="System.OperationCanceledException">The cancellation token was canceled.</exception>
         Task<bool> TryUpdateSecurityAsync(User user, UserSecurity? expected, UserSecurity security, CancellationToken cancellationToken = default);
 

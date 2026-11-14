@@ -56,7 +56,7 @@ namespace Lithindium.Identity {
         /// Attempts to conditionally update a phone number asynchronously.
         /// </summary>
         /// <remarks>
-        /// <para>Compares the entire persisted phone record against <paramref name="expected"/> atomically. The number and extension are immutable. Replacing or clearing a non-null challenge reference is atomic with binding or consuming the challenge.</para>
+        /// <para>Compares the entire persisted phone record against <paramref name="expected"/> atomically. The number and extension are immutable. The caller binds or consumes the associated challenge in the same transaction when replacing or clearing its reference.</para>
         /// <para>Only verified phone numbers can be primary. Setting a primary number atomically clears the previous primary number.</para>
         /// </remarks>
         /// <param name="user">The user to whom the phone number belongs.</param>
