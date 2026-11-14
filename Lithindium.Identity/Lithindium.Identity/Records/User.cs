@@ -27,27 +27,9 @@ namespace Lithindium.Identity {
         public required string Username { get; init; }
 
         /// <summary>
-        /// Gets the password hash, or <see langword="null"/> if unset.
-        /// </summary>
-        public required string? Password { get; init; }
-
-        /// <summary>
         /// Gets the display name, or <see langword="null"/> if unset.
         /// </summary>
         public required string? DisplayName { get; init; }
-
-        /// <summary>
-        /// Gets the authentication generation.
-        /// </summary>
-        /// <remarks>
-        /// Incremented to invalidate generation-bound credentials.
-        /// </remarks>
-        public required ushort Rotation { get; init; }
-
-        /// <summary>
-        /// Gets the recovery challenge UUID, or <see langword="null"/> if none.
-        /// </summary>
-        public required Guid? Recovery { get; init; }
 
         /// <summary>
         /// Gets the account status.
@@ -58,12 +40,10 @@ namespace Lithindium.Identity {
         /// Creates a <see cref="User"/> with the given values.
         /// </summary>
         [SetsRequiredMembers]
-        public User(Guid uuid, string username, string? password, string? displayName, ushort rotation, UserStatus status) {
+        public User(Guid uuid, string username, string? displayName, UserStatus status) {
             Uuid = uuid;
             Username = username;
-            Password = password;
             DisplayName = displayName;
-            Rotation = rotation;
             Status = status;
         }
 
