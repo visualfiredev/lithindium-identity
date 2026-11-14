@@ -45,11 +45,11 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Adds an audit record.
         /// </summary>
-        /// <param name="audit">Audit record.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Preserves audits after associated users or entities are deleted.
         /// </remarks>
+        /// <param name="audit">Audit record.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the audit record was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddAuditAsync(UserAudit audit, CancellationToken cancellationToken = default);
 

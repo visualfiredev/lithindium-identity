@@ -50,27 +50,27 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Conditionally updates an authenticator.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="expected">Expected authenticator.</param>
-        /// <param name="totp">Updated authenticator.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Compares the entire expected state atomically, including the secret by content.
         /// The UUID, secret, algorithm, digits and period are immutable. LastStep never decreases or resets after acceptance.
         /// Accepting a code requires a strictly greater LastStep. Successful enrollment clears the challenge in the same transaction as consumption.
         /// </remarks>
+        /// <param name="user">Owning user.</param>
+        /// <param name="expected">Expected authenticator.</param>
+        /// <param name="totp">Updated authenticator.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the authenticator was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateTotpAsync(User user, UserTotp expected, UserTotp totp, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes an authenticator.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="totp">Authenticator.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Removes the associated pending challenge in the same transaction, if present.
         /// </remarks>
+        /// <param name="user">Owning user.</param>
+        /// <param name="totp">Authenticator.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the authenticator was removed, otherwise <see langword="false"/>.</returns>
         Task<bool> TryRemoveTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
 

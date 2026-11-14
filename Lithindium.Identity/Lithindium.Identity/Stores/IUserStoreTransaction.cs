@@ -23,10 +23,10 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Commits the transaction.
         /// </summary>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Throws an exception if the commit outcome is uncertain or an unexpected failure occurs.
         /// </remarks>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if committed, or <see langword="false"/> for a known transaction abort with no committed changes.</returns>
         Task<bool> TryCommitAsync(CancellationToken cancellationToken = default);
 

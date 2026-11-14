@@ -27,11 +27,11 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Begins an atomic transaction.
         /// </summary>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// All capabilities on the same instance participate until commit, rollback or disposal.
         /// The transaction provides serializable isolation or equivalent guarantees for current reads, writes and entity sets. Nested transactions are unsupported.
         /// </remarks>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The transaction.</returns>
         Task<IUserStoreTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 
@@ -54,34 +54,34 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Creates a user.
         /// </summary>
-        /// <param name="user">New user.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// UUIDs are never reused, and usernames are unique.
         /// </remarks>
+        /// <param name="user">New user.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the user was created, otherwise <see langword="false"/>.</returns>
         Task<bool> TryCreateAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Conditionally updates a user.
         /// </summary>
-        /// <param name="expected">Expected user.</param>
-        /// <param name="user">Updated user.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Compares all expected persisted values atomically. The UUID is immutable.
         /// </remarks>
+        /// <param name="expected">Expected user.</param>
+        /// <param name="user">Updated user.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the user was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateAsync(User expected, User user, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes a user.
         /// </summary>
-        /// <param name="uuid">User UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Removes all dependent identity state, including challenges, in the same transaction. Historical audits are preserved.
         /// </remarks>
+        /// <param name="uuid">User UUID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the user was deleted, otherwise <see langword="false"/>.</returns>
         Task<bool> TryDeleteAsync(Guid uuid, CancellationToken cancellationToken = default);
 

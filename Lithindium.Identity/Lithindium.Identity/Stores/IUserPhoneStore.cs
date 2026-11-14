@@ -41,40 +41,40 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Adds a phone.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="phone">New phone.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Rejects pending primary phones. Adding a verified primary clears the previous primary in the same transaction.
         /// </remarks>
+        /// <param name="user">Owning user.</param>
+        /// <param name="phone">New phone.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the phone was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Conditionally updates a phone.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="expected">Expected phone.</param>
-        /// <param name="phone">Updated phone.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Compares the entire expected state atomically. The number and extension are immutable.
         /// A non-null challenge is replaced or cleared only in the transaction binding or consuming it.
         /// Only verified phones can be primary; setting a primary clears the previous primary in the same transaction.
         /// </remarks>
+        /// <param name="user">Owning user.</param>
+        /// <param name="expected">Expected phone.</param>
+        /// <param name="phone">Updated phone.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the phone was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdatePhoneAsync(User user, UserPhone expected, UserPhone phone, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a phone.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="phone">Phone.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Removes the associated pending challenge in the same transaction, if present.
         /// Removal of a verified recovery contact invalidates outstanding account recovery.
         /// </remarks>
+        /// <param name="user">Owning user.</param>
+        /// <param name="phone">Phone.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the phone was removed, otherwise <see langword="false"/>.</returns>
         Task<bool> TryRemovePhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
 

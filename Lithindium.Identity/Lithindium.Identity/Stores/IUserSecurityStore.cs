@@ -31,15 +31,15 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Conditionally creates or updates security state.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="expected">Expected security state, or <see langword="null"/> if absent.</param>
-        /// <param name="security">Updated security state.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Compares the entire expected state atomically; a <see langword="null"/> expectation requires no existing row.
         /// Binds or clears the recovery challenge in the same transaction as its creation or consumption.
         /// Rotation changes are committed with required revocations. Rotation never wraps or decreases.
         /// </remarks>
+        /// <param name="user">Owning user.</param>
+        /// <param name="expected">Expected security state, or <see langword="null"/> if absent.</param>
+        /// <param name="security">Updated security state.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the security state was saved, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateSecurityAsync(User user, UserSecurity? expected, UserSecurity security, CancellationToken cancellationToken = default);
 

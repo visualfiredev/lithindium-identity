@@ -38,37 +38,37 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Finds a user by external issuer and subject.
         /// </summary>
-        /// <param name="issuer">External issuer.</param>
-        /// <param name="subject">Issuer-assigned subject.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Compares issuer and subject exactly and case-sensitively.
         /// </remarks>
+        /// <param name="issuer">External issuer.</param>
+        /// <param name="subject">Issuer-assigned subject.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The user, or <see langword="null"/> if not found.</returns>
         Task<User?> FindByExternalIdentityAsync(string issuer, string subject, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Adds an external identity.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="identity">New external identity.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Issuer and subject pairs are unique across the store.
         /// </remarks>
+        /// <param name="user">Owning user.</param>
+        /// <param name="identity">New external identity.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the external identity was added, otherwise <see langword="false"/>.</returns>
         Task<bool> TryAddExternalIdentityAsync(User user, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Conditionally updates external identity metadata.
         /// </summary>
+        /// <remarks>
+        /// Compares the entire expected state atomically. The UUID, issuer and subject are immutable.
+        /// </remarks>
         /// <param name="user">Owning user.</param>
         /// <param name="expected">Expected external identity.</param>
         /// <param name="identity">Updated external identity.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <remarks>
-        /// Compares the entire expected state atomically. The UUID, issuer and subject are immutable.
-        /// </remarks>
         /// <returns><see langword="true"/> if the external identity was updated, otherwise <see langword="false"/>.</returns>
         Task<bool> TryUpdateExternalIdentityAsync(User user, UserExternalIdentity expected, UserExternalIdentity identity, CancellationToken cancellationToken = default);
 

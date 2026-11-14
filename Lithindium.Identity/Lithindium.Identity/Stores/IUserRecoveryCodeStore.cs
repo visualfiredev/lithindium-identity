@@ -29,24 +29,24 @@ namespace Lithindium.Identity {
         /// <summary>
         /// Replaces all of a user's recovery codes.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="codes">Replacement recovery codes.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Replaces the set atomically. An empty set removes all codes. UUIDs and code hashes are unique as applicable.
         /// </remarks>
+        /// <param name="user">Owning user.</param>
+        /// <param name="codes">Replacement recovery codes.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the recovery codes were replaced, otherwise <see langword="false"/>.</returns>
         Task<bool> TryReplaceRecoveryCodesAsync(User user, IReadOnlyCollection<UserRecoveryCode> codes, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Attempts to consume a recovery code.
         /// </summary>
-        /// <param name="user">Owning user.</param>
-        /// <param name="codeHash">Recovery code hash.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <remarks>
         /// Finds and deletes the matching code atomically by hash content, scoped to the owner.
         /// </remarks>
+        /// <param name="user">Owning user.</param>
+        /// <param name="codeHash">Recovery code hash.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns><see langword="true"/> if the recovery code was consumed, otherwise <see langword="false"/>.</returns>
         Task<bool> TryConsumeRecoveryCodeAsync(User user, ImmutableArray<byte> codeHash, CancellationToken cancellationToken = default);
 
