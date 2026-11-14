@@ -18,86 +18,63 @@ namespace Lithindium.Identity {
     /// </summary>
     /// <remarks>
     /// Never reuse session UUIDs. Revocation or expiration permanently invalidates a session.
-    /// Commit authentication state changes and policy-required revocations together.
+    /// Commit authentication changes and required revocations together.
     /// </remarks>
     public interface IUserSessionStore : IUserStore {
 
         /// <summary>
-        /// Gets a user's persisted sessions.
+        /// Gets a user's pending and authenticated sessions.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Persisted sessions.</returns>
         IAsyncEnumerable<UserSession> GetSessionsAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a user's session by UUID.
+        /// Gets a session by UUID, or returns null.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="uuid">Session UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Session, or <see langword="null"/> if absent.</returns>
         /// <remarks>
-        /// Retrieval alone does not establish validity. Authentication requires an existing,
-        /// unexpired session belonging to the authenticated user.
+        /// Only an existing, unexpired session with no challenge can authenticate its owner.
         /// </remarks>
         Task<UserSession?> GetSessionAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds an authentication session.
+        /// Adds a pending or authenticated session.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="session">Session.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreAddSession"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Identifier"/>.
-        /// </returns>
         /// <remarks>
-        /// Success requires insertion. Expiration must follow authentication.
-        /// Issue within the transaction validating
-        /// the authorizing authentication state, including required verification state changes.
+        /// Expiration must follow creation. Issue within the transaction validating the authorizing authentication state.
         /// </remarks>
-        Task<OperationResult> AddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
+        Task<StoreResult> AddSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Conditionally updates a session.
+        /// </summary>
+        /// <remarks>
+        /// Compare the entire expected state atomically, including authentication methods by content.
+        /// UUID and creation time are immutable. Clear a pending challenge and update authentication evidence only after successful proof, atomically with consumption.
+        /// Never reactivate an expired session.
+        /// </remarks>
+        Task<StoreResult> TryUpdateSessionAsync(User user, UserSession expected, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes a session.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="session">Session.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreRemoveSession"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
-        /// </returns>
-        Task<OperationResult> RemoveSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Removes a user's sessions.
-        /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="exceptUuid">Session UUID to preserve, or <see langword="null"/> for all.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreRemoveSessions"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// </returns>
         /// <remarks>
-        /// Remove matching sessions atomically; no matches is success.
+        /// Remove its pending challenge atomically.
         /// </remarks>
-        Task<OperationResult> RemoveSessionsAsync(User user, Guid? exceptUuid = null, CancellationToken cancellationToken = default);
+        Task<StoreResult> RemoveSessionAsync(User user, UserSession session, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes expired sessions.
+        /// Removes a user's sessions, optionally preserving one UUID.
         /// </summary>
-        /// <param name="expiresAt">Inclusive UTC expiration cutoff.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Number of sessions removed.</returns>
+        /// <remarks>
+        /// Remove matching sessions and associated pending challenges atomically; no matches is success.
+        /// </remarks>
+        Task<StoreResult> RemoveSessionsAsync(User user, Guid? exceptUuid = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Removes sessions expiring at or before the UTC cutoff.
+        /// </summary>
+        /// <remarks>
+        /// Remove associated pending challenges atomically; return the number of sessions removed.
+        /// </remarks>
         Task<int> RemoveExpiredSessionsAsync(DateTime expiresAt, CancellationToken cancellationToken = default);
 
     }

@@ -7,7 +7,7 @@ A modern identity and authentication library for .NET.
 
 ## Projects
 
-- `Lithindium.Identity` — identity records and store contracts. Store contracts are temporarily excluded from compilation because they depend on the reference-only result system.
+- `Lithindium.Identity` — identity records and store contracts.
 - `Lithindium.Identity.Reference` — previous managers, options, results and extensions, retained as source files for reference only. Not compiled or packed.
 - `Lithindium.Identity.Tests` — empty test project reserved for future tests.
 
@@ -22,6 +22,8 @@ dotnet build Lithindium.Identity/Lithindium.Identity.sln
 ```
 
 The library is being redesigned and does not yet provide a working authentication implementation.
+
+Store mutations return `StoreResult`. The interfaces define persistence outcomes, conditional updates, and atomic transactions; authentication and verification policy belong to the calling code. Pending credentials and sessions are not usable until their challenges are satisfied.
 
 ## Contributing
 

@@ -17,31 +17,17 @@ namespace Lithindium.Identity {
     public interface IUserLockoutStore : IUserStore {
 
         /// <summary>
-        /// Gets a user's lockout state.
+        /// Gets a user's lockout state, or returns null.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Lockout state, or <see langword="null"/> if absent.</returns>
         Task<UserLockout?> GetLockoutAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Attempts a conditional lockout update.
+        /// Conditionally creates or updates lockout state.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="expected">Expected lockout, or <see langword="null"/> if absent.</param>
-        /// <param name="lockout">Updated lockout state.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreUpdateLockout"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.Conflict"/>.
-        /// </returns>
         /// <remarks>
-        /// Atomically compare and update; a <see langword="null"/> expectation requires no existing state.
-        /// Success requires applying the replacement.
+        /// Compare the entire expected state atomically; a null expectation requires no existing row.
         /// </remarks>
-        Task<OperationResult> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default);
+        Task<StoreResult> TryUpdateLockoutAsync(User user, UserLockout? expected, UserLockout lockout, CancellationToken cancellationToken = default);
 
     }
 

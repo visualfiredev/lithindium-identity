@@ -13,74 +13,52 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Verified email persistence.
+    /// User email persistence.
     /// </summary>
+    /// <remarks>
+    /// Pending records are not credentials. The email address must be unique per owner;
+    /// verified emails must also be unique across users. Pending records must not reserve another user's verified lookup.
+    /// </remarks>
     public interface IUserEmailStore : IUserStore {
 
         /// <summary>
-        /// Gets a user's verified emails.
+        /// Gets a user's pending and verified emails.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Email addresses.</returns>
         IAsyncEnumerable<UserEmail> GetEmailsAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Finds a user by verified email.
+        /// Finds a user by verified email address, or returns null.
         /// </summary>
-        /// <param name="address">Verified email address.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>User, or <see langword="null"/> if absent.</returns>
+        /// <remarks>
+        /// Pending records are never returned by this lookup.
+        /// </remarks>
         Task<User?> FindByEmailAsync(string address, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds a verified email.
+        /// Adds a email.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="email">Email address.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreAddEmail"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Email"/>.
-        /// </returns>
         /// <remarks>
-        /// Adding a primary email must atomically clear the previous primary.
+        /// A pending email must not be primary. A verified primary atomically replaces the previous primary.
         /// </remarks>
-        Task<OperationResult> AddEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
+        Task<StoreResult> AddEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes a verified email.
+        /// Conditionally updates a email.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="email">Email address.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreRemoveEmail"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
-        /// </returns>
-        Task<OperationResult> RemoveEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
+        /// <remarks>
+        /// Compare the entire expected state atomically; address is immutable.
+        /// A non-null challenge may be replaced or cleared only in the transaction binding or consuming it.
+        /// Only verified records may be primary; setting a primary atomically clears the previous primary.
+        /// </remarks>
+        Task<StoreResult> TryUpdateEmailAsync(User user, UserEmail expected, UserEmail email, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Sets the primary email.
+        /// Removes a email.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="email">New primary, or <see langword="null"/> to clear.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreSetPrimaryEmail"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
-        /// </returns>
         /// <remarks>
-        /// Set the primary atomically. Clearing an absent primary succeeds; a non-null email
-        /// must belong to the user.
+        /// Remove its pending challenge atomically. Removing a verified recovery contact must invalidate outstanding account recovery.
         /// </remarks>
-        Task<OperationResult> SetPrimaryEmailAsync(User user, UserEmail? email, CancellationToken cancellationToken = default);
+        Task<StoreResult> RemoveEmailAsync(User user, UserEmail email, CancellationToken cancellationToken = default);
 
     }
 

@@ -19,43 +19,27 @@ namespace Lithindium.Identity {
     public interface IUserAuditStore : IUserStore {
 
         /// <summary>
-        /// Gets audits by affected user.
+        /// Gets audits by affected user UUID.
         /// </summary>
-        /// <param name="user">Affected user UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Audit records.</returns>
         IAsyncEnumerable<UserAudit> GetAuditsAsync(Guid user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets audits by actor.
+        /// Gets audits by acting user UUID.
         /// </summary>
-        /// <param name="actor">Acting user UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Audit records.</returns>
         IAsyncEnumerable<UserAudit> GetAuditsByActorAsync(Guid actor, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets audits by affected entity.
+        /// Gets audits by affected entity UUID.
         /// </summary>
-        /// <param name="entity">Affected entity UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Audit records.</returns>
         IAsyncEnumerable<UserAudit> GetAuditsByEntityAsync(Guid entity, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Adds an audit record.
         /// </summary>
-        /// <param name="audit">Audit record.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreAddAudit"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Identifier"/>.
-        /// </returns>
         /// <remarks>
-        /// Preserve audits even after associated users or entities are deleted.
+        /// Preserve audits after associated users or entities are deleted.
         /// </remarks>
-        Task<OperationResult> AddAuditAsync(UserAudit audit, CancellationToken cancellationToken = default);
+        Task<StoreResult> AddAuditAsync(UserAudit audit, CancellationToken cancellationToken = default);
 
     }
 

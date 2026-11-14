@@ -16,90 +16,43 @@ namespace Lithindium.Identity {
     /// <summary>
     /// TOTP authenticator persistence.
     /// </summary>
+    /// <remarks>
+    /// Pending authenticators cannot satisfy authentication. Never reuse authenticator UUIDs.
+    /// </remarks>
     public interface IUserTotpStore : IUserStore {
 
         /// <summary>
-        /// Gets a user's TOTP authenticators.
+        /// Gets a user's pending and verified authenticators.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Authenticators.</returns>
         IAsyncEnumerable<UserTotp> GetTotpsAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a user's TOTP authenticator by UUID.
+        /// Gets an authenticator by UUID, or returns null.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="uuid">Authenticator UUID.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Authenticator, or <see langword="null"/> if absent.</returns>
         Task<UserTotp?> GetTotpAsync(User user, Guid uuid, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds a TOTP authenticator.
+        /// Adds an authenticator.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="totp">Authenticator.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreAddTotp"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Identifier"/>.
-        /// </returns>
-        Task<OperationResult> AddTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
+        Task<StoreResult> AddTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes a TOTP authenticator.
+        /// Conditionally updates an authenticator.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="totp">Authenticator.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreRemoveTotp"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
-        /// </returns>
-        Task<OperationResult> RemoveTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Attempts a conditional authenticator rename.
-        /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="totp">Authenticator with expected name.</param>
-        /// <param name="name">New name, or <see langword="null"/> to clear.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreRenameTotp"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
-        /// <see cref="StatusCode.Conflict"/>.
-        /// </returns>
         /// <remarks>
-        /// Atomically compare and change only the name; preserve concurrent step advances.
+        /// Compare the entire expected state atomically, including the secret by content.
+        /// UUID, secret, algorithm, digits and period are immutable. LastStep must never decrease or reset after acceptance.
+        /// Accepting a code requires advancing LastStep strictly. Clear the challenge only on successful enrollment in the same transaction as consumption.
         /// </remarks>
-        Task<OperationResult> TryRenameTotpAsync(User user, UserTotp totp, string? name, CancellationToken cancellationToken = default);
+        Task<StoreResult> TryUpdateTotpAsync(User user, UserTotp expected, UserTotp totp, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Attempts to advance the accepted TOTP time step.
+        /// Removes an authenticator.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="totp">Authenticator.</param>
-        /// <param name="step">Accepted time step.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreAdvanceTotpStep"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
-        /// <see cref="StatusCode.AlreadyUsed"/> / <see cref="ContextCode.Totp"/>.
-        /// </returns>
         /// <remarks>
-        /// Atomically accept only a step strictly greater than the persisted step, if any.
+        /// Remove its pending challenge atomically.
         /// </remarks>
-        Task<OperationResult> TryAdvanceTotpStepAsync(User user, UserTotp totp, ulong step, CancellationToken cancellationToken = default);
+        Task<StoreResult> RemoveTotpAsync(User user, UserTotp totp, CancellationToken cancellationToken = default);
 
     }
 

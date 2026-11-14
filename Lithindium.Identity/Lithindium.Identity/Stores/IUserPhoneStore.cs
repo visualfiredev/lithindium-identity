@@ -13,75 +13,52 @@ using System.Threading.Tasks;
 namespace Lithindium.Identity {
 
     /// <summary>
-    /// Verified phone persistence.
+    /// User phone persistence.
     /// </summary>
+    /// <remarks>
+    /// Pending records are not credentials. The phone number and extension must be unique per owner;
+    /// verified phones must also be unique across users. Pending records must not reserve another user's verified lookup.
+    /// </remarks>
     public interface IUserPhoneStore : IUserStore {
 
         /// <summary>
-        /// Gets a user's verified phones.
+        /// Gets a user's pending and verified phones.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Phone numbers.</returns>
         IAsyncEnumerable<UserPhone> GetPhonesAsync(User user, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Finds a user by phone number and extension.
+        /// Finds a user by verified phone number and extension, or returns null.
         /// </summary>
-        /// <param name="number">Verified E.164 phone number.</param>
-        /// <param name="extension">Extension, or <see langword="null"/> if unset.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>User, or <see langword="null"/> if absent.</returns>
+        /// <remarks>
+        /// Pending records are never returned by this lookup.
+        /// </remarks>
         Task<User?> FindByPhoneAsync(string number, string? extension = null, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds a verified phone.
+        /// Adds a phone.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="phone">Phone number.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreAddPhone"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.AlreadyExists"/> / <see cref="ContextCode.Phone"/>.
-        /// </returns>
         /// <remarks>
-        /// Adding a primary phone must atomically clear the previous primary.
+        /// A pending phone must not be primary. A verified primary atomically replaces the previous primary.
         /// </remarks>
-        Task<OperationResult> AddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
+        Task<StoreResult> AddPhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Removes a verified phone.
+        /// Conditionally updates a phone.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="phone">Phone number.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreRemovePhone"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
-        /// </returns>
-        Task<OperationResult> RemovePhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
+        /// <remarks>
+        /// Compare the entire expected state atomically; number and extension is immutable.
+        /// A non-null challenge may be replaced or cleared only in the transaction binding or consuming it.
+        /// Only verified records may be primary; setting a primary atomically clears the previous primary.
+        /// </remarks>
+        Task<StoreResult> TryUpdatePhoneAsync(User user, UserPhone expected, UserPhone phone, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Sets the primary phone.
+        /// Removes a phone.
         /// </summary>
-        /// <param name="user">User.</param>
-        /// <param name="phone">New primary, or <see langword="null"/> to clear.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>
-        /// <see cref="OperationCode.StoreSetPrimaryPhone"/>:
-        /// <see cref="StatusCode.Success"/> on success.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.User"/>.
-        /// <see cref="StatusCode.NotFound"/> / <see cref="ContextCode.Entity"/>.
-        /// </returns>
         /// <remarks>
-        /// Set the primary atomically. Clearing an absent primary succeeds; a non-null phone
-        /// must belong to the user.
+        /// Remove its pending challenge atomically. Removing a verified recovery contact must invalidate outstanding account recovery.
         /// </remarks>
-        Task<OperationResult> SetPrimaryPhoneAsync(User user, UserPhone? phone, CancellationToken cancellationToken = default);
+        Task<StoreResult> RemovePhoneAsync(User user, UserPhone phone, CancellationToken cancellationToken = default);
 
     }
 

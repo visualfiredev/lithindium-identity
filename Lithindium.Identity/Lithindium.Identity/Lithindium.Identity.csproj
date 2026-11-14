@@ -42,9 +42,6 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Lithindium.Identity.Tests" />
-        <!-- Store contracts depend on the reference-only result system. -->
-        <Compile Remove="Stores/**/*.cs" />
-        <None Include="Stores/**/*.cs" />
     </ItemGroup>
 
 </Project>
